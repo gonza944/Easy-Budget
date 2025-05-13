@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { supabase } from "../supabaseConnection";
 
 export const bodySchema = z.object({
   email: z.string().email(),
@@ -8,16 +9,31 @@ export const bodySchema = z.object({
 export default defineEventHandler(async (event) => {
   const { email, password } = await readValidatedBody(event, bodySchema.parse)
 
-  if (email === 'admin@admin.com' && password === 'iamtheadmin') {
-    // set the user session in the cookie
-    // this server util is auto-imported by the auth-utils module
+  // Authenticate with Supabase
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+
+  if (error) {
+    throw createError({
+      statusCode: 401,
+      message: error.message || 'Bad credentials'
+    })
+  }
+
+  // Set the user session in the cookie if authentication successful
+  if (data.user) {
     await setUserSession(event, {
       user: {
-        name: 'John Doe'
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User'
       }
     })
-    return {}
+    return { success: true }
   }
+  
   throw createError({
     statusCode: 401,
     message: 'Bad credentials'
