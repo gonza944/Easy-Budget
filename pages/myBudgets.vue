@@ -7,6 +7,7 @@ definePageMeta({
 
 const { user } = useUserSession();
 const budgetName = ref('');
+const isModalOpen = ref(false);
 
 // Single useFetch that handles both initial and filtered data
 const { data: budgets, refresh } = await useFetch<BudgetsResponse>(() => {
@@ -26,18 +27,18 @@ watch(budgetName, () => {
 
 <template>
   <div class="h-full flex flex-col gap-8 items-center pt-[20vh]">
-    <h1 class="text-4xl font-bold mb-8">Welcome Back, {{ user?.name }}</h1>
-    <div class="flex w-xl items-center gap-1.5">
-      <Input id="budget-name" v-model="budgetName" type="text" placeholder="Budget name" class="h-12" />
+    <h1 class="text-2xl md:text-4xl font-bold mb-8 text-center">Welcome Back, {{ user?.name }}</h1>
+    <div class="flex w-full md:w-xl items-center gap-1.5">
+      <Input id="budget-name" v-model="budgetName" type="text" placeholder="Budget name" class="h-12 bg-background" />
       <Button type="submit" size="iconLg">
         <SearchIcon class="h-7 w-7" />
       </Button>
     </div>
 
 
-    <div class="flex gap-8 items-center justify-center">
-      <div v-for="budget in budgets" :key="budget.id" class="flex gap-4">
-        <Card class="aspect-square bg-secondary cursor-pointer group hover:animate-pulse transition-all duration-300">
+    <div class="flex flex-col md:flex-row gap-8 items-center justify-center relative w-full">
+      <div v-for="budget in budgets" :key="budget.id" class="w-full md:w-auto">
+        <Card class="w-full md:aspect-square cursor-pointer group hover:animate-pulse transition-all duration-300">
           <CardHeader class="justify-center">
             <CardTitle class="text-lg font-semibold">{{ budget.name }}</CardTitle>
           </CardHeader>
@@ -51,9 +52,10 @@ watch(budgetName, () => {
         </Card>
       </div>
 
-      <Button size="iconXl" class="cursor-pointer">
-        <PlusIcon class="h-10 w-10" />
+      <Button size="iconXl" class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg" @click="isModalOpen = true">
+        <PlusIcon class="h-12 w-12" />
       </Button>
     </div>
+    <NewBudgetForm v-model="isModalOpen" />
   </div>
 </template>
