@@ -1,5 +1,5 @@
 <template>
-  <main class="w-full h-screen bg-[#faf9f5] text-[#3d3929]">
+  <main class="w-full h-screen bg-background text-foreground">
     <NavBar />
       <slot />
   </main>
