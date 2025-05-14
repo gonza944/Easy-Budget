@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import { PlusIcon, SearchIcon } from 'lucide-vue-next'
 
+definePageMeta({
+  middleware: ['authenticated'],
+})
+
 const { user } = useUserSession();
 const budgetName = ref('');
 

@@ -18,6 +18,9 @@ const { loggedIn, clear: clearSession } = useUserSession()
 
 async function logout() {
   await clearSession()
+  $fetch('/api/logout', {
+    method: 'POST',
+  })
   await navigateTo('/login')
 }
 
