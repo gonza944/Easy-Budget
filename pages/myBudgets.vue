@@ -42,7 +42,7 @@ watch(budgetName, () => {
           <CardHeader class="justify-center">
             <CardTitle class="text-lg font-semibold">{{ budget.name }}</CardTitle>
           </CardHeader>
-          <CardContent class="flex flex-col items-center text-left">
+          <CardContent v-if="budget.description" class="flex flex-col items-center text-left">
             <p class="break-words">{{ budget.description }}</p>
           </CardContent>
           <CardFooter class="flex flex-col items-center justify-center">
@@ -56,6 +56,6 @@ watch(budgetName, () => {
         <PlusIcon class="h-12 w-12" />
       </Button>
     </div>
-    <NewBudgetForm v-model="isModalOpen" />
+    <NewBudgetForm v-model="isModalOpen" :success="refresh" />
   </div>
 </template>

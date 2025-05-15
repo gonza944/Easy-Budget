@@ -1,100 +1,3 @@
-<!-- <script lang="ts" setup>
-import { toTypedSchema } from '@vee-validate/zod';
-import { useForm } from 'vee-validate';
-import DatePicker from '~/components/datePicker.vue';
-import { newBudgetSchema } from '~/utils/budgetSchemas';
-
-definePageMeta({
-  middleware: ['authenticated'],
-})
-
-const formSchema = toTypedSchema(newBudgetSchema);
-
-const form = useForm({
-  validationSchema: formSchema,
-});
-
-const onSubmit = form.handleSubmit((values) => {
-  $fetch('/api/budgets', {
-    method: 'POST',
-    body: values,
-  });
-});
-
-</script>
-
-<template>
-  <div class="flex flex-col gap-6 items-center justify-center h-full">
-    <Card class="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Create a new budget</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form @submit="onSubmit">
-          <FormField v-slot="{ componentField }" name="name">
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" />
-              </FormControl>
-              <FormDescription>
-                This is the name of the budget. 
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <FormField v-slot="{ componentField }" name="description">
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Tell us a little bit about the budget" class="resize-none"
-                  v-bind="componentField" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <FormField v-slot="{ componentField }" name="startingBudget">
-            <FormItem>
-              <FormLabel>Starting Budget</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" format="currency" />
-              </FormControl>
-              <FormDescription>
-                How much money you have to start with.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <FormField v-slot="{ componentField }" name="maxExpensesPerDay">
-            <FormItem>
-              <FormLabel>Max Expenses Per Day</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" format="currency" />
-              </FormControl>
-              <FormDescription>
-                This is the maximum amount of money you can spend per day.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <DatePicker v-model="form.values.startDate" name="startDate" label="Start Date"
-            description="This is the start date of the budget." />
-
-          <Button type="submit">
-            Submit
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-  </div>
-</template>
- -->
-
-
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import {
@@ -107,45 +10,84 @@ import {
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import DatePicker from '~/components/datePicker.vue';
-import { newBudgetSchema } from '~/utils/budgetSchemas';
+import { newBudgetSchemaForm } from '~/utils/budgetSchemas';
+import { CalendarDate } from '@internationalized/date';
+import { computed } from 'vue';
 
-definePageMeta({
-  middleware: ['authenticated'],
-})
+const isOpen = defineModel<boolean>('modelValue', { required: true });
+const props = defineProps<{
+  success: () => void;
+}>();
 
-const formSchema = toTypedSchema(newBudgetSchema);
+const formSchema = toTypedSchema(newBudgetSchemaForm);
 
 const form = useForm({
   validationSchema: formSchema,
 });
 
-const isOpen = defineModel<boolean>('modelValue', { required: true });
+const isFormValid = computed(() => {
+  return Object.keys(form.errors.value).length === 0 && form.meta.value.touched;
+});
 
-const onSubmit = form.handleSubmit((values) => {
-  $fetch('/api/budgets', {
+
+// Calculate max date (10 years from today)
+const maxDate = new Date();
+maxDate.setFullYear(maxDate.getFullYear() + 10);
+
+// Convert JavaScript Date to CalendarDate
+const maxCalendarDate = new CalendarDate(
+  maxDate.getFullYear(),
+  maxDate.getMonth() + 1, // Month is 0-indexed in JS Date, 1-indexed in CalendarDate
+  maxDate.getDate()
+);
+
+const onSubmit = form.handleSubmit(async (values) => {
+  const response = await $fetch('/api/budgets', {
     method: 'POST',
     body: values,
   });
+
+  if (response.success) {
+    props.success();
+    isOpen.value = false;
+  }
 });
+
+// Only allow numeric input with decimals
+const onNumberInput = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const value = input.value.replace(/[^0-9.]/g, '');
+  
+  // Handle decimal points
+  const parts = value.split('.');
+  if (parts.length > 1) {
+    // Keep only first decimal point and limit to 2 decimal places
+    input.value = `${parts[0]}.${parts.slice(1).join('').substring(0, 2)}`;
+  } else {
+    input.value = value;
+  }
+  
+  // Trigger validation update
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+};
 </script>
 
 <template>
   <Dialog :open="isOpen" @update:open="isOpen = $event">
     <DialogContent class="sm:max-w-[425px]">
-      <DialogHeader>
+      <DialogHeader class="pb-4">
         <DialogTitle>Create a new budget</DialogTitle>
       </DialogHeader>
-      <form @submit="onSubmit">
+      <form class="flex flex-col gap-6" @submit="onSubmit">
         <FormField v-slot="{ componentField }" name="name">
-          <FormItem>
+          <FormItem class="flex flex-col gap-4">
             <FormLabel>Name</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" />
+              <Input type="text" v-bind="componentField" placeholder="Budget name" />
             </FormControl>
-            <FormDescription>
-              This is the name of the budget.
-            </FormDescription>
-            <FormMessage />
+            <div class="min-h-[20px] block">
+              <FormMessage />
+            </div>
           </FormItem>
         </FormField>
 
@@ -156,42 +98,52 @@ const onSubmit = form.handleSubmit((values) => {
               <Textarea placeholder="Tell us a little bit about the budget" class="resize-none"
                 v-bind="componentField" />
             </FormControl>
-            <FormMessage />
+            <div class="min-h-[20px] block">
+              <FormMessage />
+            </div>
           </FormItem>
         </FormField>
 
+       <div class="flex gap-4 items-center justify-center">
         <FormField v-slot="{ componentField }" name="startingBudget">
-          <FormItem>
+          <FormItem class="flex flex-col items-center justify-center">
             <FormLabel>Starting Budget</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" format="currency" />
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                <Input type="text" inputmode="decimal" @input="onNumberInput" v-bind="componentField" class="pl-7"
+                  placeholder="1000.00" />
+              </div>
             </FormControl>
-            <FormDescription>
-              How much money you have to start with.
-            </FormDescription>
-            <FormMessage />
+            <div class="min-h-[20px] w-full block">
+              <FormMessage />
+            </div>
           </FormItem>
         </FormField>
 
         <FormField v-slot="{ componentField }" name="maxExpensesPerDay">
-          <FormItem>
-            <FormLabel>Max Expenses Per Day</FormLabel>
+          <FormItem class="flex flex-col items-center justify-center">
+            <FormLabel>Daily Budget</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" format="currency" />
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                <Input type="text" inputmode="decimal" @input="onNumberInput" v-bind="componentField" class="pl-7"
+                  placeholder="100.00" />
+              </div>
             </FormControl>
-            <FormDescription>
-              This is the maximum amount of money you can spend per day.
-            </FormDescription>
-            <FormMessage />
+            <div class="min-h-[20px] w-full block">
+              <FormMessage />
+            </div>
           </FormItem>
         </FormField>
+       </div>
 
         <DatePicker v-model="form.values.startDate" name="startDate" label="Start Date"
-          description="This is the start date of the budget." />
+          description="This is the start date of the budget." :maxValue="maxCalendarDate" />
       </form>
 
       <DialogFooter>
-        <Button type="submit">
+        <Button type="submit" @click="onSubmit" :disabled="!isFormValid">
           Submit
         </Button>
       </DialogFooter>
