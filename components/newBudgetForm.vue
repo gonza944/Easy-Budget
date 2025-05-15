@@ -79,11 +79,11 @@ const onNumberInput = (e: Event) => {
 
 <template>
   <Dialog :open="isOpen" @update:open="isOpen = $event">
-    <DialogContent class="sm:max-w-[425px]">
+    <DialogContent class="sm:max-w-md">
       <DialogHeader class="pb-4">
-        <DialogTitle>Create a new budget</DialogTitle>
+        <DialogTitle class="text-2xl font-bold">Create a New Budget</DialogTitle>
       </DialogHeader>
-      <form class="flex flex-col gap-6" @submit="onSubmit">
+      <form class="flex flex-col gap-6 " @submit="onSubmit">
         <FormField v-slot="{ componentField }" name="name">
           <FormItem class="flex flex-col gap-4">
             <FormLabel>Name</FormLabel>
