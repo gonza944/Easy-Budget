@@ -1,5 +1,5 @@
 <template>
-  <nav class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-2 flex items-center">
+  <nav class="sticky top-0 z-50 w-full border-b border-border/40 px-4 py-2 flex items-center">
     <div class="flex-1 flex justify-end items-center">
       <Button v-if="loggedIn" variant="ghost" size="sm" @click="logout">
         Logout
@@ -18,6 +18,9 @@ const { loggedIn, clear: clearSession } = useUserSession()
 
 async function logout() {
   await clearSession()
+  $fetch('/api/logout', {
+    method: 'POST',
+  })
   await navigateTo('/login')
 }
 
