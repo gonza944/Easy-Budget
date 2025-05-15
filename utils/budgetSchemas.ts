@@ -20,7 +20,7 @@ export const BudgetSchema = z.array(
   z.object({
     id: z.number(),
     name: z.string(),
-    description: z.string().optional(),
+    description: z.string().optional().nullable(),
     startingBudget: z.number().min(1),
     maxExpensesPerDay: z.number().min(1),
     startDate: z.string().optional().default(new Date().toLocaleDateString()),

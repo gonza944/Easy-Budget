@@ -13,6 +13,7 @@ import DatePicker from '~/components/datePicker.vue';
 import { newBudgetSchemaForm } from '~/utils/budgetSchemas';
 import { CalendarDate } from '@internationalized/date';
 import { computed } from 'vue';
+import type { BudgetApiResponse } from '~/server/api/budgets.post';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const props = defineProps<{
@@ -42,14 +43,18 @@ const maxCalendarDate = new CalendarDate(
 );
 
 const onSubmit = form.handleSubmit(async (values) => {
-  const response = await $fetch('/api/budgets', {
-    method: 'POST',
-    body: values,
-  });
+  try {
+    const response = await $fetch<BudgetApiResponse>('/api/budgets', {
+      method: 'POST',
+      body: values,
+    });
 
-  if (response.success) {
-    props.success();
-    isOpen.value = false;
+    if (response && response.success) {
+      props.success();
+      isOpen.value = false;
+    }
+  } catch (error) {
+    console.error('Failed to create budget:', error);
   }
 });
 
@@ -74,11 +79,11 @@ const onNumberInput = (e: Event) => {
 
 <template>
   <Dialog :open="isOpen" @update:open="isOpen = $event">
-    <DialogContent class="sm:max-w-[425px]">
+    <DialogContent class="sm:max-w-md">
       <DialogHeader class="pb-4">
-        <DialogTitle>Create a new budget</DialogTitle>
+        <DialogTitle class="text-2xl font-bold">Create a New Budget</DialogTitle>
       </DialogHeader>
-      <form class="flex flex-col gap-6" @submit="onSubmit">
+      <form class="flex flex-col gap-6 " @submit="onSubmit">
         <FormField v-slot="{ componentField }" name="name">
           <FormItem class="flex flex-col gap-4">
             <FormLabel>Name</FormLabel>
