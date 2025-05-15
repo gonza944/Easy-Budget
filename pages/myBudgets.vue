@@ -37,7 +37,7 @@ watch(budgetName, () => {
 
 
     <div class="flex flex-col md:flex-row gap-8 items-center justify-center relative w-full">
-      <div v-for="budget in budgets" :key="budget.id" class="w-full md:w-auto">
+      <div v-for="budget in budgets" :key="budget.id" class="w-full md:w-auto md:max-w-xs">
         <Card class="w-full md:aspect-square cursor-pointer group hover:animate-pulse transition-all duration-300">
           <CardHeader class="justify-center">
             <CardTitle class="text-lg font-semibold">{{ budget.name }}</CardTitle>

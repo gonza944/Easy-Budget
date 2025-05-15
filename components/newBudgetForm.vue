@@ -13,6 +13,7 @@ import DatePicker from '~/components/datePicker.vue';
 import { newBudgetSchemaForm } from '~/utils/budgetSchemas';
 import { CalendarDate } from '@internationalized/date';
 import { computed } from 'vue';
+import type { BudgetApiResponse } from '~/server/api/budgets.post';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const props = defineProps<{
@@ -42,14 +43,18 @@ const maxCalendarDate = new CalendarDate(
 );
 
 const onSubmit = form.handleSubmit(async (values) => {
-  const response = await $fetch('/api/budgets', {
-    method: 'POST',
-    body: values,
-  });
+  try {
+    const response = await $fetch<BudgetApiResponse>('/api/budgets', {
+      method: 'POST',
+      body: values,
+    });
 
-  if (response.success) {
-    props.success();
-    isOpen.value = false;
+    if (response && response.success) {
+      props.success();
+      isOpen.value = false;
+    }
+  } catch (error) {
+    console.error('Failed to create budget:', error);
   }
 });
 
