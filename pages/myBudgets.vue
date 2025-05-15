@@ -50,7 +50,7 @@ watch(budgetName, () => {
 
 
     <div class="flex flex-col md:flex-row gap-8 items-center justify-center relative w-full">
-      <div v-for="budget in budgets" :key="budget.id" class="w-full md:w-auto md:w-sm">
+      <div v-for="budget in budgets" :key="budget.id" class="w-full md:w-sm">
         <Card class="w-full md:aspect-square cursor-pointer group hover:animate-pulse transition-all duration-300">
           <CardHeader class="justify-center">
             <CardTitle class="text-lg font-semibold capitalize">{{ budget.name }}</CardTitle>
@@ -64,8 +64,8 @@ watch(budgetName, () => {
               <p>Daily Budget:</p>
             </div>
             <div class="flex flex-col gap-2 text-right">
-              <p class="text-secondary-foreground">${{ formatCurrency(budget.startingBudget) }}</p>
-              <p class="text-secondary-foreground">${{ formatCurrency(budget.maxExpensesPerDay) }}</p>
+              <p class="text-secondary-foreground dark:text-secondary">${{ formatCurrency(budget.startingBudget) }}</p>
+              <p class="text-secondary-foreground dark:text-secondary">${{ formatCurrency(budget.maxExpensesPerDay) }}</p>
             </div>
           </CardFooter>
         </Card>

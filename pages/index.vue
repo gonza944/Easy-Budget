@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   middleware: ['authenticated'],
+  redirect: '/myBudgets'
 })
 </script>
 
