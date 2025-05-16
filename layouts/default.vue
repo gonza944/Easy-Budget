@@ -4,12 +4,13 @@
     <main>
       <slot />
     </main>
-    <ToggleMenu />
+    <ToggleMenu v-if="loggedIn" />
   </div>
 
 </template>
 
 <script lang="ts" setup>
+const { loggedIn } = useUserSession();
 </script>
 
 <style></style>
