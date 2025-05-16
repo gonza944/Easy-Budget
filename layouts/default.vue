@@ -1,13 +1,15 @@
 <template>
-  <main class="w-full h-screen bg-layout-background text-foreground px-4 md:px-0">
+  <div class="w-full h-screen bg-layout-background text-foreground px-4 md:px-0">
     <NavBar />
+    <main>
       <slot />
-  </main>
+    </main>
+    <ToggleMenu />
+  </div>
+
 </template>
 
 <script lang="ts" setup>
 </script>
 
-<style>
-
-</style>
+<style></style>

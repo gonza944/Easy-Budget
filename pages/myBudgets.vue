@@ -1,7 +1,5 @@
 <script lang="ts" setup>
 import { PlusIcon, SearchIcon } from 'lucide-vue-next';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import ScrollBar from '@/components/ui/scroll-area/ScrollBar.vue';
 
 definePageMeta({
   middleware: ['authenticated'],
@@ -10,7 +8,13 @@ definePageMeta({
 const { user } = useUserSession();
 const budgetName = ref('');
 const isModalOpen = ref(false);
+useUpdateMenuElements([
+  {
+    label: "New Budget",
+    onClick: () => { isModalOpen.value = true },
+  },
 
+]);
 // Single useFetch that handles both initial and filtered data
 const { data: budgets, refresh } = await useFetch<BudgetsResponse>(() => {
   return `/api/budgets${budgetName.value ? `?name=${budgetName.value}` : ''}`;
@@ -23,7 +27,6 @@ const { data: budgets, refresh } = await useFetch<BudgetsResponse>(() => {
   }))
 });
 
-// Only trigger fetch if search is at least 3 chars or empty
 watch(budgetName, () => {
   if (budgetName.value.length === 0 || budgetName.value.length > 2) {
     refresh();
@@ -44,7 +47,7 @@ watch(budgetName, () => {
 
 
     <div class="relative w-full flex justify-center">
-      <ScrollArea class="w-full">
+      <ScrollArea class="w-full" v-if="budgets && budgets.length > 0">
         <div class="flex gap-4 pb-4 overflow-x-auto md:justify-center"
           :class="budgets && budgets.length > 0 ? 'px-4' : ''">
           <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
@@ -59,10 +62,6 @@ watch(budgetName, () => {
         <PlusIcon />
       </Button>
     </div>
-    <ToggleMenu :elements="[
-      { label: 'New Budget', onClick: () => { } },
-      { label: 'Settings', onClick: () => { } },
-    ]" />
     <NewBudgetForm v-model="isModalOpen" :success="refresh" />
   </div>
 </template>

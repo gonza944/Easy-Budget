@@ -1,29 +1,31 @@
 <script lang="ts" setup>
 import { MenuIcon, XIcon } from 'lucide-vue-next';
 
-defineProps<{
-  elements: {
-    label: string;
-    onClick: () => void;
-  }[];
-}>();
-const isOpen = ref(false);
+
+export type MenuElement = {
+  label: string;
+  onClick: () => void;
+};
+
+const isOpen = useState('menu', () => false);
+const elements = useState<MenuElement[]>('menuElements', () => []);
+
+const onClickWrapper = (onClick: () => void) => {
+  isOpen.value = false;
+  onClick();
+}
 
 </script>
 
 <template>
-  <div class="sticky top-0 w-full max-w-sm flex flex-col gap-8">
-    <Transition
-      enter-active-class="transition duration-500 ease-out"
-      leave-active-class="transition duration-200 ease-in"
-      enter-from-class="transform scale-95 opacity-0"
-      enter-to-class="transform scale-100 opacity-100"
-      leave-from-class="transform scale-100 opacity-100"
-      leave-to-class="transform scale-95 opacity-0"
-    >
+  <div class="fixed bottom-[5%] right-0 left-0 mx-auto z-10 w-full max-w-sm flex flex-col gap-4">
+    <Transition enter-active-class="transition duration-500 ease-out"
+      leave-active-class="transition duration-200 ease-in" enter-from-class="transform scale-95 opacity-0"
+      enter-to-class="transform scale-100 opacity-100" leave-from-class="transform scale-100 opacity-100"
+      leave-to-class="transform scale-95 opacity-0">
       <Card v-if="isOpen">
         <CardContent class="flex flex-col gap-4 items-start px-2">
-          <Button v-for="element in elements" :key="element.label" variant="ghost" @click="element.onClick"
+          <Button v-for="element in elements" :key="element.label" variant="ghost" @click="onClickWrapper(element.onClick)"
             class="w-full py-6 text-sm text-left justify-start">
             {{ element.label }}
           </Button>
@@ -34,15 +36,9 @@ const isOpen = ref(false);
     <Button variant="outline" @click="isOpen = !isOpen"
       class="w-full flex justify-between py-6 text-sm hover:bg-primary hover:text-primary-foreground">
       Menu
-      <Transition
-        mode="out-in"
-        enter-active-class="transition-transform duration-300 ease-in-out"
-        leave-active-class="transition-transform duration-300 ease-in-out"
-        enter-from-class="rotate-0 scale-100"
-        enter-to-class="rotate-90 scale-110"
-        leave-from-class="rotate-90 scale-110"
-        leave-to-class="rotate-0 scale-100"
-      >
+      <Transition mode="out-in" enter-active-class="transition-transform duration-300 ease-in-out"
+        leave-active-class="transition-transform duration-300 ease-in-out" enter-from-class="rotate-0 scale-100"
+        enter-to-class="rotate-90 scale-110" leave-from-class="rotate-90 scale-110" leave-to-class="rotate-0 scale-100">
         <XIcon v-if="isOpen" class="w-6 h-6" key="close-icon" />
         <MenuIcon v-else class="w-6 h-6" key="menu-icon" />
       </Transition>
