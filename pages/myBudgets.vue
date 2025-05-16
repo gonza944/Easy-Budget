@@ -45,7 +45,7 @@ const handleDeleteConfirm = async () => {
   if (budgetToDelete.value) {
     await $fetch('/api/budgets', {
       method: 'DELETE',
-      body: { id: budgetToDelete.value },
+      body: { id: Number(budgetToDelete.value) },
     });
     refresh();
     isDeleteDialogOpen.value = false;
