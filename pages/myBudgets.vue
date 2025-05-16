@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import { PlusIcon, SearchIcon } from 'lucide-vue-next';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import ScrollBar from '@/components/ui/scroll-area/ScrollBar.vue';
 
 definePageMeta({
   middleware: ['authenticated'],
@@ -21,14 +23,6 @@ const { data: budgets, refresh } = await useFetch<BudgetsResponse>(() => {
   }))
 });
 
-// Format number with thousands separator and 2 decimal places
-const formatCurrency = (value: number) => {
-  return value.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-};
-
 // Only trigger fetch if search is at least 3 chars or empty
 watch(budgetName, () => {
   if (budgetName.value.length === 0 || budgetName.value.length > 2) {
@@ -49,29 +43,17 @@ watch(budgetName, () => {
     </div>
 
 
-    <div class="flex flex-col md:flex-row gap-8 items-center justify-center relative w-full">
-      <div v-for="budget in budgets" :key="budget.id" class="w-full md:w-sm">
-        <Card class="w-full md:aspect-square cursor-pointer group hover:animate-pulse transition-all duration-300">
-          <CardHeader class="justify-center">
-            <CardTitle class="text-lg font-semibold capitalize">{{ budget.name }}</CardTitle>
-          </CardHeader>
-          <CardContent v-if="budget.description" class="flex flex-col text-left">
-            <p class="break-words first-letter:uppercase">{{ budget.description }}</p>
-          </CardContent>
-          <CardFooter class="flex justify-between mt-auto w-full">
-            <div class="flex flex-col gap-2">
-              <p>Budget:</p>
-              <p>Daily Budget:</p>
-            </div>
-            <div class="flex flex-col gap-2 text-right">
-              <p class="text-secondary-foreground dark:text-secondary">${{ formatCurrency(budget.startingBudget) }}</p>
-              <p class="text-secondary-foreground dark:text-secondary">${{ formatCurrency(budget.maxExpensesPerDay) }}</p>
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
+    <div class="relative w-full flex justify-center">
+      <ScrollArea class="w-full">
+        <div class="flex gap-4 pb-4 overflow-x-auto md:justify-center" :class="budgets && budgets.length > 0 ? 'px-4' : ''">
+          <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
+            <BudgetCard :budget="budget" />
+          </div>
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
-      <Button size="iconLg" class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg"
+      <Button size="iconLg" class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg" :class="budgets && budgets.length > 0 ? 'md:hidden' : ''"
         @click="isModalOpen = true">
         <PlusIcon />
       </Button>
