@@ -45,7 +45,8 @@ watch(budgetName, () => {
 
     <div class="relative w-full flex justify-center">
       <ScrollArea class="w-full">
-        <div class="flex gap-4 pb-4 overflow-x-auto md:justify-center" :class="budgets && budgets.length > 0 ? 'px-4' : ''">
+        <div class="flex gap-4 pb-4 overflow-x-auto md:justify-center"
+          :class="budgets && budgets.length > 0 ? 'px-4' : ''">
           <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
             <BudgetCard :budget="budget" />
           </div>
@@ -53,11 +54,15 @@ watch(budgetName, () => {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <Button size="iconLg" class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg" :class="budgets && budgets.length > 0 ? 'md:hidden' : ''"
-        @click="isModalOpen = true">
+      <Button v-if="!budgets || budgets.length === 0" size="iconLg"
+        class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg" @click="isModalOpen = true">
         <PlusIcon />
       </Button>
     </div>
+    <ToggleMenu :elements="[
+      { label: 'New Budget', onClick: () => { } },
+      { label: 'Settings', onClick: () => { } },
+    ]" />
     <NewBudgetForm v-model="isModalOpen" :success="refresh" />
   </div>
 </template>
