@@ -9,9 +9,9 @@ defineProps<{
 
 const isPopoverOpen = ref(false);
 
-const handleDeleteClick = (callback: () => void) => {
+const handleDeleteClick = (callback: () => void, id: string) => {
     isPopoverOpen.value = false;
-    callback();
+    callback(id);
 };
 </script>
 
@@ -25,11 +25,11 @@ const handleDeleteClick = (callback: () => void) => {
                         <MenuIcon class="h-4 w-4" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent class="p-4">
+                <PopoverContent class="p-4" align="end" side="bottom">
                     <Button 
                         variant="ghost" 
                         class="w-full justify-start rounded-sm h-9 px-2 text-destructive-foreground"
-                        @click="handleDeleteClick(onDeleteClick)"
+                        @click="handleDeleteClick(onDeleteClick, budget.id)"
                     >
                         Delete Budget
                     </Button>

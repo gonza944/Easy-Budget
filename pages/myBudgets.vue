@@ -40,12 +40,32 @@ const handleDeleteClick = (budgetId: string) => {
   budgetToDelete.value = budgetId;
   isDeleteDialogOpen.value = true;
 };
+
+const handleDeleteConfirm = async () => {
+  if (budgetToDelete.value) {
+    await $fetch('/api/budgets', {
+      method: 'DELETE',
+      body: { id: budgetToDelete.value },
+    });
+    refresh();
+    isDeleteDialogOpen.value = false;
+  }
+};
+
+
 </script>
 
 
 <template>
-  <div class="h-full flex flex-col gap-8 items-center pt-[20vh]">
-    <h1 class="text-2xl md:text-4xl font-bold mb-8 text-center">Welcome Back, {{ user?.name }}</h1>
+  <div class="h-full flex flex-col gap-8 items-center pt-[15vh] md:pt-[20vh]">
+    <div class="flex flex-col items-center md:flex-row md:items-center md:gap-4 mb-8">
+      <NuxtImg 
+        src="/Logo.png" 
+        alt="Easy Budget Logo" 
+        class="h-20 md:h-16 w-auto mb-3 md:mb-0" 
+      />
+      <h1 class="text-2xl md:text-4xl font-bold text-center">Welcome Back, {{ user?.name }}</h1>
+    </div>
     <div class="flex w-full md:w-xl items-center gap-1.5">
       <Input id="budget-name" v-model="budgetName" type="text" placeholder="Budget Name" class="h-12 bg-background" />
       <Button type="submit" size="iconLg">
@@ -82,7 +102,7 @@ const handleDeleteClick = (budgetId: string) => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel @click="isDeleteDialogOpen = false">Cancel</AlertDialogCancel>
-          <AlertDialogAction @click="isDeleteDialogOpen = false">Delete</AlertDialogAction>
+          <AlertDialogAction @click="handleDeleteConfirm">Delete</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
