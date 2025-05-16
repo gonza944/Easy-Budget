@@ -9,7 +9,7 @@ defineProps<{
 <template>
     <Card
         class="w-full aspect-square cursor-pointer group hover:animate-pulse transition-all duration-300 items-baseline justify-end">
-        <CardHeader class="justify-left w-full">
+        <CardHeader class="justify-start w-full">
             <CardTitle class="text-lg font-semibold capitalize">{{ budget.name }}</CardTitle>
         </CardHeader>
         <CardContent v-if="budget.description" class="flex flex-col text-left">
