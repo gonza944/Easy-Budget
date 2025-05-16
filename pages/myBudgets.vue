@@ -8,13 +8,16 @@ definePageMeta({
 const { user } = useUserSession();
 const budgetName = ref('');
 const isModalOpen = ref(false);
+const isDeleteDialogOpen = ref(false);
+const budgetToDelete = ref<string | null>(null);
+
 useUpdateMenuElements([
   {
     label: "New Budget",
     onClick: () => { isModalOpen.value = true },
   },
-
 ]);
+
 // Single useFetch that handles both initial and filtered data
 const { data: budgets, refresh } = await useFetch<BudgetsResponse>(() => {
   return `/api/budgets${budgetName.value ? `?name=${budgetName.value}` : ''}`;
@@ -32,12 +35,37 @@ watch(budgetName, () => {
     refresh();
   }
 });
+
+const handleDeleteClick = (budgetId: string) => {
+  budgetToDelete.value = budgetId;
+  isDeleteDialogOpen.value = true;
+};
+
+const handleDeleteConfirm = async () => {
+  if (budgetToDelete.value) {
+    await $fetch('/api/budgets', {
+      method: 'DELETE',
+      body: { id: Number(budgetToDelete.value) },
+    });
+    refresh();
+    isDeleteDialogOpen.value = false;
+  }
+};
+
+
 </script>
 
 
 <template>
-  <div class="h-full flex flex-col gap-8 items-center pt-[20vh]">
-    <h1 class="text-2xl md:text-4xl font-bold mb-8 text-center">Welcome Back, {{ user?.name }}</h1>
+  <div class="h-full flex flex-col gap-8 items-center pt-[15vh] md:pt-[20vh]">
+    <div class="flex flex-col items-center md:flex-row md:items-center md:gap-4 mb-8">
+      <NuxtImg 
+        src="/Logo.png" 
+        alt="Easy Budget Logo" 
+        class="h-20 md:h-16 w-auto mb-3 md:mb-0" 
+      />
+      <h1 class="text-2xl md:text-4xl font-bold text-center">Welcome Back, {{ user?.name }}</h1>
+    </div>
     <div class="flex w-full md:w-xl items-center gap-1.5">
       <Input id="budget-name" v-model="budgetName" type="text" placeholder="Budget Name" class="h-12 bg-background" />
       <Button type="submit" size="iconLg">
@@ -48,10 +76,10 @@ watch(budgetName, () => {
 
     <div class="relative w-full flex justify-center">
       <ScrollArea class="w-full" v-if="budgets && budgets.length > 0">
-        <div class="flex gap-4 pb-4 overflow-x-auto md:justify-center"
+        <div class="flex gap-4 pb-4 overflow-x-auto justify-center"
           :class="budgets && budgets.length > 0 ? 'px-4' : ''">
           <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
-            <BudgetCard :budget="budget" />
+            <BudgetCard :budget="budget" :onDeleteClick="() => handleDeleteClick(budget.id)" />
           </div>
         </div>
         <ScrollBar orientation="horizontal" />
@@ -63,5 +91,20 @@ watch(budgetName, () => {
       </Button>
     </div>
     <NewBudgetForm v-model="isModalOpen" :success="refresh" />
+
+    <AlertDialog v-model:open="isDeleteDialogOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Budget</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this budget? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">Cancel</AlertDialogCancel>
+          <AlertDialogAction @click="handleDeleteConfirm">Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
