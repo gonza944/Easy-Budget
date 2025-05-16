@@ -76,7 +76,7 @@ const handleDeleteConfirm = async () => {
 
     <div class="relative w-full flex justify-center">
       <ScrollArea class="w-full" v-if="budgets && budgets.length > 0">
-        <div class="flex gap-4 pb-4 overflow-x-auto md:justify-center"
+        <div class="flex gap-4 pb-4 overflow-x-auto justify-center"
           :class="budgets && budgets.length > 0 ? 'px-4' : ''">
           <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
             <BudgetCard :budget="budget" :onDeleteClick="() => handleDeleteClick(budget.id)" />
