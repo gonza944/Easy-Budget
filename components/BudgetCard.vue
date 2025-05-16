@@ -4,7 +4,7 @@ import { MenuIcon } from 'lucide-vue-next';
 
 defineProps<{
     budget: Budget;
-    onDeleteClick: () => void;
+    onDeleteClick: (id: string) => void;
 }>();
 
 const isPopoverOpen = ref(false);
