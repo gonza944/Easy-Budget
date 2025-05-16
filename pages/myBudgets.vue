@@ -8,13 +8,16 @@ definePageMeta({
 const { user } = useUserSession();
 const budgetName = ref('');
 const isModalOpen = ref(false);
+const isDeleteDialogOpen = ref(false);
+const budgetToDelete = ref<string | null>(null);
+
 useUpdateMenuElements([
   {
     label: "New Budget",
     onClick: () => { isModalOpen.value = true },
   },
-
 ]);
+
 // Single useFetch that handles both initial and filtered data
 const { data: budgets, refresh } = await useFetch<BudgetsResponse>(() => {
   return `/api/budgets${budgetName.value ? `?name=${budgetName.value}` : ''}`;
@@ -32,6 +35,11 @@ watch(budgetName, () => {
     refresh();
   }
 });
+
+const handleDeleteClick = (budgetId: string) => {
+  budgetToDelete.value = budgetId;
+  isDeleteDialogOpen.value = true;
+};
 </script>
 
 
@@ -51,7 +59,7 @@ watch(budgetName, () => {
         <div class="flex gap-4 pb-4 overflow-x-auto md:justify-center"
           :class="budgets && budgets.length > 0 ? 'px-4' : ''">
           <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
-            <BudgetCard :budget="budget" />
+            <BudgetCard :budget="budget" :onDeleteClick="() => handleDeleteClick(budget.id)" />
           </div>
         </div>
         <ScrollBar orientation="horizontal" />
@@ -63,5 +71,20 @@ watch(budgetName, () => {
       </Button>
     </div>
     <NewBudgetForm v-model="isModalOpen" :success="refresh" />
+
+    <AlertDialog v-model:open="isDeleteDialogOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Budget</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this budget? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">Cancel</AlertDialogCancel>
+          <AlertDialogAction @click="isDeleteDialogOpen = false">Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
