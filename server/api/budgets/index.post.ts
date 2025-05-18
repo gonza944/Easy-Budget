@@ -1,5 +1,5 @@
 import { newBudgetSchema } from "~/utils/budgetSchemas";
-import { supabase } from "../supabaseConnection";
+import { supabase } from "../../supabaseConnection";
 
 // Define and export API response type
 export type BudgetApiResponse = {
@@ -44,4 +44,4 @@ export default defineEventHandler(async (event) => {
       success: false
     } satisfies BudgetApiResponse;
   }
-});
+}); 

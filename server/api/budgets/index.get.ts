@@ -1,5 +1,5 @@
 import { BudgetSchema, type BudgetsResponse } from "~/utils/budgetSchemas";
-import { supabase } from "../supabaseConnection";
+import { supabase } from "../../supabaseConnection";
 
 export default defineEventHandler<Promise<BudgetsResponse | { statusCode: number; body: { message: string; error: string } }>>(async (event) => {
   const query = getQuery(event);
@@ -25,4 +25,4 @@ export default defineEventHandler<Promise<BudgetsResponse | { statusCode: number
       body: { message: "Failed to fetch budgets", error: error instanceof Error ? error.message : String(error) },
     };
   }
-});
+}); 

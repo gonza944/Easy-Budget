@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { supabase } from "../supabaseConnection";
+import { supabase } from "../../supabaseConnection";
 
 // Define the schema for delete request
 const deleteBudgetSchema = z.object({
@@ -40,4 +40,4 @@ export default defineEventHandler(async (event) => {
       error: error instanceof Error ? error.message : String(error),
     } satisfies DeleteBudgetApiResponse;
   }
-});
+}); 
