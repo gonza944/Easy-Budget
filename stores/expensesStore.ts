@@ -43,6 +43,7 @@ export const useMyExpensesStoreStore = defineStore("myExpensesStoreStore", {
     setSelectedBudget(budgetId: number) {
       this.selectedBudget =
         this.budgets.find((budget) => budget.id === budgetId) || null;
+      this.fetchExpenses(budgetId);
     },
   },
   getters: {

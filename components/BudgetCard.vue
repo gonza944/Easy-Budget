@@ -19,7 +19,7 @@ const handleDeleteClick = (callback: () => void, id: string) => {
 
 const navigateToExpenses = (id: string) => {
     setSelectedBudget(id);
-    router.push(`/expenses-preview?budgetId=${id}`);
+    router.push(`/dashboard`);
 };
 </script>
 
