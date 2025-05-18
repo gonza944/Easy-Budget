@@ -10,6 +10,11 @@ const budgetName = ref('');
 const isModalOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
 const budgetToDelete = ref<string | null>(null);
+const { fetchBudgets, getBudgets } = useMyExpensesStoreStore();
+const budgets = ref(getBudgets);
+
+await callOnce(fetchBudgets);
+
 
 useUpdateMenuElements([
   {
@@ -18,21 +23,10 @@ useUpdateMenuElements([
   },
 ]);
 
-// Single useFetch that handles both initial and filtered data
-const { data: budgets, refresh } = await useFetch<BudgetsResponse>(() => {
-  return `/api/budgets${budgetName.value ? `?name=${budgetName.value}` : ''}`;
-}, {
-  key: computed(() => `budgets-${budgetName.value || 'all'}`),
-  transform: (data) => data.map((budget) => ({
-    ...budget,
-    startingBudget: Number(budget.startingBudget),
-    maxExpensesPerDay: Number(budget.maxExpensesPerDay)
-  }))
-});
 
 watch(budgetName, () => {
   if (budgetName.value.length === 0 || budgetName.value.length > 2) {
-    refresh();
+    fetchBudgets(budgetName.value);
   }
 });
 
@@ -59,11 +53,7 @@ const handleDeleteConfirm = async () => {
 <template>
   <div class="h-full flex flex-col gap-8 items-center pt-[15vh] md:pt-[20vh]">
     <div class="flex flex-col items-center md:flex-row md:items-center md:gap-4 mb-8">
-      <NuxtImg 
-        src="/Logo.png" 
-        alt="Easy Budget Logo" 
-        class="h-20 md:h-16 w-auto mb-3 md:mb-0" 
-      />
+      <NuxtImg src="/Logo.png" alt="Easy Budget Logo" class="h-20 md:h-16 w-auto mb-3 md:mb-0" />
       <h1 class="text-2xl md:text-4xl font-bold text-center">Welcome Back, {{ user?.name }}</h1>
     </div>
     <div class="flex w-full md:w-xl items-center gap-1.5">

@@ -16,15 +16,19 @@ export const newBudgetSchema = z.object({
   startDate: z.string().optional().default(new Date().toLocaleDateString()),
 });
 
-export const BudgetSchema = z.array(
-  z.object({
-    id: z.number(),
-    name: z.string(),
-    description: z.string().optional().nullable(),
-    startingBudget: z.number().min(1),
-    maxExpensesPerDay: z.number().min(1),
-    startDate: z.string().optional().default(new Date().toLocaleDateString()),
-  })
+export const BudgetSchema =  z.object({
+  id: z.number(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  startingBudget: z.number().min(1),
+  maxExpensesPerDay: z.number().min(1),
+  startDate: z.string().optional().default(new Date().toLocaleDateString()),
+});
+
+export const BudgetsSchema = z.array(
+  BudgetSchema
 );
 
-export type BudgetsResponse = z.infer<typeof BudgetSchema>;
+export type BudgetsResponse = z.infer<typeof BudgetsSchema>;
+export type Budget = z.infer<typeof BudgetSchema>;
+

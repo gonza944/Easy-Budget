@@ -58,7 +58,6 @@ export default defineEventHandler(async (event) => {
   supabaseQuery = supabaseQuery.order('date', { ascending: false });
 
   const { data, error } = await supabaseQuery;
-  console.log(data);
 
   try {
     if (error) {
