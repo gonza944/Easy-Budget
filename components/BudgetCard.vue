@@ -10,6 +10,7 @@ defineProps<{
 
 const router = useRouter();
 const isPopoverOpen = ref(false);
+const { setSelectedBudget } = useMyExpensesStoreStore();
 
 const handleDeleteClick = (callback: () => void, id: string) => {
     isPopoverOpen.value = false;
@@ -17,6 +18,7 @@ const handleDeleteClick = (callback: () => void, id: string) => {
 };
 
 const navigateToExpenses = (id: string) => {
+    setSelectedBudget(id);
     router.push(`/expenses-preview?budgetId=${id}`);
 };
 </script>

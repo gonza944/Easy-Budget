@@ -24,9 +24,9 @@ useUpdateMenuElements([
 ]);
 
 
-watch(budgetName, () => {
+watch(budgetName, async () => {
   if (budgetName.value.length === 0 || budgetName.value.length > 2) {
-    fetchBudgets(budgetName.value);
+    await fetchBudgets(budgetName.value);
   }
 });
 
@@ -41,7 +41,7 @@ const handleDeleteConfirm = async () => {
       method: 'DELETE',
       body: { id: Number(budgetToDelete.value) },
     });
-    refresh();
+    await fetchBudgets();
     isDeleteDialogOpen.value = false;
   }
 };
@@ -80,7 +80,7 @@ const handleDeleteConfirm = async () => {
         <PlusIcon />
       </Button>
     </div>
-    <NewBudgetForm v-model="isModalOpen" :success="refresh" />
+    <NewBudgetForm v-model="isModalOpen" :success="fetchBudgets" />
 
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>

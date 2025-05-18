@@ -1,17 +1,22 @@
 <script lang="ts" setup>
 import { SearchIcon, ListFilterIcon } from 'lucide-vue-next';
-import type { Budget, Expense, Category } from '~/types';
+import type { Category } from '~/types';
 
 definePageMeta({
   middleware: ['authenticated'],
 })
 
-const _route = useRoute();
 const router = useRouter();
+const route = useRoute();
+const expensesStore = useMyExpensesStoreStore();
 
-// State - Fix for handling budgetId properly
-const budgetId = ref(23);
-const selectedBudget = ref<Budget | null>(null);
+// Get budgetId from store or fall back to route params
+const budgetId = computed(() => {
+  const storeId = expensesStore.getSelectedBudget?.id;
+  const paramId = route.query.budgetId ? Number(route.query.budgetId) : undefined;
+  return storeId || paramId;
+});
+
 const searchTerm = ref('');
 const selectedCategoryIds = ref<number[]>([]);
 const selectedDateRange = ref<{ start: Date | null; end: Date | null }>({
@@ -20,16 +25,21 @@ const selectedDateRange = ref<{ start: Date | null; end: Date | null }>({
 });
 const isFilterMenuOpen = ref(false);
 
-// Fetch budget details
-const { data: _ } = await useFetch<Budget>(`/api/budgets/${budgetId.value}`, {
-  key: computed(() => `budget-${budgetId.value}`),
-  enabled: computed(() => !!budgetId.value),
-  onResponse({ response }) {
-    if (response.ok && response._data) {
-      selectedBudget.value = response._data;
+// Fetch budget details and expenses on first load
+const fetchInitialData = async () => {
+  if (budgetId.value) {
+    if (!expensesStore.getSelectedBudget || expensesStore.getSelectedBudget.id !== budgetId.value) {
+      expensesStore.setSelectedBudget(budgetId.value);
     }
+    await expensesStore.fetchExpenses(budgetId.value);
   }
-});
+};
+
+// Call once on component mount
+callOnce(fetchInitialData);
+
+// Computed property to get the selected budget from store
+const selectedBudget = computed(() => expensesStore.getSelectedBudget);
 
 // Fetch categories
 const { data: categories } = await useFetch<Category[]>('/api/categories', {
@@ -37,65 +47,57 @@ const { data: categories } = await useFetch<Category[]>('/api/categories', {
   transform: (data) => data || []
 });
 
-// Prepare query params for expenses
-const expenseQueryParams = computed(() => {
-  const params: Record<string, string> = {};
+// Get expenses from store and apply local filters
+const expenses = computed(() => {
+  if (!budgetId.value || !expensesStore.getExpenses?.[budgetId.value]) return [];
   
-  if (budgetId.value) {
-    params.budget_id = budgetId.value;
-  }
-  
-  if (selectedCategoryIds.value.length === 1) {
-    params.category_id = selectedCategoryIds.value[0].toString();
-  }
-  
-  if (selectedDateRange.value.start) {
-    params.start_date = selectedDateRange.value.start.toISOString().split('T')[0];
-  }
-  
-  if (selectedDateRange.value.end) {
-    params.end_date = selectedDateRange.value.end.toISOString().split('T')[0];
-  }
-  
-  return params;
-});
-
-// Fetch expenses based on filters
-const { data: expenses, refresh: refreshExpenses } = await useFetch<Expense[]>('/api/expenses', {
-  key: computed(() => `expenses-${JSON.stringify(expenseQueryParams.value)}`),
-  params: expenseQueryParams,
-  transform: (data) => {
-    return (data || []).filter(expense => {
-      // Apply local search filter
-      if (searchTerm.value && !expense.name.toLowerCase().includes(searchTerm.value.toLowerCase())) {
+  return expensesStore.getExpenses[budgetId.value].filter(expense => {
+    // Apply local search filter
+    if (searchTerm.value && !expense.name.toLowerCase().includes(searchTerm.value.toLowerCase())) {
+      return false;
+    }
+    
+    // Apply category filter if categories are selected
+    if (selectedCategoryIds.value.length > 0 && !selectedCategoryIds.value.includes(expense.category_id)) {
+      return false;
+    }
+    
+    // Apply date range filter
+    if (selectedDateRange.value.start || selectedDateRange.value.end) {
+      const expenseDate = new Date(expense.date);
+      
+      if (selectedDateRange.value.start && expenseDate < selectedDateRange.value.start) {
         return false;
       }
       
-      // Apply category filter if multiple categories are selected
-      if (selectedCategoryIds.value.length > 1 && !selectedCategoryIds.value.includes(expense.category_id)) {
-        return false;
+      if (selectedDateRange.value.end) {
+        const endDate = new Date(selectedDateRange.value.end);
+        endDate.setHours(23, 59, 59, 999); // End of day
+        if (expenseDate > endDate) {
+          return false;
+        }
       }
-      
-      return true;
-    });
-  }
+    }
+    
+    return true;
+  });
 });
 
-// Watch for filter changes
+// Watch for filter changes to refresh the computed property
 watch([searchTerm, selectedCategoryIds, selectedDateRange], () => {
-  refreshExpenses();
+  // The computed property will automatically recalculate
 }, { deep: true });
 
 // Get expense total
 const expenseTotal = computed(() => {
-  return expenses.value?.reduce((total, expense) => total + expense.amount, 0) || 0;
+  return expenses.value.reduce((total, expense) => total + expense.amount, 0) || 0;
 });
 
 // Get expenses by category for chart
 const expensesByCategory = computed(() => {
   const result: Record<string, number> = {};
   
-  if (!expenses.value || !categories.value) return result;
+  if (!expenses.value.length || !categories.value) return result;
   
   expenses.value.forEach(expense => {
     const category = categories.value?.find(cat => cat.id === expense.category_id);
