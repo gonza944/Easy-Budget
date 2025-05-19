@@ -5,9 +5,10 @@ import TableCard from '@/components/TableCard.vue';
 import DateSelector from '@/components/DateSelector.vue';
 
 const router = useRouter();
-const { getSelectedBudget, getExpenses } = useMyExpensesStoreStore();
+const { getSelectedBudget, getExpensesByBudgetId } = useMyExpensesStoreStore();
 
-const expenses = computed(() => getExpenses[getSelectedBudget?.id]);
+
+const expenses = computed(() => getExpensesByBudgetId(getSelectedBudget?.id));
 
 // Selected date from DateSelector
 const selectedDate = ref(new Date());
