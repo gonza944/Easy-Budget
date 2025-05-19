@@ -12,6 +12,7 @@ const forwarded = useForwardPropsEmits(props, emits)
   <SplitterPanel
     data-slot="resizable-panel"
     v-bind="forwarded"
+    class="rounded-xl"
   >
     <slot />
   </SplitterPanel>
