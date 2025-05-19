@@ -6,9 +6,13 @@ import DateSelector from '@/components/DateSelector.vue';
 
 const router = useRouter();
 const store = useMyExpensesStoreStore();
+const { getExpensesByBudgetId } = store;
 
-const {  getExpensesByBudgetId } = store;
 const getSelectedBudget = computed(() => store.getSelectedBudget);
+const getRemainingDailyBudget = computed(() => store.getRemainingDailyBudget);
+const getRemainingMonthlyBudget = computed(() => store.getRemainingMonthlyBudget);
+const getRemainingBudget = computed(() => store.getRemainingBudget);
+
 const expenses = computed(() => getExpensesByBudgetId(getSelectedBudget?.value?.id || 0));
 if (!getSelectedBudget.value) {
   router.push('/myBudgets');
@@ -33,7 +37,7 @@ const expensesConfig = [
   {
     columnHeaderText: 'Amount',
     key: 'amount',
-    class: 'text-right',
+    class: 'text-right text-destructive-foreground',
     headerClass: 'text-right'
   }
 ];
@@ -57,8 +61,8 @@ useUpdateMenuElements([
             <CardHeader>
               <CardTitle>Total Expenses</CardTitle>
             </CardHeader>
-            <CardContent>
-              150000000
+            <CardContent :class="{ 'text-destructive-foreground': getRemainingBudget < 0, 'text-success': getRemainingBudget >= 0 }">
+              {{ getRemainingBudget }}
             </CardContent>
           </Card>
 
@@ -66,8 +70,8 @@ useUpdateMenuElements([
             <CardHeader>
               <CardTitle>Monthly Budget</CardTitle>
             </CardHeader>
-            <CardContent>
-              300000
+            <CardContent :class="{ 'text-destructive-foreground': getRemainingMonthlyBudget < 0, 'text-success': getRemainingMonthlyBudget >= 0 }">
+              {{ getRemainingMonthlyBudget }}
             </CardContent>
           </Card>
 
@@ -75,8 +79,8 @@ useUpdateMenuElements([
             <CardHeader>
               <CardTitle>Daily Budget</CardTitle>
             </CardHeader>
-            <CardContent>
-              50000
+            <CardContent :class="{ 'text-destructive-foreground': getRemainingDailyBudget < 0, 'text-success': getRemainingDailyBudget >= 0 }">
+              {{ getRemainingDailyBudget }}
             </CardContent>
           </Card>
         </div>
