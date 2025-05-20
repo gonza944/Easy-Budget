@@ -23,6 +23,7 @@ export const useMyExpensesStoreStore = defineStore("myExpensesStoreStore", () =>
   const budgets = ref<BudgetsResponse>([]);
   const selectedBudget = ref<SelectedBudget | null>(null);
   const expenses = ref<Record<number, Expense[]>>({});
+  const selectedDate = ref<Date>(new Date());
   
   // Separate budget metrics from selectedBudget
   const budgetMetrics = ref<BudgetMetrics>({
@@ -50,6 +51,8 @@ export const useMyExpensesStoreStore = defineStore("myExpensesStoreStore", () =>
   const getExpenses = computed(() => expenses.value);
   
   const getBudgets = computed(() => budgets.value);
+
+  const getSelectedDate = computed(() => selectedDate.value);
   
   // Calculate budget metrics when expenses or selectedBudget changes
   // but don't modify selectedBudget itself to avoid recursive updates
@@ -86,6 +89,13 @@ export const useMyExpensesStoreStore = defineStore("myExpensesStoreStore", () =>
   watchEffect(() => {
     if (selectedBudget.value && getSelectedBudgetExpenses.value) {
       calculateBudgetMetrics();
+    }
+  });
+  
+  // Add watchers for date and budget changes to auto-fetch expenses
+  watch([selectedDate, selectedBudget], () => {
+    if (selectedBudget.value?.id) {
+      fetchExpenses(selectedBudget.value.id);
     }
   });
   
@@ -145,12 +155,19 @@ export const useMyExpensesStoreStore = defineStore("myExpensesStoreStore", () =>
     
     try {
       expensesFetchState.value = { isLoading: true, error: null };
+      const date = selectedDate.value;
+      
+      // Format date as YYYY-MM-DD (without time component)
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       
       const { data: fetchedExpenses, error } = await useFetch<Expense[]>(
         () => `/api/expenses`,
         {
-          query: { budgetId },
-          key: `expenses-${budgetId}`
+          query: { 
+            budget_id: budgetId.toString(), 
+            date: formattedDate
+          },
+          key: `expenses-${budgetId}-${formattedDate}`
         }
       );
       
@@ -179,12 +196,10 @@ export const useMyExpensesStoreStore = defineStore("myExpensesStoreStore", () =>
     if (!budget) return;
     
     selectedBudget.value = budget;
-    
-    // Only fetch expenses if we don't already have them for this budget
-    if (!expenses.value[budgetId]?.length) {
-      fetchExpenses(budgetId);
-    }
-    // Budget metrics will be recalculated automatically via watchEffect
+  }
+
+  function setSelectedDate(date: Date) {
+    selectedDate.value = date;
   }
   
   // Add/update an expense and recalculate metrics
@@ -233,6 +248,7 @@ export const useMyExpensesStoreStore = defineStore("myExpensesStoreStore", () =>
     budgets,
     selectedBudget,
     expenses,
+    selectedDate,
     budgetMetrics,
     
     // Fetch states
@@ -250,11 +266,12 @@ export const useMyExpensesStoreStore = defineStore("myExpensesStoreStore", () =>
     getRemainingDailyBudget,
     getRemainingMonthlyBudget,
     getRemainingBudget,
-    
+    getSelectedDate,
     // Actions
     fetchBudgets,
     fetchExpenses,
     setSelectedBudget,
+    setSelectedDate,
     addExpense,
     deleteExpense
   };
