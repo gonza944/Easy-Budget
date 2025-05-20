@@ -1,19 +1,38 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import TableCard from '@/components/TableCard.vue';
 import DateSelector from '@/components/DateSelector.vue';
+
+interface Expense {
+  id: number;
+  name: string;
+  budget_id: number;
+  category_id: number;
+  amount: number;
+  date: string;
+  description?: string;
+}
+
+interface ColumnConfig<K extends keyof Expense> {
+  columnHeaderText: string;
+  key: K;
+  class?: string;
+  headerClass?: string;
+}
 
 const router = useRouter();
 const store = useMyExpensesStoreStore();
 const { getExpensesByBudgetId } = store;
+
+const condensedMode = ref(false);
 
 const getSelectedBudget = computed(() => store.getSelectedBudget);
 const getRemainingDailyBudget = computed(() => store.getRemainingDailyBudget);
 const getRemainingMonthlyBudget = computed(() => store.getRemainingMonthlyBudget);
 const getRemainingBudget = computed(() => store.getRemainingBudget);
 
-const expenses = computed(() => getExpensesByBudgetId(getSelectedBudget?.value?.id || 0));
+const expenses = computed(() => getExpensesByBudgetId(getSelectedBudget?.value?.id || 0) as Expense[]);
 if (!getSelectedBudget.value) {
   router.push('/myBudgets');
 }
@@ -22,25 +41,33 @@ if (!getSelectedBudget.value) {
 const selectedDate = ref(new Date());
 
 // Config for the expenses table
-const expensesConfig = [
-  {
-    columnHeaderText: 'Name',
-    key: 'name',
-    class: 'font-medium',
-    headerClass: 'text-left'
-  },
-  {
-    columnHeaderText: 'Description',
-    key: 'description',
-    class: 'break-words'
-  },
-  {
+const expensesConfig = computed(() => {
+  const config: ColumnConfig<keyof Expense>[] = [
+    {
+      columnHeaderText: 'Name',
+      key: 'name',
+      class: 'font-medium',
+      headerClass: 'text-left'
+    }
+  ];
+  
+  if (!condensedMode.value) {
+    config.push({
+      columnHeaderText: 'Description',
+      key: 'description',
+      class: 'break-words'
+    });
+  }
+  
+  config.push({
     columnHeaderText: 'Amount',
     key: 'amount',
     class: 'text-right text-destructive-foreground',
     headerClass: 'text-right'
-  }
-];
+  });
+  
+  return config;
+});
 
 useUpdateMenuElements([
   {
@@ -93,7 +120,13 @@ useUpdateMenuElements([
       </ResizablePanel>
       <ResizableHandle id="handle-demo-handle-1" class="px-2" />
       <ResizablePanel id="handle-demo-panel-2" :default-size="40">
-        <TableCard title="Expenses" :content="expenses || []" :config="expensesConfig" class="h-[90dvh]" />
+        <TableCard 
+          title="Expenses" 
+          :content="expenses || []" 
+          :config="expensesConfig" 
+          v-model:condensed-mode="condensedMode"
+          class="h-[90dvh]"
+        />
       </ResizablePanel>
     </ResizablePanelGroup>
   </div>

@@ -1,7 +1,10 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
 import { cn } from '@/lib/utils';
+import { SettingsIcon } from 'lucide-vue-next';
 
-interface ColumnConfig<K extends keyof T> {
+type ColumnKey<T> = Extract<keyof T, string | number>;
+
+interface ColumnConfig<T, K extends ColumnKey<T>> {
   columnHeaderText: string;
   key: K;
   class?: string;
@@ -11,25 +14,35 @@ interface ColumnConfig<K extends keyof T> {
 interface TableCardProps<T> {
   title: string;
   content: T[];
-  config: ColumnConfig<keyof T>[];
+  config: ColumnConfig<T, ColumnKey<T>>[];
   class?: string;
 }
 
 const props = defineProps<TableCardProps<T>>();
+const condensedMode = defineModel<boolean>('condensedMode', { default: false });
+
+const toggleCondensedMode = () => {
+  condensedMode.value = !condensedMode.value;
+};
 </script>
 
 <template>
-  <Card :class="cn('flex flex-col h-full', props.class)">
+  <Card :class="cn('flex flex-col h-full group relative', props.class)">
     <CardHeader>
       <CardTitle>{{ title }}</CardTitle>
     </CardHeader>
+    <div class="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
+      <Button variant="ghost" size="icon" class="h-8 w-8" @click.stop="toggleCondensedMode">
+        <SettingsIcon class="h-4 w-4" />
+      </Button>
+    </div>
     <CardContent class="flex-1 overflow-hidden flex flex-col">
       <Table class="flex-1">
         <TableHeader>
           <TableRow>
             <TableHead 
               v-for="column in config" 
-              :key="column.key"
+              :key="String(column.key)"
               :class="column.headerClass"
             >
               {{ column.columnHeaderText }}
@@ -40,7 +53,7 @@ const props = defineProps<TableCardProps<T>>();
           <TableRow v-for="(item, index) in content" :key="index">
             <TableCell 
               v-for="column in config" 
-              :key="`${index}-${column.key}`" 
+              :key="`${index}-${String(column.key)}`" 
               :class="column.class"
             >
               {{ item[column.key] }}
