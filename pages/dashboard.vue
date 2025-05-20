@@ -33,10 +33,10 @@ const getRemainingDailyBudget = computed(() => store.getRemainingDailyBudget);
 const getRemainingMonthlyBudget = computed(() => store.getRemainingMonthlyBudget);
 const getRemainingBudget = computed(() => store.getRemainingBudget);
 
-const expenses = computed(() => getExpensesByBudgetId(getSelectedBudget?.value?.id || 0) as Expense[]);
 if (!getSelectedBudget.value) {
   router.push('/myBudgets');
 }
+const expenses = computed(() => getSelectedBudget?.value?.id ? getExpensesByBudgetId(getSelectedBudget?.value?.id) as Expense[] : []);
 
 // Selected date from DateSelector
 const selectedDate = ref(new Date());
