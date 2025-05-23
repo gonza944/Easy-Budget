@@ -4,29 +4,27 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import TableCard from '@/components/TableCard.vue';
 import DateSelector from '@/components/DateSelector.vue';
 import { PlusIcon } from 'lucide-vue-next';
-
-interface Expense {
-  id: number;
-  name: string;
-  budget_id: number;
-  category_id: number;
-  amount: number;
-  date: string;
-  description?: string;
-}
-
-interface ColumnConfig<K extends keyof Expense> {
-  columnHeaderText: string;
-  key: K;
-  class?: string;
-  headerClass?: string;
-}
+import type { ColumnDefinition } from '~/components/types';
+import type { Expense } from '~/types';
+import ExpenseNameCell from '~/components/ExpenseNameCell.vue';
+import { useBreakpoints, breakpointsTailwind } from '@vueuse/core';
 
 const router = useRouter();
 const store = useMyExpensesStoreStore();
 const { getExpensesByBudgetId } = store;
 
 const condensedMode = ref(false);
+
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = breakpoints.smaller('md'); // md is 768px
+
+// Set initial condensedMode based on screen size
+condensedMode.value = isMobile.value;
+
+// Watch for changes in screen size to update condensedMode
+watch(isMobile, (value) => {
+  condensedMode.value = value;
+});
 
 const getSelectedBudget = computed(() => store.getSelectedBudget);
 const getRemainingDailyBudget = computed(() => store.getRemainingDailyBudget);
@@ -38,17 +36,16 @@ if (!getSelectedBudget.value) {
 }
 const expenses = computed(() => getSelectedBudget?.value?.id ? getExpensesByBudgetId(getSelectedBudget?.value?.id) as Expense[] : []);
 
-// Selected date from DateSelector
 const selectedDate = ref(new Date());
 
-// Config for the expenses table
-const expensesConfig = computed(() => {
-  const config: ColumnConfig<keyof Expense>[] = [
+const expensesConfig = computed((): ColumnDefinition<Expense>[] => {
+  const config: ColumnDefinition<Expense>[] = [
     {
       columnHeaderText: 'Name',
       key: 'name',
       class: 'font-medium',
-      headerClass: 'text-left'
+      headerClass: 'text-left',
+      renderer: ExpenseNameCell
     }
   ];
 

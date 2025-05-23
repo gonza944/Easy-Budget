@@ -12,13 +12,13 @@ const router = useRouter();
 const isPopoverOpen = ref(false);
 const { setSelectedBudget } = useMyExpensesStoreStore();
 
-const handleDeleteClick = (callback: () => void, id: string) => {
+const handleDeleteClick = (callback: (id: string) => void, id: string) => {
     isPopoverOpen.value = false;
     callback(id);
 };
 
 const navigateToExpenses = (id: string) => {
-    setSelectedBudget(id);
+    setSelectedBudget(Number(id));
     router.push(`/dashboard`);
 };
 </script>
