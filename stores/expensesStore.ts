@@ -1,7 +1,9 @@
 import { defineStore } from "pinia";
 import type { Expense } from "~/server/api/expenses/index.get";
 import type { Budget } from "~/utils/budgetSchemas";
-import type { Category } from "~/server/api/categories/index.get";
+import type { Category as ApiCategory } from "~/server/api/categories/index.get";
+
+export type Category = ApiCategory & { color: string };
 
 type BudgetsResponse = Array<Budget & { id: number }>;
 
@@ -65,6 +67,13 @@ export const useMyExpensesStoreStore = defineStore(
     const getSelectedDate = computed(() => selectedDate.value);
 
     const getCategories = computed(() => categories.value);
+
+    const getCategoryColor = computed(() => {
+      return (categoryId: number) => {
+        const category = categories.value.find(cat => cat.id === categoryId);
+        return category?.color;
+      };
+    });
 
     const getCategoryFromExpense = computed(() => {
       return (expense: Expense) => {
@@ -272,6 +281,14 @@ export const useMyExpensesStoreStore = defineStore(
       // Budget metrics will be recalculated automatically via watchEffect
     }
 
+    const assignCategoryColors = () => {
+      const availableColors = ["chart-1", "chart-2", "chart-3", "chart-4", "chart-5"];
+      categories.value = categories.value.map((category, index) => ({
+        ...category,
+        color: availableColors[index % availableColors.length],
+      }));
+    };
+
     async function fetchCategories() {
       const { data: fetchedCategories, error } = await useFetch<Category[]>(
         () => `/api/categories`,
@@ -285,6 +302,7 @@ export const useMyExpensesStoreStore = defineStore(
       }
 
       categories.value = fetchedCategories.value || [];
+      assignCategoryColors();
     }
 
     return {
@@ -312,6 +330,7 @@ export const useMyExpensesStoreStore = defineStore(
       getRemainingBudget,
       getSelectedDate,
       getCategories,
+      getCategoryColor,
       getCategoryFromExpense,
       // Actions
       fetchBudgets,
@@ -320,6 +339,7 @@ export const useMyExpensesStoreStore = defineStore(
       setSelectedDate,
       addExpense,
       deleteExpense,
+      fetchCategories,
     };
   }
 );

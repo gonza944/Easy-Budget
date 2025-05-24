@@ -4,8 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import TableCard from '@/components/TableCard.vue';
 import DateSelector from '@/components/DateSelector.vue';
 import { PlusIcon } from 'lucide-vue-next';
-import type { ColumnDefinition } from '~/components/types';
-import type { Expense } from '~/types';
+import type { ColumnDefinition, Expense } from '~/types';
 import ExpenseNameCell from '~/components/ExpenseNameCell.vue';
 import { useBreakpoints, breakpointsTailwind } from '@vueuse/core';
 
