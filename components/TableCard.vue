@@ -1,20 +1,12 @@
-<script setup lang="ts" generic="T extends Record<string, any>">
+<script setup lang="ts" generic="T extends object">
 import { cn } from '@/lib/utils';
 import { EyeIcon } from 'lucide-vue-next';
+import type { ColumnDefinition } from '~/types';
 
-type ColumnKey<T> = Extract<keyof T, string | number>;
-
-interface ColumnConfig<T, K extends ColumnKey<T>> {
-  columnHeaderText: string;
-  key: K;
-  class?: string;
-  headerClass?: string;
-}
-
-interface TableCardProps<T> {
+interface TableCardProps<T extends object> {
   title: string;
   content: T[];
-  config: ColumnConfig<T, ColumnKey<T>>[];
+  config: Array<ColumnDefinition<T>>;
   class?: string;
 }
 
@@ -50,7 +42,12 @@ const toggleCondensedMode = () => {
             <TableRow v-for="(item, index) in content" :key="index">
               <TableCell v-for="column in config" :key="`${index}-${String(column.key)}`" 
                 :class="cn('break-words whitespace-normal hyphens-auto', column.class)">
-                {{ item[column.key] }}
+                <template v-if="column.renderer">
+                  <component :is="column.renderer" :item="item" :column="column" />
+                </template>
+                <template v-else>
+                  {{ item[column.key] }}
+                </template>
               </TableCell>
             </TableRow>
           </TableBody>
