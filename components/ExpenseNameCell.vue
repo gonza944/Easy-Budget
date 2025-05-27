@@ -9,7 +9,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const store = useMyExpensesStoreStore();
+const store = useMyExpensesStore();
 const { getCategoryFromExpense, getCategoryColor } = store;
 
 const category = computed(() => {
@@ -22,8 +22,7 @@ const categoryName = computed(() => category.value?.name || 'Uncategorized');
 const badgeColorClass = computed(() => {
   if (category.value?.id) {
     const colorName = getCategoryColor(category.value.id);
-    console.log(colorName);
-    return colorName ? `bg-${colorName}` : 'bg-primary';
+    return colorName ? `bg-chart-2` : 'bg-primary';
   }
   return 'bg-primary';
 });

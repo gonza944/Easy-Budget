@@ -21,8 +21,8 @@ interface FetchState {
   error: string | null;
 }
 
-export const useMyExpensesStoreStore = defineStore(
-  "myExpensesStoreStore",
+export const useMyExpensesStore = defineStore(
+  "myExpensesStore",
   () => {
     // State
     const budgets = ref<BudgetsResponse>([]);

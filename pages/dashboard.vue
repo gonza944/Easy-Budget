@@ -9,7 +9,7 @@ import ExpenseNameCell from '~/components/ExpenseNameCell.vue';
 import { useBreakpoints, breakpointsTailwind } from '@vueuse/core';
 
 const router = useRouter();
-const store = useMyExpensesStoreStore();
+const store = useMyExpensesStore();
 const { getExpensesByBudgetId } = store;
 
 const condensedMode = ref(false);

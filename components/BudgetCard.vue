@@ -10,7 +10,7 @@ defineProps<{
 
 const router = useRouter();
 const isPopoverOpen = ref(false);
-const { setSelectedBudget } = useMyExpensesStoreStore();
+const { setSelectedBudget } = useMyExpensesStore();
 
 const handleDeleteClick = (callback: (id: string) => void, id: string) => {
     isPopoverOpen.value = false;

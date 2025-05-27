@@ -10,7 +10,7 @@ const budgetName = ref('');
 const isModalOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
 const budgetToDelete = ref<string | null>(null);
-const myExpensesStore = useMyExpensesStoreStore();
+const myExpensesStore = useMyExpensesStore();
 const { fetchBudgets } = myExpensesStore;
 const budgets = computed(() => myExpensesStore.getBudgets);
 
