@@ -22,7 +22,7 @@ const categoryName = computed(() => category.value?.name || 'Uncategorized');
 const badgeColorClass = computed(() => {
   if (category.value?.id) {
     const colorName = getCategoryColor(category.value.id);
-    return colorName ? `bg-chart-2` : 'bg-primary';
+    return colorName ? `bg-chart-4 text-secondary-foreground dark:text-secondary dark:bg-chart-2` : 'bg-primary';
   }
   return 'bg-primary';
 });

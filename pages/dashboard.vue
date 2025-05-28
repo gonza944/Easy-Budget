@@ -7,12 +7,14 @@ import { PlusIcon } from 'lucide-vue-next';
 import type { ColumnDefinition, Expense } from '~/types';
 import ExpenseNameCell from '~/components/ExpenseNameCell.vue';
 import { useBreakpoints, breakpointsTailwind } from '@vueuse/core';
+import NewExpenseForm from '~/components/newExpenseForm.vue';
 
 const router = useRouter();
 const store = useMyExpensesStore();
 const { getExpensesByBudgetId } = store;
 
 const condensedMode = ref(false);
+const showExpenseForm = ref(false);
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = breakpoints.smaller('md'); // md is 768px
@@ -67,8 +69,9 @@ const expensesConfig = computed((): ColumnDefinition<Expense>[] => {
 });
 
 const handleAddExpense = () => {
-  
+  showExpenseForm.value = !showExpenseForm.value;
 };
+
 
 useUpdateMenuElements([
   {
@@ -144,11 +147,16 @@ useUpdateMenuElements([
       >
         <TableCard title="Expenses" :content="expenses || []" :config="expensesConfig"
           v-model:condensed-mode="condensedMode" class="h-[54dvh] md:h-[85dvh]">
-          <Button size="iconLg" class="self-center my-6" @click="handleAddExpense">
-            <PlusIcon />
-          </Button>
+          <div class="flex flex-col items-center w-full">
+            <Button size="iconLg" class="my-6" @click="handleAddExpense">
+              <PlusIcon />
+            </Button>
+          </div>
         </TableCard>
       </ResizablePanel>
     </ResizablePanelGroup>
+
+    <!-- New Expense Form Dialog -->
+    <NewExpenseForm v-model="showExpenseForm" />
     </div>
 </template>

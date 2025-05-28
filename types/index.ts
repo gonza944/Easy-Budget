@@ -20,13 +20,3 @@ export type ColumnDefinition<TItem extends object> =
       columnHeaderText: string;
       renderer: Component<{ item: TItem; column: ColumnDefinition<TItem> }>;
     });
-
-export interface Expense {
-  id: number;
-  name: string;
-  budget_id: number;
-  category_id: number;
-  amount: number;
-  date: string;
-  description?: string;
-}

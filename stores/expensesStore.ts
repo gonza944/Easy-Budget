@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
-import type { Expense } from "~/server/api/expenses/index.get";
 import type { Budget } from "~/utils/budgetSchemas";
-import type { Category as ApiCategory } from "~/server/api/categories/index.get";
-
-export type Category = ApiCategory & { color: string };
+import type { Expense, ExpenseCreate } from "~/types/expense";
+import type { CategoriesResponse } from "~/types/category";
 
 type BudgetsResponse = Array<Budget & { id: number }>;
 
@@ -29,7 +27,7 @@ export const useMyExpensesStore = defineStore(
     const selectedBudget = ref<SelectedBudget | null>(null);
     const expenses = ref<Record<number, Expense[]>>({});
     const selectedDate = ref<Date>(new Date());
-    const categories = ref<Category[]>([]);
+    const categories = ref<CategoriesResponse>([]);
 
     // Separate budget metrics from selectedBudget
     const budgetMetrics = ref<BudgetMetrics>({
@@ -239,24 +237,13 @@ export const useMyExpensesStore = defineStore(
     }
 
     // Add/update an expense and recalculate metrics
-    function addExpense(expense: Expense) {
+    function addExpense(expense: ExpenseCreate) {
       if (!selectedBudget.value?.id) return;
 
       const budgetId = selectedBudget.value.id;
       const currentExpenses = [...(expenses.value[budgetId] || [])];
 
-      // Check if expense already exists to update it
-      const expenseIndex = currentExpenses.findIndex(
-        (e) => e.id === expense.id
-      );
-
-      if (expenseIndex >= 0) {
-        // Update existing expense
-        currentExpenses[expenseIndex] = expense;
-      } else {
-        // Add new expense
-        currentExpenses.push(expense);
-      }
+      currentExpenses.push(expense);
 
       expenses.value = {
         ...expenses.value,
@@ -290,7 +277,7 @@ export const useMyExpensesStore = defineStore(
     };
 
     async function fetchCategories() {
-      const { data: fetchedCategories, error } = await useFetch<Category[]>(
+      const { data: fetchedCategories, error } = await useFetch<CategoriesResponse>(
         () => `/api/categories`,
         {
           key: `categories`,
