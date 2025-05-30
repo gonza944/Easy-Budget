@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
-import type { Expense } from "~/server/api/expenses/index.get";
 import type { Budget } from "~/utils/budgetSchemas";
-import type { Category as ApiCategory } from "~/server/api/categories/index.get";
-
-export type Category = ApiCategory & { color: string };
+import type { Expense, ExpenseCreate } from "~/types/expense";
+import type { CategoriesResponse } from "~/types/category";
 
 type BudgetsResponse = Array<Budget & { id: number }>;
 
@@ -21,15 +19,15 @@ interface FetchState {
   error: string | null;
 }
 
-export const useMyExpensesStoreStore = defineStore(
-  "myExpensesStoreStore",
+export const useMyExpensesStore = defineStore(
+  "myExpensesStore",
   () => {
     // State
     const budgets = ref<BudgetsResponse>([]);
     const selectedBudget = ref<SelectedBudget | null>(null);
     const expenses = ref<Record<number, Expense[]>>({});
     const selectedDate = ref<Date>(new Date());
-    const categories = ref<Category[]>([]);
+    const categories = ref<CategoriesResponse>([]);
 
     // Separate budget metrics from selectedBudget
     const budgetMetrics = ref<BudgetMetrics>({
@@ -128,7 +126,7 @@ export const useMyExpensesStoreStore = defineStore(
         fetchExpenses(selectedBudget.value.id);
       }
     });
-
+    
     // Derived getters for budget calculations now use budgetMetrics
     const getRemainingDailyBudget = computed(
       () => budgetMetrics.value.remainingDailyBudget
@@ -239,29 +237,28 @@ export const useMyExpensesStoreStore = defineStore(
     }
 
     // Add/update an expense and recalculate metrics
-    function addExpense(expense: Expense) {
+    async function addExpense(expense: ExpenseCreate) {
       if (!selectedBudget.value?.id) return;
 
       const budgetId = selectedBudget.value.id;
       const currentExpenses = [...(expenses.value[budgetId] || [])];
 
-      // Check if expense already exists to update it
-      const expenseIndex = currentExpenses.findIndex(
-        (e) => e.id === expense.id
-      );
-
-      if (expenseIndex >= 0) {
-        // Update existing expense
-        currentExpenses[expenseIndex] = expense;
-      } else {
-        // Add new expense
-        currentExpenses.push(expense);
-      }
+      currentExpenses.push({
+        ...expense,
+        id: currentExpenses.length + 1,
+      });
 
       expenses.value = {
         ...expenses.value,
         [budgetId]: currentExpenses,
       };
+
+      await $fetch<Expense>('/api/expenses', {
+        method: 'POST',
+        body: expense,
+      });
+
+      fetchExpenses(budgetId);
 
       // Budget metrics will be recalculated automatically via watchEffect
     }
@@ -290,7 +287,7 @@ export const useMyExpensesStoreStore = defineStore(
     };
 
     async function fetchCategories() {
-      const { data: fetchedCategories, error } = await useFetch<Category[]>(
+      const { data: fetchedCategories, error } = await useFetch<CategoriesResponse>(
         () => `/api/categories`,
         {
           key: `categories`,

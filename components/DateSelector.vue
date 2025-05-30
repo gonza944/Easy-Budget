@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 
-const state = useMyExpensesStoreStore();
+const state = useMyExpensesStore();
 const selectedDate = computed(() => state.getSelectedDate);
 const setSelectedDate = state.setSelectedDate;
 
