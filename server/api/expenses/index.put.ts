@@ -1,45 +1,6 @@
-import { z } from 'zod';
 import { supabase } from "../../supabaseConnection";
-
-// Schema for updating an expense
-export const UpdateExpenseSchema = z.object({
-  id: z.number(),
-  budget_id: z.number().optional(),
-  category_id: z.number().optional(),
-  name: z.string().optional(),
-  amount: z.number().positive().optional(),
-  description: z.string().optional(),
-  date: z.string().or(z.date()).optional()
-});
-
-// Schema for the response body
-export const ExpenseResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.object({
-    id: z.number(),
-    budget_id: z.number(),
-    category_id: z.number(),
-    name: z.string(),
-    amount: z.number(),
-    description: z.string().optional(),
-    date: z.string()
-  }).optional(),
-  error: z.string().optional()
-});
-
-// Interface for the update data
-interface ExpenseUpdateData {
-  budget_id?: number;
-  category_id?: number;
-  name?: string;
-  amount?: number;
-  description?: string;
-  date?: string | Date;
-}
-
-// Derive TypeScript types from Zod schemas
-export type UpdateExpense = z.infer<typeof UpdateExpenseSchema>;
-export type ExpenseResponse = z.infer<typeof ExpenseResponseSchema>;
+import { UpdateExpenseSchema } from '~/types/expense';
+import type { ExpenseResponse, ExpenseUpdateData } from '~/types/expense';
 
 export default defineEventHandler(async (event) => {
   try {

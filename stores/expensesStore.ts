@@ -7,13 +7,6 @@ type BudgetsResponse = Array<Budget & { id: number }>;
 
 type SelectedBudget = Budget & { id: number };
 
-// Separate budget metrics to avoid recursive update
-interface BudgetMetrics {
-  remainingDailyBudget: number;
-  remainingMonthlyBudget: number;
-  remainingBudget: number;
-}
-
 interface FetchState {
   isLoading: boolean;
   error: string | null;
@@ -28,13 +21,6 @@ export const useMyExpensesStore = defineStore(
     const expenses = ref<Record<number, Expense[]>>({});
     const selectedDate = ref<Date>(new Date());
     const categories = ref<CategoriesResponse>([]);
-
-    // Separate budget metrics from selectedBudget
-    const budgetMetrics = ref<BudgetMetrics>({
-      remainingDailyBudget: 0,
-      remainingMonthlyBudget: 0,
-      remainingBudget: 0,
-    });
 
     // UI states
     const budgetsFetchState = ref<FetchState>({
@@ -66,57 +52,12 @@ export const useMyExpensesStore = defineStore(
 
     const getCategories = computed(() => categories.value);
 
-    const getCategoryColor = computed(() => {
-      return (categoryId: number) => {
-        const category = categories.value.find(cat => cat.id === categoryId);
-        return category?.color;
-      };
-    });
-
     const getCategoryFromExpense = computed(() => {
       return (expense: Expense) => {
         return categories.value.find(
           (category) => category.id === expense?.category_id
         );
       };
-    });
-
-    // Calculate budget metrics when expenses or selectedBudget changes
-    // but don't modify selectedBudget itself to avoid recursive updates
-    const calculateBudgetMetrics = () => {
-      if (!selectedBudget.value || !selectedBudget.value.id) {
-        budgetMetrics.value = {
-          remainingDailyBudget: 0,
-          remainingMonthlyBudget: 0,
-          remainingBudget: 0,
-        };
-        return;
-      }
-
-      const budgetId = selectedBudget.value.id;
-      const budgetExpenses = expenses.value[budgetId] || [];
-
-      const totalExpenses = budgetExpenses.reduce(
-        (sum, expense) => sum + Number(expense.amount),
-        0
-      );
-
-      const startingBudget = Number(selectedBudget.value.startingBudget);
-      const maxDailyBudget = Number(selectedBudget.value.maxExpensesPerDay);
-
-      // Update the separate metrics object instead of selectedBudget
-      budgetMetrics.value = {
-        remainingBudget: startingBudget - totalExpenses,
-        remainingDailyBudget: maxDailyBudget,
-        remainingMonthlyBudget: startingBudget - totalExpenses,
-      };
-    };
-
-    // Use watchEffect to run calculations when dependencies change
-    watchEffect(() => {
-      if (selectedBudget.value && getSelectedBudgetExpenses.value) {
-        calculateBudgetMetrics();
-      }
     });
 
     // Add watchers for date and budget changes to auto-fetch expenses
@@ -129,15 +70,21 @@ export const useMyExpensesStore = defineStore(
     
     // Derived getters for budget calculations now use budgetMetrics
     const getRemainingDailyBudget = computed(
-      () => budgetMetrics.value.remainingDailyBudget
-    );
+      () => {
+        if (!selectedBudget.value?.id) return 0;
 
-    const getRemainingMonthlyBudget = computed(
-      () => budgetMetrics.value.remainingMonthlyBudget
-    );
+        const budgetId = selectedBudget.value.id;
+        const budgetExpenses = expenses.value[budgetId] || [];
 
-    const getRemainingBudget = computed(
-      () => budgetMetrics.value.remainingBudget
+        const totalExpenses = budgetExpenses.reduce(
+          (sum, expense) => sum + Number(expense.amount),
+          0
+        );
+
+        const maxDailyBudget = Number(selectedBudget.value.maxExpensesPerDay);
+
+        return maxDailyBudget - totalExpenses;
+      }
     );
 
     const isLoadingBudgets = computed(() => budgetsFetchState.value.isLoading);
@@ -277,15 +224,6 @@ export const useMyExpensesStore = defineStore(
 
       // Budget metrics will be recalculated automatically via watchEffect
     }
-
-    const assignCategoryColors = () => {
-      const availableColors = ["chart-1", "chart-2", "chart-3", "chart-4", "chart-5"];
-      categories.value = categories.value.map((category, index) => ({
-        ...category,
-        color: availableColors[index % availableColors.length],
-      }));
-    };
-
     async function fetchCategories() {
       const { data: fetchedCategories, error } = await useFetch<CategoriesResponse>(
         () => `/api/categories`,
@@ -299,7 +237,6 @@ export const useMyExpensesStore = defineStore(
       }
 
       categories.value = fetchedCategories.value || [];
-      assignCategoryColors();
     }
 
     return {
@@ -308,7 +245,6 @@ export const useMyExpensesStore = defineStore(
       selectedBudget,
       expenses,
       selectedDate,
-      budgetMetrics,
 
       // Fetch states
       isLoadingBudgets,
@@ -323,11 +259,8 @@ export const useMyExpensesStore = defineStore(
       getExpenses,
       getBudgets,
       getRemainingDailyBudget,
-      getRemainingMonthlyBudget,
-      getRemainingBudget,
       getSelectedDate,
       getCategories,
-      getCategoryColor,
       getCategoryFromExpense,
       // Actions
       fetchBudgets,

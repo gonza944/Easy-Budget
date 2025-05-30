@@ -1,20 +1,6 @@
-import { z } from 'zod';
 import { supabase } from "../../supabaseConnection";
-
-// Schema for deleting an expense
-export const DeleteExpenseSchema = z.object({
-  id: z.number(),
-});
-
-// Schema for the response body
-export const DeleteResponseSchema = z.object({
-  success: z.boolean(),
-  error: z.string().optional()
-});
-
-// Derive TypeScript types from Zod schemas
-export type DeleteExpense = z.infer<typeof DeleteExpenseSchema>;
-export type DeleteResponse = z.infer<typeof DeleteResponseSchema>;
+import { DeleteExpenseSchema } from '~/types/expense';
+import type { DeleteResponse } from '~/types/expense';
 
 export default defineEventHandler(async (event) => {
   try {
