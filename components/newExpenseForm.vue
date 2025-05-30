@@ -40,7 +40,7 @@
                 </SelectContent>
               </Select>
               <Transition name="slide-fade">
-                <FormMessage v-if="categoryError || amountError" :class="{ 'opacity-0': !categoryError }">
+                <FormMessage v-if="categoryError" :class="{ 'opacity-0': !categoryError }">
                   {{ categoryError || ' ' }}
                 </FormMessage>
               </Transition>
