@@ -2,16 +2,38 @@ import { z } from 'zod';
 import { supabase } from "../../supabaseConnection";
 import { ExpenseCreateSchema, ExpenseSchema } from '~/types/expense';
 
+// Define simplified session user type based on what's stored in the session
+type SessionUser = {
+  id: string;
+  email: string;
+  name: string;
+};
+
 export default defineEventHandler(async (event) => {
   try {
     // Parse and validate request body
-    const body = await readBody(event);
-    const validatedData = ExpenseCreateSchema.parse(body);
+    const validatedData = await readValidatedBody(event, ExpenseCreateSchema.parse);
     
-    // Insert expense into database
+    // Get user session to attach user_id
+    const session = await getUserSession(event);
+    
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+    
+    // Cast to our session user type
+    const user = session.user as SessionUser;
+    
+    // Insert expense into database with user_id
     const { data, error } = await supabase
       .from('expenses')
-      .insert([validatedData])
+      .insert([{
+        ...validatedData,
+        user_id: user.id  // Use just the ID, not the whole user object
+      }])
       .select();
     
     if (error) {
@@ -26,6 +48,7 @@ export default defineEventHandler(async (event) => {
     return ExpenseSchema.parse(data[0]);
     
   } catch (error) {
+    console.log(error);
     return {
       statusCode: error instanceof z.ZodError ? 400 : 500,
       body: { 

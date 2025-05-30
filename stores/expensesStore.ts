@@ -126,7 +126,7 @@ export const useMyExpensesStore = defineStore(
         fetchExpenses(selectedBudget.value.id);
       }
     });
-
+    
     // Derived getters for budget calculations now use budgetMetrics
     const getRemainingDailyBudget = computed(
       () => budgetMetrics.value.remainingDailyBudget
@@ -237,18 +237,28 @@ export const useMyExpensesStore = defineStore(
     }
 
     // Add/update an expense and recalculate metrics
-    function addExpense(expense: ExpenseCreate) {
+    async function addExpense(expense: ExpenseCreate) {
       if (!selectedBudget.value?.id) return;
 
       const budgetId = selectedBudget.value.id;
       const currentExpenses = [...(expenses.value[budgetId] || [])];
 
-      currentExpenses.push(expense);
+      currentExpenses.push({
+        ...expense,
+        id: currentExpenses.length + 1,
+      });
 
       expenses.value = {
         ...expenses.value,
         [budgetId]: currentExpenses,
       };
+
+      await $fetch<Expense>('/api/expenses', {
+        method: 'POST',
+        body: expense,
+      });
+
+      fetchExpenses(budgetId);
 
       // Budget metrics will be recalculated automatically via watchEffect
     }
