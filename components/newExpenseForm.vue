@@ -59,7 +59,7 @@
                 </div>
               </FormControl>
               <Transition name="slide-fade">
-                <FormMessage v-if="categoryError || amountError" :class="{ 'opacity-0': !amountError }">
+                <FormMessage v-if="amountError" :class="{ 'opacity-0': !amountError }">
                   {{ amountError || ' ' }}
                 </FormMessage>
               </Transition>
