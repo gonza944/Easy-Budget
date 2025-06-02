@@ -13,6 +13,7 @@ import type { Expense } from '~/types/expense';
 const router = useRouter();
 const store = useMyExpensesStore();
 const { getExpensesByBudgetId } = store;
+const { monthlyBudget } = useUseExpensesTotals();
 
 const condensedMode = ref(false);
 const showExpenseForm = ref(false);
@@ -107,7 +108,7 @@ useUpdateMenuElements([
               <CardTitle>Monthly Budget</CardTitle>
             </CardHeader>
             <CardContent>
-              0
+              $ {{ monthlyBudget.data }}
             </CardContent>
           </Card>
 
