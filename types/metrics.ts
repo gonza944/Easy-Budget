@@ -6,3 +6,10 @@ export const MonthlyBudgetQuerySchema = z.object({
 });
 
 export type MonthlyBudgetQuery = z.infer<typeof MonthlyBudgetQuerySchema>;
+
+
+export const RemainingBudgetQuerySchema = z.object({
+  budget_id: z.string().transform((val) => Number(val)),
+});
+
+export type RemainingBudgetQuery = z.infer<typeof RemainingBudgetQuerySchema>;

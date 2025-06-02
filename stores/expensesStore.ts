@@ -29,7 +29,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     isLoading: false,
     error: null,
   });
-  const { fetchMonthlyBudget } = useUseExpensesTotals();
+  const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
 
   // Getters
   const getSelectedBudget = computed(() => selectedBudget.value);
@@ -146,6 +146,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
         }
       );
       fetchMonthlyBudget(budgetId, selectedDate.value);
+      fetchRemainingBudget(budgetId);
 
       if (error.value) {
         throw new Error(error.value.message || "Failed to fetch expenses");

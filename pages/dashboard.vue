@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CurrencyCell } from '#components';
 import DateSelector from '@/components/DateSelector.vue';
 import TableCard from '@/components/TableCard.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import type { Expense } from '~/types/expense';
 const router = useRouter();
 const store = useMyExpensesStore();
 const { getExpensesByBudgetId } = store;
-const { monthlyBudget } = useUseExpensesTotals();
+const { monthlyBudget, remainingBudget } = useUseExpensesTotals();
 
 const condensedMode = ref(false);
 const showExpenseForm = ref(false);
@@ -61,7 +62,8 @@ const expensesConfig = computed((): ColumnDefinition<Expense>[] => {
     columnHeaderText: 'Amount',
     key: 'amount',
     class: 'text-right text-destructive-foreground',
-    headerClass: 'text-right'
+    headerClass: 'text-right',
+    renderer: CurrencyCell
   });
 
   return config;
@@ -99,7 +101,7 @@ useUpdateMenuElements([
               <CardTitle>Total Expenses</CardTitle>
             </CardHeader>
             <CardContent>
-              0
+              {{ Number(remainingBudget.value).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
             </CardContent>
           </Card>
 
@@ -108,7 +110,7 @@ useUpdateMenuElements([
               <CardTitle>Monthly Budget</CardTitle>
             </CardHeader>
             <CardContent>
-              $ {{ monthlyBudget.data }}
+              {{ Number(monthlyBudget.value).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
             </CardContent>
           </Card>
 
