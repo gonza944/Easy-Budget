@@ -120,7 +120,7 @@ useUpdateMenuElements([
             </CardHeader>
             <CardContent
               :class="{ 'text-destructive-foreground': getRemainingDailyBudget < 0, 'text-success': getRemainingDailyBudget >= 0 }">
-              $ {{ getRemainingDailyBudget.toFixed(2) }}
+              {{ getRemainingDailyBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
             </CardContent>
           </Card>
         </div>
