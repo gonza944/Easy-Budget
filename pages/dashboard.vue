@@ -13,7 +13,7 @@ import type { Expense } from '~/types/expense';
 
 const router = useRouter();
 const store = useMyExpensesStore();
-const { getExpensesByBudgetId } = store;
+const { getExpensesByBudgetId, selectedDate:storeSelectedDate } = store;
 const { monthlyBudget, remainingBudget } = useUseExpensesTotals();
 
 const condensedMode = ref(false);
@@ -36,8 +36,7 @@ if (!getSelectedBudget.value) {
   router.push('/myBudgets');
 }
 const expenses = computed(() => getSelectedBudget?.value?.id ? getExpensesByBudgetId(getSelectedBudget?.value?.id) : []);
-
-const selectedDate = ref(new Date());
+const selectedDate = computed(() => storeSelectedDate);
 
 const expensesConfig = computed((): ColumnDefinition<Expense>[] => {
   const config: ColumnDefinition<Expense>[] = [
@@ -125,11 +124,7 @@ useUpdateMenuElements([
           </Card>
         </div>
 
-        <Card class=" md:h-[50dvh]">
-          <CardHeader>
-            <CardTitle>Dashboards</CardTitle>
-          </CardHeader>
-        </Card>
+        <BudgetBurdownChart :data="[{x: 0, y: 400, y2: 400}, {x: 1, y: 200, y2: 300}, {x: 2, y: 100, y2: 200}, {x: 3, y: 50, y2: 100}, {x: 4, y: 0, y2: 0}]" />
       </ResizablePanel>
       <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
       <ResizablePanel id="handle-demo-panel-2" :default-size="40" class="!basis-auto md:!basis-0">

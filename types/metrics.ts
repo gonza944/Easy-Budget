@@ -13,3 +13,7 @@ export const RemainingBudgetQuerySchema = z.object({
 });
 
 export type RemainingBudgetQuery = z.infer<typeof RemainingBudgetQuerySchema>;
+
+export type DataRecord = {
+  [key: string]: number
+}
