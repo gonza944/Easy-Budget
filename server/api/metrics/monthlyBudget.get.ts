@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { supabase } from "~/server/supabaseConnection";
 import { MonthlyBudgetQuerySchema } from "~/types/metrics";
+import { calculateFirstAndLastDayOfTheMonth } from "~/utils/date";
 
 export default defineEventHandler(async (event) => {
     // Validate query parameters
@@ -18,12 +19,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-      const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-      
-      // Format dates as ISO strings for PostgreSQL
-      const startDate = firstDayOfMonth.toISOString().split('T')[0];
-      const endDate = lastDayOfMonth.toISOString().split('T')[0];
+      const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(date);
 
       
       // Query expenses for the month

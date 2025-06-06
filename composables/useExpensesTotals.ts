@@ -11,7 +11,7 @@ export const useUseExpensesTotals = () => {
 
   const monthlyBudget = computed(() => {
     const { data } = useNuxtData<number>("monthlyBudget");
-    return data;
+    return data.value;
   });
 
   const fetchRemainingBudget = (budget_id: number) => {
@@ -25,7 +25,7 @@ export const useUseExpensesTotals = () => {
 
   const remainingBudget = computed(() => {
     const { data } = useNuxtData<number>("remainingBudget");
-    return data;
+    return data.value;
   });
 
   return {

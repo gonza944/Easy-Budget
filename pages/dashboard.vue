@@ -15,6 +15,7 @@ const router = useRouter();
 const store = useMyExpensesStore();
 const { getExpensesByBudgetId, selectedDate:storeSelectedDate } = store;
 const { monthlyBudget, remainingBudget } = useUseExpensesTotals();
+const { expensesBurnDown } = useUseChartData();
 
 const condensedMode = ref(false);
 const showExpenseForm = ref(false);
@@ -100,7 +101,7 @@ useUpdateMenuElements([
               <CardTitle>Total Expenses</CardTitle>
             </CardHeader>
             <CardContent>
-              {{ Number(remainingBudget.value).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+              {{ Number(remainingBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
             </CardContent>
           </Card>
 
@@ -109,7 +110,7 @@ useUpdateMenuElements([
               <CardTitle>Monthly Budget</CardTitle>
             </CardHeader>
             <CardContent>
-              {{ Number(monthlyBudget.value).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+              {{ Number(monthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
             </CardContent>
           </Card>
 
@@ -124,7 +125,7 @@ useUpdateMenuElements([
           </Card>
         </div>
 
-        <BudgetBurdownChart :data="[{x: 0, y: 400, y2: 400}, {x: 1, y: 200, y2: 300}, {x: 2, y: 100, y2: 200}, {x: 3, y: 50, y2: 100}, {x: 4, y: 0, y2: 0}]" />
+        <BudgetBurdownChart :data="expensesBurnDown?.expensesBurnDown || []" />
       </ResizablePanel>
       <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
       <ResizablePanel id="handle-demo-panel-2" :default-size="40" class="!basis-auto md:!basis-0">

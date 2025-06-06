@@ -30,6 +30,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     error: null,
   });
   const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
+  const { fetchExpensesBurnDown } = useUseChartData();
 
   // Getters
   const getSelectedBudget = computed(() => selectedBudget.value);
@@ -145,8 +146,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
           key: `expenses-${budgetId}-${formattedDate}`,
         }
       );
-      fetchMonthlyBudget(budgetId, selectedDate.value);
-      fetchRemainingBudget(budgetId);
 
       if (error.value) {
         throw new Error(error.value.message || "Failed to fetch expenses");
@@ -158,6 +157,8 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
         [budgetId]: fetchedExpenses.value || [],
       };
 
+      fetchCalculatedData(budgetId);
+
       // Budget metrics will be recalculated automatically via watchEffect
     } catch (err) {
       const errorMessage =
@@ -167,6 +168,15 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     } finally {
       expensesFetchState.value.isLoading = false;
     }
+  }
+
+  const fetchCalculatedData = (budgetId: number) => {
+    console.log("fetching calculated data", budgetId, selectedDate.value);
+    fetchMonthlyBudget(budgetId, selectedDate.value);
+    fetchRemainingBudget(budgetId);
+    
+    const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(selectedDate.value);
+    fetchExpensesBurnDown(budgetId, startDate, endDate);
   }
 
   function setSelectedBudget(budgetId: number) {
@@ -203,8 +213,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     });
 
     fetchExpenses(budgetId);
-
-    // Budget metrics will be recalculated automatically via watchEffect
   }
 
   // Delete an expense and recalculate metrics
