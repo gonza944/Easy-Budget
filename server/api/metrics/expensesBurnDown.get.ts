@@ -4,6 +4,9 @@ import { ExpensesArraySchema } from "~/types/expense";
 import { ExpensesBurnDownQuerySchema } from "~/types/metrics";
 import { formatDateForSupabase } from "~/utils/date";
 
+// Calculate burn down in a single pass
+type BurnDownItem = { x: number; y: number | undefined; y2: number | null };
+
 export default defineEventHandler(async (event) => {
   const validatedQuery = await getValidatedQuery(
     event,
@@ -14,8 +17,9 @@ export default defineEventHandler(async (event) => {
   const finalDate = new Date(validatedQuery.final_date);
   const budget_id = validatedQuery.budget_id;
 
-  const startDate = formatDateForSupabase(initialDate);
-  const endDate = formatDateForSupabase(finalDate);
+  // Get today's date and set to the beginning of the day for comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   try {
     const [expenses, budgetData] = await Promise.all([
@@ -23,8 +27,8 @@ export default defineEventHandler(async (event) => {
         .from("expenses")
         .select("amount, date")
         .eq("budget_id", budget_id)
-        .gte("date", startDate)
-        .lte("date", endDate)
+        .gte("date", formatDateForSupabase(initialDate))
+        .lte("date", formatDateForSupabase(finalDate))
         .order('date', { ascending: true }),
       supabase
         .from("budgets")
@@ -44,10 +48,9 @@ export default defineEventHandler(async (event) => {
     
     const validatedMaxExpensesPerDay = z.number().parse(budgetData.data.maxExpensesPerDay);
 
-    const daysInPeriod = Math.floor(
-      (finalDate.getTime() - initialDate.getTime()) / (1000 * 60 * 60 * 24)
+    const maxPeriodBudget = validatedMaxExpensesPerDay * (
+      Math.floor((finalDate.getTime() - initialDate.getTime()) / (1000 * 60 * 60 * 24))
     ) + 1;
-    const maxPeriodBudget = validatedMaxExpensesPerDay * daysInPeriod;
       
     // Prepare dates for iteration
     const msPerDay = 24 * 60 * 60 * 1000;
@@ -56,17 +59,17 @@ export default defineEventHandler(async (event) => {
     const dayCount = Math.floor((endMs - startMs) / msPerDay) + 1;
     
     // Process expenses once to create a map of expense amounts by timestamp
-    const expensesByDay: Record<number, number> = {};
-    validatedExpenses.forEach(expense => {
+    const expensesByDay = validatedExpenses.reduce<Record<number, number>>((acc, expense) => {
       const expenseDate = new Date(expense.date as string);
       const dayIndex = Math.floor((expenseDate.getTime() - startMs) / msPerDay);
-      if (dayIndex >= 0 && dayIndex < dayCount) {
-        expensesByDay[dayIndex] = (expensesByDay[dayIndex] || 0) + expense.amount;
-      }
-    });
+      if (dayIndex >= 0 && dayIndex < dayCount)
+        acc[dayIndex] = (acc[dayIndex] || 0) + expense.amount;
+      return acc;
+    }, {});
     
-    // Calculate burn down in a single pass
-    type BurnDownItem = { x: number; y: number; y2: number };
+    // Initial values for tracking the "last valid" remaining budget for calculations
+    let lastCalculatedActualRemaining = maxPeriodBudget;
+    let lastCalculatedTheoreticalRemaining = maxPeriodBudget;
     
     // Generate array of day indices
     const dayIndices = Array.from({ length: dayCount }, (_, i) => i);
@@ -78,30 +81,24 @@ export default defineEventHandler(async (event) => {
       // Calculate the actual date for the current dayIndex
       const currentDate = new Date(initialDate.getTime() + dayIndex * msPerDay);
 
-      // For the first day
-      if (dayIndex === 0) {
-        // Actual remaining budget after day's expenses
-        const actualRemaining = maxPeriodBudget - dailyExpenses;
-        
-        // Theoretical "ideal" remaining if spending exactly maxExpensesPerDay
-        const theoreticalRemaining = maxPeriodBudget - validatedMaxExpensesPerDay;
-        
-        acc.push({ x: currentDate.getTime(), y: actualRemaining, y2: theoreticalRemaining });
-      } else {
-        // Get previous day's values
-        const prevDay = acc[dayIndex - 1];
-        
-        // Actual remaining budget based on previous day minus today's expenses
-        const actualRemaining = dailyExpenses > prevDay.y ? 0 : prevDay.y - dailyExpenses;
-        
-        // Theoretical "ideal" remaining continues to decrease by maxExpensesPerDay each day
-        const theoreticalRemaining = prevDay.y2 - validatedMaxExpensesPerDay;
-        
-        acc.push({ x: currentDate.getTime(), y: actualRemaining, y2: theoreticalRemaining });
-      }
+      // Calculate the values based on the *last valid calculated* amounts
+      const currentCalculatedActual = lastCalculatedActualRemaining - dailyExpenses;
+      const currentCalculatedTheoretical = lastCalculatedTheoreticalRemaining - validatedMaxExpensesPerDay;
+
+      // Update the "last valid calculated" amounts for the next iteration
+      lastCalculatedActualRemaining = currentCalculatedActual;
+      lastCalculatedTheoreticalRemaining = currentCalculatedTheoretical;
+      
+      acc.push({
+        x: currentDate.getTime(),
+        y: (currentDate.getTime() > today.getTime() && dailyExpenses === 0) ? undefined : currentCalculatedActual,
+        y2: currentCalculatedTheoretical,
+      });
       
       return acc;
     }, []);
+    const lastItem = expensesBurnDown[expensesBurnDown.length - 1];
+    lastItem.y = (lastItem.x > today.getTime() && lastItem.y === undefined) ? 0 : lastItem.y;
 
     return { expensesBurnDown };
   } catch (error) {
