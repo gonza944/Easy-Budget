@@ -96,20 +96,21 @@ useUpdateMenuElements([
       <ResizablePanel id="handle-demo-panel-1" :default-size="60" class="flex flex-col gap-4 !basis-auto md:!basis-0">
         <DateSelector v-model:selectedDate="selectedDate" />
         <div class="flex flex-row gap-4 w-full">
-          <Card class="w-full">
+          <!-- TODO: Add remaining budget card whenever I have a way to top up the budget -->
+          <!-- <Card class="w-full">
             <CardHeader>
               <CardTitle>Total Expenses</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent :class="{ 'text-destructive-foreground': (remainingBudget || 0) < 0, 'text-success': (remainingBudget || 0) >= 0 }">
               {{ Number(remainingBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
             </CardContent>
-          </Card>
+          </Card> -->
 
           <Card class="w-full">
             <CardHeader>
               <CardTitle>Monthly Budget</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent :class="{ 'text-destructive-foreground': (monthlyBudget || 0) < 0, 'text-success': (monthlyBudget || 0) >= 0 }">
               {{ Number(monthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
             </CardContent>
           </Card>

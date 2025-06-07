@@ -80,7 +80,7 @@
   --ring: oklch(0.59 0.17 253.06);
   --chart-1: oklch(0.56 0.13 43);
   --chart-2: oklch(0.69 0.16 290.41);
-  --chart-3: oklch(0.88 0.03 93.13);
+  --chart-3: oklch(0.21 0.01 95.42);
   --chart-4: oklch(0.88 0.04 298.18);
   --chart-5: oklch(0.56 0.13 42.06);
   --sidebar: oklch(0.97 0.01 98.88);
@@ -110,7 +110,6 @@
     0 8px 10px 0px hsl(0 0% 0% / 0.13);
   --shadow-2xl: 0 1px 9.5px 1px hsl(0 0% 0% / 0.33);
   --spacing: 0.24rem;
-  --vis-font-family: Roboto Mono, Montserrat, sans-serif;
 }
 
 /* Dark mode styles using prefers-color-scheme */
@@ -138,7 +137,7 @@
     --ring: oklch(0.59 0.17 253.06);
     --chart-1: oklch(0.56 0.13 43);
     --chart-2: oklch(0.69 0.16 290.41);
-    --chart-3: oklch(0.21 0.01 95.42);
+    --chart-3: oklch(0.88 0.03 93.13);
     --chart-4: oklch(0.31 0.05 289.32);
     --chart-5: oklch(0.56 0.13 42.06);
     --sidebar: oklch(0.24 0 67.71);
@@ -191,18 +190,11 @@
 
 /* Budget chart specific styling */
 .budget-chart {
-  --vis-line-color: #72f89a;
-  --vis-line-stroke-width: 2px;
-  --vis-line-stroke-opacity: 1;
-  --vis-line-series-0-color: #72f89a;
-  --vis-line-series-1-color: #9d9f32;
+  --vis-tooltip-background-color: var(--card);
+  --vis-tooltip-text-color: var(--card-foreground);
+  --vis-tooltip-border-color: var(--border);
 }
 
 /* Apply colors to all Unovis line charts */
-.vis-line-path {
-  stroke: var(--vis-line-series-0-color, #72f89a) !important;
-}
 
-.vis-line-path-1 {
-  stroke: var(--vis-line-series-1-color, #9d9f32) !important;
-}
+
