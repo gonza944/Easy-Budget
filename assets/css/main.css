@@ -110,6 +110,7 @@
     0 8px 10px 0px hsl(0 0% 0% / 0.13);
   --shadow-2xl: 0 1px 9.5px 1px hsl(0 0% 0% / 0.33);
   --spacing: 0.24rem;
+  --vis-font-family: Roboto Mono, Montserrat, sans-serif;
 }
 
 /* Dark mode styles using prefers-color-scheme */
@@ -166,6 +167,7 @@
     --shadow-xl: 0 1px 9.5px 1px hsl(0 0% 0% / 0.13),
       0 8px 10px 0px hsl(0 0% 0% / 0.13);
     --shadow-2xl: 0 1px 9.5px 1px hsl(0 0% 0% / 0.33);
+    --vis-font-family: Roboto Mono, Montserrat, sans-serif;
   }
 }
 
@@ -183,4 +185,22 @@
       font-family: "Comfortaa", var(--font-sans); /* Uses Comfortaa, falls back to Montserrat */
     }
   }
+}
+
+/* Budget chart specific styling */
+.budget-chart {
+  --vis-line-color: #72f89a;
+  --vis-line-stroke-width: 2px;
+  --vis-line-stroke-opacity: 1;
+  --vis-line-series-0-color: #72f89a;
+  --vis-line-series-1-color: #9d9f32;
+}
+
+/* Apply colors to all Unovis line charts */
+.vis-line-path {
+  stroke: var(--vis-line-series-0-color, #72f89a) !important;
+}
+
+.vis-line-path-1 {
+  stroke: var(--vis-line-series-1-color, #9d9f32) !important;
 }

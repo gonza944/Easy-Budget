@@ -24,5 +24,7 @@ export type ExpensesBurnDownQuery = z.infer<typeof ExpensesBurnDownQuerySchema>;
 
 
 export type DataRecord = {
-  [key: string]: number | null | undefined
+  x: number;
+  y: number;
+  y2: number;
 }
