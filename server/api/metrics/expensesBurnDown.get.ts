@@ -2,7 +2,7 @@ import { z } from "zod";
 import { supabase } from "~/server/supabaseConnection";
 import { ExpensesArraySchema } from "~/types/expense";
 import { ExpensesBurnDownQuerySchema } from "~/types/metrics";
-import { formatDateForSupabase } from "~/utils/date";
+import { formatDateToUTCISOString } from "~/utils/date";
 
 // Calculate burn down in a single pass
 type BurnDownItem = { x: number; y: number | undefined; y2: number | null };
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
   // Get today's date and set to the beginning of the day for comparison
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
 
   try {
     const [expenses, budgetData] = await Promise.all([
@@ -27,8 +27,8 @@ export default defineEventHandler(async (event) => {
         .from("expenses")
         .select("amount, date")
         .eq("budget_id", budget_id)
-        .gte("date", formatDateForSupabase(initialDate))
-        .lte("date", formatDateForSupabase(finalDate))
+        .gte("date", formatDateToUTCISOString(initialDate))
+        .lte("date", formatDateToUTCISOString(finalDate))
         .order('date', { ascending: true }),
       supabase
         .from("budgets")

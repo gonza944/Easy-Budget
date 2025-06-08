@@ -2,7 +2,6 @@ import type { DataRecord } from "~/types/metrics";
 
 export const useUseChartData = () => {
   const fetchExpensesBurnDown = (budget_id: number, startDate: string, endDate: string) => {
-    console.log("fetching expenses burn down", budget_id, startDate, endDate);
     useFetch("/api/metrics/expensesBurnDown", {
       query: {
         initial_date: startDate,

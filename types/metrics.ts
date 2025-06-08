@@ -15,8 +15,14 @@ export const RemainingBudgetQuerySchema = z.object({
 export type RemainingBudgetQuery = z.infer<typeof RemainingBudgetQuerySchema>;
 
 export const ExpensesBurnDownQuerySchema = z.object({
-  initial_date: z.string().transform((val) => new Date(val)),
-  final_date: z.string().transform((val) => new Date(val)),
+  initial_date: z.string().transform((val) => {
+    const [year, month, day] = val.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  }),
+  final_date: z.string().transform((val) => {
+    const [year, month, day] = val.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  }),
   budget_id: z.string().transform((val) => Number(val)),
 });
 
