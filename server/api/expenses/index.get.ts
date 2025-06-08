@@ -1,33 +1,5 @@
-import { z } from 'zod';
 import { supabase } from "../../supabaseConnection";
-
-// Schema for expense entity (response)
-export const ExpenseSchema = z.object({
-  id: z.number(),
-  budget_id: z.number(),
-  category_id: z.number(),
-  name: z.string(),
-  amount: z.number(),
-  description: z.string().optional(),
-  date: z.string(),
-});
-
-// Schema for expenses array
-export const ExpensesArraySchema = z.array(ExpenseSchema);
-
-// Schema for query parameters
-export const ExpenseQuerySchema = z.object({
-  budget_id: z.string(),
-  category_id: z.string().optional(),
-  date: z.string().optional(),
-  start_date: z.string().optional(),
-  end_date: z.string().optional()
-});
-
-// Derive TypeScript types from Zod schemas
-export type Expense = z.infer<typeof ExpenseSchema>;
-export type ExpensesResponse = z.infer<typeof ExpensesArraySchema>;
-export type ExpenseQuery = z.infer<typeof ExpenseQuerySchema>;
+import { ExpensesArraySchema, ExpenseQuerySchema } from "~/types/expense";
 
 export default defineEventHandler(async (event) => {
   // Validate query parameters
