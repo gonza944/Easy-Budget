@@ -117,9 +117,9 @@ console.log('expensesByCategory', expensesByCategory.value);
           </Card>
         </div>
 
-        <div class="flex flex-row gap-4 w-full">
-          <BudgetBurdownChart :data="expensesBurnDown?.expensesBurnDown || []" class="w-3/4" />
-          <ExpensesByCategory :data="Object.values(expensesByCategory?.expensesByCategory || {})" class="w-1/4" />
+        <div class="flex flex-col gap-4 w-full">
+          <BudgetBurdownChart :data="expensesBurnDown?.expensesBurnDown || []" class="w-full" />
+          <ExpensesByCategory :data="expensesByCategory?.expensesByCategory || {}" class="w-full" />
         </div>
       </ResizablePanel>
       <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
