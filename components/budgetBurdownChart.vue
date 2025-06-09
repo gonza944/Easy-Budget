@@ -2,8 +2,9 @@
 import { VisXYContainer, VisLine, VisAxis, VisCrosshair, VisTooltip } from '@unovis/vue'
 import type { DataRecord } from '~/types/metrics'
 import { utcFormat } from 'd3-time-format'
+import type { HTMLAttributes } from 'vue';
 
-defineProps<{ data: DataRecord[] }>()
+defineProps<{ data: DataRecord[], class?: HTMLAttributes['class'] }>()
 const x = (d: DataRecord) => d.x
 const y = [
   (d: DataRecord) => d.y,
@@ -20,7 +21,7 @@ const lineDashArray = (d: DataRecord, i: number) => i === 1 ? [3] : []
 </script>
 
 <template>
-  <Card>
+  <Card :class="class">
     <CardHeader>
       <CardTitle>Budget Burdown</CardTitle>
     </CardHeader>

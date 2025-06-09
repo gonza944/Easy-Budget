@@ -30,8 +30,8 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     error: null,
   });
   const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
-  const { fetchExpensesBurnDown } = useUseChartData();
-
+  const { fetchExpensesBurnDown } = useBurnDownChartData();
+  const { fetchExpensesByCategory } = useExpensesByCategoryChart();
   // Getters
   const getSelectedBudget = computed(() => selectedBudget.value);
 
@@ -174,10 +174,12 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     console.log("fetching calculated data", budgetId, selectedDate.value);
     fetchMonthlyBudget(budgetId, selectedDate.value);
     fetchRemainingBudget(budgetId);
-    
-    const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(selectedDate.value);
+    const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(
+      selectedDate.value
+    );
     fetchExpensesBurnDown(budgetId, startDate, endDate);
-  }
+    fetchExpensesByCategory(budgetId, startDate, endDate);
+  };
 
   function setSelectedBudget(budgetId: number) {
     const budget = budgets.value.find((budget) => budget.id === budgetId);
