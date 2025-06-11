@@ -8,20 +8,6 @@ export default defineEventHandler(async (event) => {
     const validatedData = await readValidatedBody(event, DeleteExpenseSchema.parse);
     const { id } = validatedData;
 
-    // Verify the expense exists
-    const { data: expenseData, error: expenseError } = await supabase
-      .from("expenses")
-      .select('id')
-      .eq('id', id)
-      .single();
-
-    if (expenseError || !expenseData) {
-      throw createError({
-        statusCode: 404,
-        message: "Expense not found",
-      });
-    }
-
     // Delete the expense
     const { error } = await supabase
       .from("expenses")
