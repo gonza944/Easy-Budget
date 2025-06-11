@@ -14,11 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { PlusIcon } from 'lucide-vue-next'
 
 const props = defineProps<{
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   title: string
+  handleAddExpense: () => void 
 }>()
 
 const table = useVueTable({
@@ -61,6 +63,15 @@ const table = useVueTable({
               </TableRow>
             </template>
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell :colspan="columns.length" class="h-24 text-center">
+                <Button size="iconLg" class="cursor-pointer" @click="handleAddExpense">
+                  <PlusIcon />
+                </Button>
+              </TableCell>
+            </TableRow>
+          </TableFooter>
         </Table>
       <slot />
     </CardContent>

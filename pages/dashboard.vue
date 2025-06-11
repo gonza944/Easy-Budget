@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DateSelector from '@/components/DateSelector.vue';
-import TableCard from '~/components/ui/expenses-table/TableCard.vue';
+import ExpensesTable from '~/components/ui/expenses-table/ExpensesTable.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'vue-router';
 import NewExpenseForm from '~/components/newExpenseForm.vue';
@@ -89,7 +89,7 @@ useUpdateMenuElements([
       </ResizablePanel>
       <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
       <ResizablePanel id="handle-demo-panel-2" :default-size="25" class="!basis-auto md:!basis-0">
-        <TableCard title="Expenses" :data="expenses || []" :columns="columns" class="h-[54dvh] md:h-[85dvh]"/>
+        <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense" class="h-[54dvh] md:h-[85dvh]"/>
       </ResizablePanel>
     </ResizablePanelGroup>
 

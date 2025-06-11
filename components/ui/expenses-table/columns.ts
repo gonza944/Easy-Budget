@@ -1,7 +1,7 @@
 import { h } from "vue";
 import type { ColumnDef } from "@tanstack/vue-table";
 import type { Expense } from "~/types/expense";
-import TableCardDropdown from "./tableCardDropdown.vue";
+import ExpensesTableDropdown from "./ExpensesTableDropdown.vue";
 
 export const columns: ColumnDef<Expense>[] = [
   {
@@ -44,7 +44,7 @@ export const columns: ColumnDef<Expense>[] = [
     cell: ({ row }) => {
       const expense = row.original
 
-      return h('div', { class: 'relative' }, h(TableCardDropdown, {
+      return h('div', { class: 'relative' }, h(ExpensesTableDropdown, {
         expense,
       }))
     },
