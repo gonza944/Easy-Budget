@@ -8,7 +8,7 @@ export const columns: ColumnDef<Expense>[] = [
     accessorKey: "name",
     header: () => h("div", { class: "text-left" }, "Name"),
     cell: ({ row }) => {
-      return h("div", { class: "text-left font-medium" }, row.getValue("name"));
+      return h("div", { class: "break-words whitespace-normal hyphens-auto text-left font-medium" }, row.getValue("name"));
     },
   },
   {
