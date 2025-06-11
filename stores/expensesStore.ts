@@ -218,7 +218,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   }
 
   // Delete an expense and recalculate metrics
-  function deleteExpense(expenseId: number) {
+  async function deleteExpense(expenseId: number) {
     if (!selectedBudget.value?.id) return;
 
     const budgetId = selectedBudget.value.id;
@@ -229,7 +229,14 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       [budgetId]: currentExpenses.filter((e) => e.id !== expenseId),
     };
 
-    // Budget metrics will be recalculated automatically via watchEffect
+    await $fetch<Expense>("/api/expenses", {
+      method: "DELETE",
+      body: {
+        id: expenseId,
+      },
+    });
+
+    fetchExpenses(budgetId);
   }
   async function fetchCategories() {
     const { data: fetchedCategories, error } =

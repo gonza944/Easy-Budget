@@ -8,10 +8,10 @@ const props = defineProps<{
 </script>
 
 <template>
-  <tfoot
-    data-slot="table-footer"
-    :class="cn('border-t font-medium [&>tr]:last:border-b-0', props.class)"
+  <span
+    data-slot="dropdown-menu-shortcut"
+    :class="cn('text-muted-foreground ml-auto text-xs tracking-widest', props.class)"
   >
     <slot />
-  </tfoot>
+  </span>
 </template>
