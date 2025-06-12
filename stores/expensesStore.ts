@@ -3,8 +3,6 @@ import type { Budget } from "~/utils/budgetSchemas";
 import type { Expense, ExpenseCreate } from "~/types/expense";
 import type { CategoriesResponse } from "~/types/category";
 
-type BudgetsResponse = Array<Budget & { id: number }>;
-
 type SelectedBudget = Budget & { id: number };
 
 interface FetchState {
@@ -13,8 +11,13 @@ interface FetchState {
 }
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
+  const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
+  const { fetchExpensesBurnDown } = useBurnDownChartData();
+  const { fetchExpensesByCategory } = useExpensesByCategoryChart();
+  const { getBudgets } =
+    useBudget();
+
   // State
-  const budgets = ref<BudgetsResponse>([]);
   const selectedBudget = ref<SelectedBudget | null>(null);
   const expenses = ref<Record<number, Expense[]>>({});
   const selectedDate = ref<Date>(new Date());
@@ -29,9 +32,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     isLoading: false,
     error: null,
   });
-  const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
-  const { fetchExpensesBurnDown } = useBurnDownChartData();
-  const { fetchExpensesByCategory } = useExpensesByCategoryChart();
+
   // Getters
   const getSelectedBudget = computed(() => selectedBudget.value);
 
@@ -45,8 +46,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   });
 
   const getExpenses = computed(() => expenses.value);
-
-  const getBudgets = computed(() => budgets.value);
 
   const getSelectedDate = computed(() => selectedDate.value);
 
@@ -89,39 +88,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const isLoadingExpenses = computed(() => expensesFetchState.value.isLoading);
   const budgetsError = computed(() => budgetsFetchState.value.error);
   const expensesError = computed(() => expensesFetchState.value.error);
-
-  // Actions
-  async function fetchBudgets(name?: string) {
-    try {
-      budgetsFetchState.value = { isLoading: true, error: null };
-
-      const { data: fetchedBudgets, error } = await useFetch<BudgetsResponse>(
-        () => `/api/budgets${name ? `?name=${name}` : ""}`,
-        {
-          key: computed(() => `budgets-${name || "all"}`),
-          transform: (data) =>
-            data.map((budget) => ({
-              ...budget,
-              startingBudget: Number(budget.startingBudget),
-              maxExpensesPerDay: Number(budget.maxExpensesPerDay),
-            })),
-        }
-      );
-
-      if (error.value) {
-        throw new Error(error.value.message || "Failed to fetch budgets");
-      }
-
-      budgets.value = fetchedBudgets.value || [];
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch budgets";
-      budgetsFetchState.value.error = errorMessage;
-      console.error("Error fetching budgets:", err);
-    } finally {
-      budgetsFetchState.value.isLoading = false;
-    }
-  }
 
   async function fetchExpenses(budgetId: number) {
     // Skip if already loading for this budget
@@ -181,7 +147,9 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     fetchExpensesByCategory(budgetId, startDate, endDate);
   };
 
-  function setSelectedBudget(budgetId: number) {
+  async function setSelectedBudget(budgetId: number) {
+    const budgets = await getBudgets();
+    if (!budgets.value) return;
     const budget = budgets.value.find((budget) => budget.id === budgetId);
     if (!budget) return;
 
@@ -253,7 +221,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
   return {
     // State
-    budgets,
     selectedBudget,
     expenses,
     selectedDate,
@@ -275,7 +242,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     getCategories,
     getCategoryFromExpense,
     // Actions
-    fetchBudgets,
     fetchExpenses,
     setSelectedBudget,
     setSelectedDate,
