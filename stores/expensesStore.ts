@@ -1,40 +1,19 @@
 import { defineStore } from "pinia";
-import type { Budget } from "~/utils/budgetSchemas";
 import type { Expense, ExpenseCreate } from "~/types/expense";
 import type { CategoriesResponse } from "~/types/category";
 
-type SelectedBudget = Budget & { id: number };
-
-interface FetchState {
-  isLoading: boolean;
-  error: string | null;
-}
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
   const { fetchExpensesBurnDown } = useBurnDownChartData();
   const { fetchExpensesByCategory } = useExpensesByCategoryChart();
-  const { getBudgets } =
+  const { selectedBudget } =
     useBudget();
 
   // State
-  const selectedBudget = ref<SelectedBudget | null>(null);
   const expenses = ref<Record<number, Expense[]>>({});
   const selectedDate = ref<Date>(new Date());
   const categories = ref<CategoriesResponse>([]);
-
-  // UI states
-  const budgetsFetchState = ref<FetchState>({
-    isLoading: false,
-    error: null,
-  });
-  const expensesFetchState = ref<FetchState>({
-    isLoading: false,
-    error: null,
-  });
-
-  // Getters
-  const getSelectedBudget = computed(() => selectedBudget.value);
 
   const getExpensesByBudgetId = computed(() => {
     return (budgetId: number) => expenses.value[budgetId] || [];
@@ -60,8 +39,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   });
 
   // Add watchers for date and budget changes to auto-fetch expenses
-  watch([selectedDate, selectedBudget], () => {
-    fetchCategories();
+  watch([selectedDate], () => {
     if (selectedBudget.value?.id) {
       fetchExpenses(selectedBudget.value.id);
     }
@@ -84,17 +62,8 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     return maxDailyBudget - totalExpenses;
   });
 
-  const isLoadingBudgets = computed(() => budgetsFetchState.value.isLoading);
-  const isLoadingExpenses = computed(() => expensesFetchState.value.isLoading);
-  const budgetsError = computed(() => budgetsFetchState.value.error);
-  const expensesError = computed(() => expensesFetchState.value.error);
-
   async function fetchExpenses(budgetId: number) {
-    // Skip if already loading for this budget
-    if (expensesFetchState.value.isLoading) return;
-
     try {
-      expensesFetchState.value = { isLoading: true, error: null };
       const date = selectedDate.value;
 
       // Format date as YYYY-MM-DD (without time component)
@@ -127,17 +96,11 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
       // Budget metrics will be recalculated automatically via watchEffect
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch expenses";
-      expensesFetchState.value.error = errorMessage;
       console.error("Error fetching expenses:", err);
-    } finally {
-      expensesFetchState.value.isLoading = false;
     }
   }
 
   const fetchCalculatedData = (budgetId: number) => {
-    console.log("fetching calculated data", budgetId, selectedDate.value);
     fetchMonthlyBudget(budgetId, selectedDate.value);
     fetchRemainingBudget(budgetId);
     const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(
@@ -146,15 +109,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     fetchExpensesBurnDown(budgetId, startDate, endDate);
     fetchExpensesByCategory(budgetId, startDate, endDate);
   };
-
-  async function setSelectedBudget(budgetId: number) {
-    const budgets = await getBudgets();
-    if (!budgets.value) return;
-    const budget = budgets.value.find((budget) => budget.id === budgetId);
-    if (!budget) return;
-
-    selectedBudget.value = budget;
-  }
 
   function setSelectedDate(date: Date) {
     selectedDate.value = date;
@@ -221,29 +175,19 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
   return {
     // State
-    selectedBudget,
     expenses,
     selectedDate,
 
-    // Fetch states
-    isLoadingBudgets,
-    isLoadingExpenses,
-    budgetsError,
-    expensesError,
-
     // Getters
-    getSelectedBudget,
     getExpensesByBudgetId,
     getSelectedBudgetExpenses,
     getExpenses,
-    getBudgets,
     getRemainingDailyBudget,
     getSelectedDate,
     getCategories,
     getCategoryFromExpense,
     // Actions
     fetchExpenses,
-    setSelectedBudget,
     setSelectedDate,
     addExpense,
     deleteExpense,

@@ -6,14 +6,13 @@ definePageMeta({
 })
 
 const { user } = useUserSession();
-const { getBudgets, fetchBudgets } = useBudget();
+const { getBudgets, fetchBudgets, deleteBudget } = useBudget();
 const budgetName = ref('');
 const isModalOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
-const budgetToDelete = ref<string | null>(null);
-const budgets = getBudgets();
-console.log('budgets', budgets);
+const budgetToDelete = ref<number | null>(null);
 await callOnce(fetchBudgets);
+const budgets = getBudgets();
 
 useUpdateMenuElements([
   {
@@ -28,18 +27,14 @@ watch(budgetName, async () => {
   }
 });
 
-const handleDeleteClick = (budgetId: string) => {
+const handleDeleteClick = (budgetId: number) => {
   budgetToDelete.value = budgetId;
   isDeleteDialogOpen.value = true;
 };
 
 const handleDeleteConfirm = async () => {
   if (budgetToDelete.value) {
-    await $fetch('/api/budgets', {
-      method: 'DELETE',
-      body: { id: Number(budgetToDelete.value) },
-    });
-    await fetchBudgets();
+    await deleteBudget(budgetToDelete.value);
     isDeleteDialogOpen.value = false;
   }
 };
@@ -61,9 +56,8 @@ const handleDeleteConfirm = async () => {
 
 
     <div class="relative w-full flex justify-center">
-      <ScrollArea class="w-full" v-if="budgets.length > 0">
-        <div class="flex gap-4 pb-4 overflow-x-auto justify-center"
-          :class="budgets.length > 0 ? 'px-4' : ''">
+      <ScrollArea class="w-full" v-if="budgets && budgets.length > 0">
+        <div class="flex gap-4 pb-4 overflow-x-auto justify-center" :class="budgets?.length > 0 ? 'px-4' : ''">
           <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
             <BudgetCard :budget="budget" :onDeleteClick="() => handleDeleteClick(budget.id)" />
           </div>
@@ -71,12 +65,12 @@ const handleDeleteConfirm = async () => {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <Button v-if="budgets.length === 0" size="iconLg"
+      <Button v-if="budgets?.length === 0" size="iconLg"
         class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg" @click="isModalOpen = true">
         <PlusIcon />
       </Button>
     </div>
-    <NewBudgetForm v-model="isModalOpen" :success="fetchBudgets" />
+    <NewBudgetForm v-model="isModalOpen" />
 
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>

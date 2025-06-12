@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
       startingBudget,
       maxExpensesPerDay,
       startDate,
-    });
+    }).select().single();
 
     if (error) {
       throw createError({
