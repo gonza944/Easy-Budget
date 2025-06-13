@@ -99,7 +99,8 @@ import { ExpenseCreateSchema } from '~/types/expense';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const store = useMyExpensesStore();
-const { getSelectedBudget, selectedDate, getCategories } = storeToRefs(store);
+const { selectedDate, getCategories } = storeToRefs(store);
+const { selectedBudget } = useBudget();
 
 // Track form errors
 const categoryError = ref('');
@@ -160,12 +161,12 @@ const onNumberInput = (e: Event) => {
 };
 
 const onSubmit = form.handleSubmit(async (values) => {
-  if (!getSelectedBudget.value?.id) return;
+  if (!selectedBudget.value?.id) return;
   const date = selectedDate.value;
   const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
   const expenseData = ExpenseCreateSchema.parse({
-    budget_id: getSelectedBudget.value.id,
+    budget_id: selectedBudget.value.id,
     category_id: values.category_id,
     name: values.name,
     amount: Number(values.amount),
