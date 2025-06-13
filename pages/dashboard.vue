@@ -12,16 +12,15 @@ const { getExpensesByBudgetId, selectedDate: storeSelectedDate } = store;
 const { monthlyBudget } = useUseExpensesTotals();
 const { expensesBurnDown } = useBurnDownChartData();
 const { expensesByCategory } = useExpensesByCategoryChart();
+const { selectedBudget } = useBudget();
 
 const showExpenseForm = ref(false);
 
-const getSelectedBudget = computed(() => store.getSelectedBudget);
 const getRemainingDailyBudget = computed(() => store.getRemainingDailyBudget);
-if (!getSelectedBudget.value) {
+if (!selectedBudget.value) {
   router.push('/myBudgets');
 }
-const expenses = computed(() => getSelectedBudget?.value?.id ? getExpensesByBudgetId(getSelectedBudget?.value?.id) : []);
-console.log('expenses', expenses);
+const expenses = computed(() => selectedBudget.value?.id ? getExpensesByBudgetId(selectedBudget.value?.id) : []);
 const selectedDate = computed(() => storeSelectedDate);
 
 const handleAddExpense = () => {
@@ -44,7 +43,7 @@ useUpdateMenuElements([
 
 <template>
   <div class="h-full flex flex-col pt-4 gap-6">
-    <h1 class="text-2xl font-bold">{{ getSelectedBudget?.name }} Dashboard</h1>
+    <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
 
     <ResizablePanelGroup id="handle-demo-group-1" direction="horizontal"
       class="h-full flex !flex-col md:!flex-row gap-4">

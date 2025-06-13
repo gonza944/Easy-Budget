@@ -25,6 +25,11 @@ export const BudgetSchema =  z.object({
   startDate: z.string().optional().default(new Date().toLocaleDateString()),
 });
 
+export const NewBudgetSchema = BudgetSchema.omit({ id: true }).extend({
+  startDate: z.date().optional().default(new Date()),
+});
+export type NewBudgetSchema = z.infer<typeof NewBudgetSchema>;
+
 export const BudgetsSchema = z.array(
   BudgetSchema
 );

@@ -1,5 +1,4 @@
 import { getRequestURL } from "h3";
-import { supabase } from "../supabaseConnection";
 
 export default defineEventHandler(async (event) => {
   // Only check authentication for API POST requests
@@ -9,8 +8,9 @@ export default defineEventHandler(async (event) => {
   if (
     event.method !== "POST" ||
     !url.pathname.startsWith("/api/") ||
-    url.pathname === "/api/login" ||
-    url.pathname === "/api/logout"
+    url.pathname === "/api/auth/login" ||
+    url.pathname === "/api/auth/logout" ||
+    url.pathname === "/api/auth/refresh"
   ) {
     return;
   }
@@ -27,10 +27,16 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Refresh Supabase session
-    await supabase.auth.refreshSession();
+    // Session refresh is now handled by the session plugin hooks
+    // No need to manually refresh here
   } catch (error) {
     console.error("Authentication error:", error);
+    
+    // Only throw auth error if it's not already an H3Error
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      throw error;
+    }
+    
     throw createError({
       statusCode: 401,
       statusMessage: "Unauthorized: Authentication failed",

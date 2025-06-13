@@ -14,13 +14,13 @@
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button'
 
-const { loggedIn, clear: clearSession } = useUserSession()
+const { loggedIn, logout: authLogout } = useAuth()
 
 async function logout() {
-  await clearSession()
-  $fetch('/api/logout', {
-    method: 'POST',
-  })
+  // Use the enhanced logout function from useAuth
+  await authLogout()
+  
+  // Navigate to login after logout
   await navigateTo('/login')
 }
 
