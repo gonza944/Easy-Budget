@@ -110,6 +110,11 @@
     0 8px 10px 0px hsl(0 0% 0% / 0.13);
   --shadow-2xl: 0 1px 9.5px 1px hsl(0 0% 0% / 0.33);
   --spacing: 0.24rem;
+  --main-gradient: radial-gradient(at 91% 85%, #E0DDD7 0px, transparent 50%),
+    radial-gradient(at 12% 35%, #FFD8BB 0px, transparent 50%),
+    radial-gradient(at 79% 71%, #FFDDD1 0px, transparent 50%),
+    radial-gradient(at 88% 54%, #BEBBB6 0px, transparent 50%),
+    var(--layout-background);
 }
 
 /* Dark mode styles using prefers-color-scheme */
@@ -169,6 +174,11 @@
     --vis-font-family: Roboto Mono, Montserrat, sans-serif;
     --vis-line-gapfill-stroke-dasharray: 6 4; /* Adjust the numbers for desired dash length and gap */
     --vis-line-gapfill-stroke-opacity: 0.8; /* Adjust opacity if needed */
+    --main-gradient: radial-gradient(at 91% 85%, #332e2c 0px, transparent 50%),
+      radial-gradient(at 12% 35%, #332b27 0px, transparent 50%),
+      radial-gradient(at 79% 71%, #5e4438 0px, transparent 50%),
+      radial-gradient(at 88% 54%, #88523b 0px, transparent 50%),
+      var(--layout-background);
   }
 }
 
@@ -195,6 +205,6 @@
   --vis-tooltip-border-color: var(--border);
 }
 
-/* Apply colors to all Unovis line charts */
-
-
+.bg-main-gradient {
+  background: var(--main-gradient);
+}
