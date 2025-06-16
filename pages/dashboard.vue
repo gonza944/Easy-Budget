@@ -8,11 +8,12 @@ import { columns } from '~/components/ui/expenses-table/columns';
 import { storeToRefs } from 'pinia';
 import { UseBurnDownChartStore } from '~/stores/useBurnDownChartStore';
 import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
+import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
 
 const router = useRouter();
 const store = useMyExpensesStore();
 const { getExpensesByBudgetId, selectedDate: storeSelectedDate } = store;
-const { monthlyBudget } = useUseExpensesTotals();
+const { monthlyBudget } = storeToRefs(UseExpensesTotalsStore());
 const { expensesBurnDown } = storeToRefs(UseBurnDownChartStore());
 const { expensesByCategory } = storeToRefs(UseExpensesByCategoryStore());
 const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());

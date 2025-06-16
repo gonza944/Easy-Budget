@@ -5,7 +5,6 @@ import { useMyBudgetStoreStore } from "~/stores/budgetStore";
 
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
-  const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
   const budgetStore = useMyBudgetStoreStore();
   const { selectedBudget } = storeToRefs(budgetStore);
 
@@ -91,18 +90,11 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
         [budgetId]: fetchedExpenses.value || [],
       };
 
-      fetchCalculatedData(budgetId);
-
-      // Budget metrics will be recalculated automatically via watchEffect
+      // All calculated data is now handled by individual store watchers
     } catch (err) {
       console.error("Error fetching expenses:", err);
     }
   }
-
-  const fetchCalculatedData = (budgetId: number) => {
-    fetchMonthlyBudget(budgetId, selectedDate.value);
-    fetchRemainingBudget(budgetId);
-  };
 
   function setSelectedDate(date: Date) {
     selectedDate.value = date;
