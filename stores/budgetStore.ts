@@ -20,7 +20,6 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
           maxExpensesPerDay: Number(budget.maxExpensesPerDay),
         })),
     });
-
     budgets.value = data.value || [];
   };
 

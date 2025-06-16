@@ -6,12 +6,14 @@ import { useRouter } from 'vue-router';
 import NewExpenseForm from '~/components/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
 import { storeToRefs } from 'pinia';
+import { UseBurnDownChartStore } from '~/stores/useBurnDownChartStore';
 
 const router = useRouter();
 const store = useMyExpensesStore();
 const { getExpensesByBudgetId, selectedDate: storeSelectedDate } = store;
 const { monthlyBudget } = useUseExpensesTotals();
-const { expensesBurnDown } = useBurnDownChartData();
+const burnDownStore = UseBurnDownChartStore();
+const { expensesBurnDown } = storeToRefs(burnDownStore);
 const { expensesByCategory } = useExpensesByCategoryChart();
 const budgetStore = useMyBudgetStoreStore();
 const { selectedBudget } = storeToRefs(budgetStore);
@@ -28,7 +30,6 @@ const selectedDate = computed(() => storeSelectedDate);
 const handleAddExpense = () => {
   showExpenseForm.value = !showExpenseForm.value;
 };
-
 
 useUpdateMenuElements([
   {
@@ -84,7 +85,7 @@ useUpdateMenuElements([
         </div>
 
         <div class="flex flex-col gap-4 w-full">
-          <BudgetBurdownChart :data="expensesBurnDown?.expensesBurnDown || []" class="w-full" />
+          <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full" />
           <ExpensesByCategory :data="expensesByCategory?.expensesByCategory || {}" class="w-full" />
         </div>
       </ResizablePanel>

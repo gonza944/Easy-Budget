@@ -6,7 +6,6 @@ import { useMyBudgetStoreStore } from "~/stores/budgetStore";
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
-  const { fetchExpensesBurnDown } = useBurnDownChartData();
   const { fetchExpensesByCategory } = useExpensesByCategoryChart();
   const budgetStore = useMyBudgetStoreStore();
   const { selectedBudget } = storeToRefs(budgetStore);
@@ -107,7 +106,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(
       selectedDate.value
     );
-    fetchExpensesBurnDown(budgetId, startDate, endDate);
     fetchExpensesByCategory(budgetId, startDate, endDate);
   };
 
