@@ -15,7 +15,7 @@ import { CalendarDate } from '@internationalized/date';
 import { computed } from 'vue';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
-const { createBudget } = useBudget();
+const { createBudget } = useMyBudgetStoreStore();
 const formSchema = toTypedSchema(newBudgetSchemaForm);
 
 const form = useForm({

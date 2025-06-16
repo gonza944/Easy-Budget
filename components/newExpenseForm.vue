@@ -94,13 +94,15 @@
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { useMyExpensesStore } from '~/stores/expensesStore';
+import { useMyBudgetStoreStore } from '~/stores/budgetStore';
 import { z } from 'zod';
 import { ExpenseCreateSchema } from '~/types/expense';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const store = useMyExpensesStore();
 const { selectedDate, getCategories } = storeToRefs(store);
-const { selectedBudget } = useBudget();
+const budgetStore = useMyBudgetStoreStore();
+const { selectedBudget } = storeToRefs(budgetStore);
 
 // Track form errors
 const categoryError = ref('');

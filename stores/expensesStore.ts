@@ -1,14 +1,15 @@
-import { defineStore } from "pinia";
+import { defineStore, storeToRefs } from "pinia";
 import type { Expense, ExpenseCreate } from "~/types/expense";
 import type { CategoriesResponse } from "~/types/category";
+import { useMyBudgetStoreStore } from "~/stores/budgetStore";
 
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
   const { fetchExpensesBurnDown } = useBurnDownChartData();
   const { fetchExpensesByCategory } = useExpensesByCategoryChart();
-  const { selectedBudget } =
-    useBudget();
+  const budgetStore = useMyBudgetStoreStore();
+  const { selectedBudget } = storeToRefs(budgetStore);
 
   // State
   const expenses = ref<Record<number, Expense[]>>({});
@@ -39,7 +40,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   });
 
   // Add watchers for date and budget changes to auto-fetch expenses
-  watch([selectedDate], () => {
+  watch([selectedDate, selectedBudget], () => {
     if (selectedBudget.value?.id) {
       fetchExpenses(selectedBudget.value.id);
     }

@@ -1,18 +1,17 @@
+import { defineStore } from "pinia";
 import type { BudgetApiResponse } from "~/server/api/budgets/index.post";
 import type { Budget, NewBudgetSchema } from "~/utils/budgetSchemas";
 
 
-export const useBudget = () => {
+export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
+  const budgets = ref<Budget[]>([]);
+  const selectedBudget = ref<Budget | null>(null);
   const queryString = ref("");
-  const selectedBudget = useState<Budget | null>(() => null);
-  const { fetchExpenses } = useMyExpensesStore();
-  const { data: budgets } = useNuxtData<Budget[]>(`budgets`);
-
 
   const fetchBudgets = async (name?: string) => {
     queryString.value = name ? `?name=${name}` : "";
 
-    await useFetch<Budget[]>(() => `/api/budgets${queryString.value}`, {
+    const { data } = await useFetch<Budget[]>(() => `/api/budgets${queryString.value}`, {
       key: `budgets`, // Use string directly instead of computed
       transform: (data) =>
         data.map((budget) => ({
@@ -21,23 +20,18 @@ export const useBudget = () => {
           maxExpensesPerDay: Number(budget.maxExpensesPerDay),
         })),
     });
-  };
 
-  const getBudgets = () => {
-    return budgets;
+    budgets.value = data.value || [];
   };
 
   const setSelectedBudget = (budgetId: number) => {
     if (selectedBudget.value?.id === budgetId) return;
-    const budgets = getBudgets();
     const budget = budgets.value?.find((budget) => budget.id === budgetId);
     if (!budget) return;
     selectedBudget.value = budget;
-    fetchExpenses(budgetId);
   };
 
   const deleteBudget = async (budgetId: number) => {
-    const budgets = getBudgets();
     let previousBudgets: Budget[] = [];
 
     return await $fetch("/api/budgets", {
@@ -56,13 +50,12 @@ export const useBudget = () => {
       },
       async onResponse() {
         // Invalidate budgets in the background if the request succeeded
-        await refreshNuxtData("budgets");
+        await fetchBudgets();
       },
     });
   };
 
   const createBudget = async (budget: NewBudgetSchema) => {
-    const budgets = getBudgets();
     let previousBudgets: Budget[] = [];
 
     return await $fetch<BudgetApiResponse>("/api/budgets", {
@@ -87,20 +80,19 @@ export const useBudget = () => {
         // Rollback the data if the request failed
         budgets.value = previousBudgets;
       },
-      async onResponse({response}) {
+      async onResponse() {
         // Invalidate budgets in the background if the request succeeded
-        await refreshNuxtData("budgets");
-        budgets.value = [response._data.data,...previousBudgets];
+        await fetchBudgets();
       },
     });
   };
 
   return {
     fetchBudgets,
-    getBudgets,
-    setSelectedBudget,
+    budgets,
     selectedBudget,
+    setSelectedBudget,
     deleteBudget,
     createBudget,
   };
-};
+});

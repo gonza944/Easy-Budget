@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'vue-router';
 import NewExpenseForm from '~/components/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
+import { storeToRefs } from 'pinia';
 
 const router = useRouter();
 const store = useMyExpensesStore();
@@ -12,7 +13,8 @@ const { getExpensesByBudgetId, selectedDate: storeSelectedDate } = store;
 const { monthlyBudget } = useUseExpensesTotals();
 const { expensesBurnDown } = useBurnDownChartData();
 const { expensesByCategory } = useExpensesByCategoryChart();
-const { selectedBudget } = useBudget();
+const budgetStore = useMyBudgetStoreStore();
+const { selectedBudget } = storeToRefs(budgetStore);
 
 const showExpenseForm = ref(false);
 
