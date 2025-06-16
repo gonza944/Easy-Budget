@@ -7,16 +7,15 @@ import NewExpenseForm from '~/components/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
 import { storeToRefs } from 'pinia';
 import { UseBurnDownChartStore } from '~/stores/useBurnDownChartStore';
+import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
 
 const router = useRouter();
 const store = useMyExpensesStore();
 const { getExpensesByBudgetId, selectedDate: storeSelectedDate } = store;
 const { monthlyBudget } = useUseExpensesTotals();
-const burnDownStore = UseBurnDownChartStore();
-const { expensesBurnDown } = storeToRefs(burnDownStore);
-const { expensesByCategory } = useExpensesByCategoryChart();
-const budgetStore = useMyBudgetStoreStore();
-const { selectedBudget } = storeToRefs(budgetStore);
+const { expensesBurnDown } = storeToRefs(UseBurnDownChartStore());
+const { expensesByCategory } = storeToRefs(UseExpensesByCategoryStore());
+const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
 
 const showExpenseForm = ref(false);
 
@@ -86,12 +85,13 @@ useUpdateMenuElements([
 
         <div class="flex flex-col gap-4 w-full">
           <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full" />
-          <ExpensesByCategory :data="expensesByCategory?.expensesByCategory || {}" class="w-full" />
+          <ExpensesByCategory :data="expensesByCategory || {}" class="w-full" />
         </div>
       </ResizablePanel>
       <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
       <ResizablePanel id="handle-demo-panel-2" :default-size="25" class="!basis-auto md:!basis-0">
-        <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense" class="h-[54dvh] md:h-[85dvh]"/>
+        <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
+          class="h-[54dvh] md:h-[85dvh]" />
       </ResizablePanel>
     </ResizablePanelGroup>
 

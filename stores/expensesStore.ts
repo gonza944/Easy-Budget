@@ -6,7 +6,6 @@ import { useMyBudgetStoreStore } from "~/stores/budgetStore";
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
-  const { fetchExpensesByCategory } = useExpensesByCategoryChart();
   const budgetStore = useMyBudgetStoreStore();
   const { selectedBudget } = storeToRefs(budgetStore);
 
@@ -103,10 +102,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const fetchCalculatedData = (budgetId: number) => {
     fetchMonthlyBudget(budgetId, selectedDate.value);
     fetchRemainingBudget(budgetId);
-    const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(
-      selectedDate.value
-    );
-    fetchExpensesByCategory(budgetId, startDate, endDate);
   };
 
   function setSelectedDate(date: Date) {
