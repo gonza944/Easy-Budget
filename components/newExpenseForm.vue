@@ -97,10 +97,12 @@ import { useMyExpensesStore } from '~/stores/expensesStore';
 import { useMyBudgetStoreStore } from '~/stores/budgetStore';
 import { z } from 'zod';
 import { ExpenseCreateSchema } from '~/types/expense';
+import { useSelectedDate } from '~/composables/useSelectedDate';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const store = useMyExpensesStore();
-const { selectedDate, getCategories } = storeToRefs(store);
+const { getCategories } = storeToRefs(store);
+const { selectedDate } = useSelectedDate();
 const budgetStore = useMyBudgetStoreStore();
 const { selectedBudget } = storeToRefs(budgetStore);
 

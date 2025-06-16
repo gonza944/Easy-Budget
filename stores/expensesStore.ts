@@ -2,15 +2,16 @@ import { defineStore, storeToRefs } from "pinia";
 import type { Expense, ExpenseCreate } from "~/types/expense";
 import type { CategoriesResponse } from "~/types/category";
 import { useMyBudgetStoreStore } from "~/stores/budgetStore";
+import { useSelectedDate } from "~/composables/useSelectedDate";
 
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const budgetStore = useMyBudgetStoreStore();
   const { selectedBudget } = storeToRefs(budgetStore);
+  const { selectedDate } = useSelectedDate();
 
   // State
   const expenses = ref<Record<number, Expense[]>>({});
-  const selectedDate = ref<Date>(new Date());
   const categories = ref<CategoriesResponse>([]);
 
   const getExpensesByBudgetId = computed(() => {
@@ -23,8 +24,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   });
 
   const getExpenses = computed(() => expenses.value);
-
-  const getSelectedDate = computed(() => selectedDate.value);
 
   const getCategories = computed(() => categories.value);
 
@@ -96,10 +95,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     }
   }
 
-  function setSelectedDate(date: Date) {
-    selectedDate.value = date;
-  }
-
   // Add/update an expense and recalculate metrics
   async function addExpense(expense: ExpenseCreate) {
     if (!selectedBudget.value?.id) return;
@@ -162,19 +157,16 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   return {
     // State
     expenses,
-    selectedDate,
 
     // Getters
     getExpensesByBudgetId,
     getSelectedBudgetExpenses,
     getExpenses,
     getRemainingDailyBudget,
-    getSelectedDate,
     getCategories,
     getCategoryFromExpense,
     // Actions
     fetchExpenses,
-    setSelectedDate,
     addExpense,
     deleteExpense,
     fetchCategories,

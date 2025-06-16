@@ -28,7 +28,7 @@ export const UseBurnDownChartStore = defineStore(
     nextTick(() => {
       // Use storeToRefs to get reactive refs from the stores
       const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
-      const { selectedDate } = storeToRefs(useMyExpensesStore());
+      const { selectedDate } = useSelectedDate();
       
       // Create computed values for only the parts we care about
       const budgetId = computed(() => selectedBudget.value?.id);

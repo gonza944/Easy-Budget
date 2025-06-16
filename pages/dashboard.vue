@@ -9,10 +9,12 @@ import { storeToRefs } from 'pinia';
 import { UseBurnDownChartStore } from '~/stores/useBurnDownChartStore';
 import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
 import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
+import { useSelectedDate } from '~/composables/useSelectedDate';
 
 const router = useRouter();
 const store = useMyExpensesStore();
-const { getExpensesByBudgetId, selectedDate: storeSelectedDate } = store;
+const { getExpensesByBudgetId } = store;
+const { selectedDate } = useSelectedDate();
 const { monthlyBudget } = storeToRefs(UseExpensesTotalsStore());
 const { expensesBurnDown } = storeToRefs(UseBurnDownChartStore());
 const { expensesByCategory } = storeToRefs(UseExpensesByCategoryStore());
@@ -25,7 +27,6 @@ if (!selectedBudget.value) {
   router.push('/myBudgets');
 }
 const expenses = computed(() => selectedBudget.value?.id ? getExpensesByBudgetId(selectedBudget.value?.id) : []);
-const selectedDate = computed(() => storeSelectedDate);
 
 const handleAddExpense = () => {
   showExpenseForm.value = !showExpenseForm.value;
