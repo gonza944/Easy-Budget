@@ -9,17 +9,35 @@ const credentials = reactive({
   email: '',
   password: '',
 })
+
+const isLoading = ref(false)
+const errorMessage = ref('')
+
 async function login() {
-  $fetch('/api/login', {
-    method: 'POST',
-    body: credentials
-  })
-    .then(async () => {
+  if (isLoading.value) return
+  
+  isLoading.value = true
+  errorMessage.value = ''
+  
+  try {
+    const result = await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: credentials
+    })
+    
+    if (result.success) {
       // Refresh the session on client-side and redirect to the home page
       await refreshSession()
       await navigateTo('/')
-    })
-    .catch(() => alert('Bad credentials'))
+    } else {
+      errorMessage.value = 'Login failed'
+    }
+  } catch (error) {
+    console.error('Login error:', error)
+    errorMessage.value = 'Bad credentials'
+  } finally {
+    isLoading.value = false
+  }
 }
 
 </script>

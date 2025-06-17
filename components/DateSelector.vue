@@ -3,10 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-
-const state = useMyExpensesStore();
-const selectedDate = computed(() => state.getSelectedDate);
-const setSelectedDate = state.setSelectedDate;
+const { selectedDate, setSelectedDate } = useSelectedDate();
 
 // Format date as dd/mm/yyyy
 const formatDate = (date: Date) => {

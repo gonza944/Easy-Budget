@@ -1,23 +1,23 @@
 <script lang="ts" setup>
-import type { Budget } from '~/types';
 import { MenuIcon } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
+import type { Budget } from '~/utils/budgetSchemas';
 
 defineProps<{
     budget: Budget;
-    onDeleteClick: (id: string) => void;
+    onDeleteClick: (id: number) => void;
 }>();
 
 const router = useRouter();
 const isPopoverOpen = ref(false);
-const { setSelectedBudget } = useMyExpensesStore();
+const { setSelectedBudget } = useMyBudgetStoreStore();
 
-const handleDeleteClick = (callback: (id: string) => void, id: string) => {
+const handleDeleteClick = (callback: (id: number) => void, id: number) => {
     isPopoverOpen.value = false;
     callback(id);
 };
 
-const navigateToExpenses = (id: string) => {
+const navigateToExpenses = (id: number) => {
     setSelectedBudget(Number(id));
     router.push(`/dashboard`);
 };

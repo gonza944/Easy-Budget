@@ -1,56 +1,18 @@
-import { defineStore } from "pinia";
-import type { Budget } from "~/utils/budgetSchemas";
+import { defineStore, storeToRefs } from "pinia";
+import { useSelectedDate } from "~/composables/useSelectedDate";
+import { useMyBudgetStoreStore } from "~/stores/budgetStore";
 import type { Expense, ExpenseCreate } from "~/types/expense";
-import type { CategoriesResponse } from "~/types/category";
-
-type BudgetsResponse = Array<Budget & { id: number }>;
-
-type SelectedBudget = Budget & { id: number };
-
-interface FetchState {
-  isLoading: boolean;
-  error: string | null;
-}
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
-  // State
-  const budgets = ref<BudgetsResponse>([]);
-  const selectedBudget = ref<SelectedBudget | null>(null);
-  const expenses = ref<Record<number, Expense[]>>({});
-  const selectedDate = ref<Date>(new Date());
-  const categories = ref<CategoriesResponse>([]);
+  const { selectedDate } = useSelectedDate();
+  const { categories } = storeToRefs(useCategoryStore());
 
-  // UI states
-  const budgetsFetchState = ref<FetchState>({
-    isLoading: false,
-    error: null,
-  });
-  const expensesFetchState = ref<FetchState>({
-    isLoading: false,
-    error: null,
-  });
-  const { fetchMonthlyBudget, fetchRemainingBudget } = useUseExpensesTotals();
-  const { fetchExpensesBurnDown } = useBurnDownChartData();
-  const { fetchExpensesByCategory } = useExpensesByCategoryChart();
-  // Getters
-  const getSelectedBudget = computed(() => selectedBudget.value);
+  // State
+  const expenses = ref<Record<number, Expense[]>>({});
 
   const getExpensesByBudgetId = computed(() => {
     return (budgetId: number) => expenses.value[budgetId] || [];
   });
-
-  const getSelectedBudgetExpenses = computed(() => {
-    if (!selectedBudget.value?.id) return [];
-    return expenses.value[selectedBudget.value.id] || [];
-  });
-
-  const getExpenses = computed(() => expenses.value);
-
-  const getBudgets = computed(() => budgets.value);
-
-  const getSelectedDate = computed(() => selectedDate.value);
-
-  const getCategories = computed(() => categories.value);
 
   const getCategoryFromExpense = computed(() => {
     return (expense: Expense) => {
@@ -60,19 +22,36 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     };
   });
 
-  // Add watchers for date and budget changes to auto-fetch expenses
-  watch([selectedDate, selectedBudget], () => {
-    fetchCategories();
-    if (selectedBudget.value?.id) {
-      fetchExpenses(selectedBudget.value.id);
-    }
+  // Watch for changes in selectedBudget and selectedDate to auto-fetch expenses
+  // Using nextTick to avoid circular dependency during store initialization
+  nextTick(() => {
+    // Access stores within the watcher to avoid circular dependency
+    const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
+
+    // Create computed values for only the parts we care about
+    const budgetId = computed(() => selectedBudget.value?.id);
+
+    // Watch the computed values that represent meaningful changes
+    watch(
+      [budgetId, selectedDate],
+      ([currentBudgetId, _currentDate]) => {
+        if (currentBudgetId) {
+          fetchExpenses(currentBudgetId);
+        }
+      },
+      { immediate: true }
+    );
   });
 
-  // Derived getters for budget calculations now use budgetMetrics
+  // Derived getters for budget calculations
   const getRemainingDailyBudget = computed(() => {
-    if (!selectedBudget.value?.id) return 0;
+    // Access budget store within computed to avoid circular dependency
+    const budgetStore = useMyBudgetStoreStore();
+    const selectedBudget = budgetStore.selectedBudget;
 
-    const budgetId = selectedBudget.value.id;
+    if (!selectedBudget?.id) return 0;
+
+    const budgetId = selectedBudget.id;
     const budgetExpenses = expenses.value[budgetId] || [];
 
     const totalExpenses = budgetExpenses.reduce(
@@ -80,55 +59,13 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       0
     );
 
-    const maxDailyBudget = Number(selectedBudget.value.maxExpensesPerDay);
+    const maxDailyBudget = Number(selectedBudget.maxExpensesPerDay);
 
     return maxDailyBudget - totalExpenses;
   });
 
-  const isLoadingBudgets = computed(() => budgetsFetchState.value.isLoading);
-  const isLoadingExpenses = computed(() => expensesFetchState.value.isLoading);
-  const budgetsError = computed(() => budgetsFetchState.value.error);
-  const expensesError = computed(() => expensesFetchState.value.error);
-
-  // Actions
-  async function fetchBudgets(name?: string) {
-    try {
-      budgetsFetchState.value = { isLoading: true, error: null };
-
-      const { data: fetchedBudgets, error } = await useFetch<BudgetsResponse>(
-        () => `/api/budgets${name ? `?name=${name}` : ""}`,
-        {
-          key: computed(() => `budgets-${name || "all"}`),
-          transform: (data) =>
-            data.map((budget) => ({
-              ...budget,
-              startingBudget: Number(budget.startingBudget),
-              maxExpensesPerDay: Number(budget.maxExpensesPerDay),
-            })),
-        }
-      );
-
-      if (error.value) {
-        throw new Error(error.value.message || "Failed to fetch budgets");
-      }
-
-      budgets.value = fetchedBudgets.value || [];
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch budgets";
-      budgetsFetchState.value.error = errorMessage;
-      console.error("Error fetching budgets:", err);
-    } finally {
-      budgetsFetchState.value.isLoading = false;
-    }
-  }
-
   async function fetchExpenses(budgetId: number) {
-    // Skip if already loading for this budget
-    if (expensesFetchState.value.isLoading) return;
-
     try {
-      expensesFetchState.value = { isLoading: true, error: null };
       const date = selectedDate.value;
 
       // Format date as YYYY-MM-DD (without time component)
@@ -157,43 +94,18 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
         [budgetId]: fetchedExpenses.value || [],
       };
 
-      fetchCalculatedData(budgetId);
-
-      // Budget metrics will be recalculated automatically via watchEffect
+      // All calculated data is now handled by individual store watchers
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch expenses";
-      expensesFetchState.value.error = errorMessage;
       console.error("Error fetching expenses:", err);
-    } finally {
-      expensesFetchState.value.isLoading = false;
     }
-  }
-
-  const fetchCalculatedData = (budgetId: number) => {
-    console.log("fetching calculated data", budgetId, selectedDate.value);
-    fetchMonthlyBudget(budgetId, selectedDate.value);
-    fetchRemainingBudget(budgetId);
-    const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(
-      selectedDate.value
-    );
-    fetchExpensesBurnDown(budgetId, startDate, endDate);
-    fetchExpensesByCategory(budgetId, startDate, endDate);
-  };
-
-  function setSelectedBudget(budgetId: number) {
-    const budget = budgets.value.find((budget) => budget.id === budgetId);
-    if (!budget) return;
-
-    selectedBudget.value = budget;
-  }
-
-  function setSelectedDate(date: Date) {
-    selectedDate.value = date;
   }
 
   // Add/update an expense and recalculate metrics
   async function addExpense(expense: ExpenseCreate) {
+    // Access budget store within function to avoid circular dependency
+    const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
+    const { refreshAllMetrics } = useRefreshMetrics();
+
     if (!selectedBudget.value?.id) return;
 
     const budgetId = selectedBudget.value.id;
@@ -215,10 +127,14 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     });
 
     fetchExpenses(budgetId);
+    refreshAllMetrics(budgetId, selectedDate.value);
   }
 
   // Delete an expense and recalculate metrics
   async function deleteExpense(expenseId: number) {
+    const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
+    const { refreshAllMetrics } = useRefreshMetrics();
+
     if (!selectedBudget.value?.id) return;
 
     const budgetId = selectedBudget.value.id;
@@ -237,50 +153,20 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     });
 
     fetchExpenses(budgetId);
-  }
-  async function fetchCategories() {
-    const { data: fetchedCategories, error } =
-      await useFetch<CategoriesResponse>(() => `/api/categories`, {
-        key: `categories`,
-      });
-
-    if (error.value) {
-      throw new Error(error.value.message || "Failed to fetch categories");
-    }
-
-    categories.value = fetchedCategories.value || [];
+    refreshAllMetrics(budgetId, selectedDate.value);
   }
 
   return {
     // State
-    budgets,
-    selectedBudget,
     expenses,
-    selectedDate,
-
-    // Fetch states
-    isLoadingBudgets,
-    isLoadingExpenses,
-    budgetsError,
-    expensesError,
 
     // Getters
-    getSelectedBudget,
     getExpensesByBudgetId,
-    getSelectedBudgetExpenses,
-    getExpenses,
-    getBudgets,
     getRemainingDailyBudget,
-    getSelectedDate,
-    getCategories,
     getCategoryFromExpense,
     // Actions
-    fetchBudgets,
     fetchExpenses,
-    setSelectedBudget,
-    setSelectedDate,
     addExpense,
     deleteExpense,
-    fetchCategories,
   };
 });

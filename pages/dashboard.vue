@@ -5,29 +5,32 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'vue-router';
 import NewExpenseForm from '~/components/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
+import { storeToRefs } from 'pinia';
+import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
+import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
+import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
+import { useSelectedDate } from '~/composables/useSelectedDate';
 
 const router = useRouter();
 const store = useMyExpensesStore();
-const { getExpensesByBudgetId, selectedDate: storeSelectedDate } = store;
-const { monthlyBudget } = useUseExpensesTotals();
-const { expensesBurnDown } = useBurnDownChartData();
-const { expensesByCategory } = useExpensesByCategoryChart();
+const { getExpensesByBudgetId } = store;
+const { selectedDate } = useSelectedDate();
+const { monthlyBudget } = storeToRefs(UseExpensesTotalsStore());
+const { expensesBurnDown } = storeToRefs(useBurnDownChartStore());
+const { expensesByCategory } = storeToRefs(UseExpensesByCategoryStore());
+const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
 
 const showExpenseForm = ref(false);
 
-const getSelectedBudget = computed(() => store.getSelectedBudget);
 const getRemainingDailyBudget = computed(() => store.getRemainingDailyBudget);
-if (!getSelectedBudget.value) {
+if (!selectedBudget.value) {
   router.push('/myBudgets');
 }
-const expenses = computed(() => getSelectedBudget?.value?.id ? getExpensesByBudgetId(getSelectedBudget?.value?.id) : []);
-console.log('expenses', expenses);
-const selectedDate = computed(() => storeSelectedDate);
+const expenses = computed(() => selectedBudget.value?.id ? getExpensesByBudgetId(selectedBudget.value?.id) : []);
 
 const handleAddExpense = () => {
   showExpenseForm.value = !showExpenseForm.value;
 };
-
 
 useUpdateMenuElements([
   {
@@ -44,7 +47,7 @@ useUpdateMenuElements([
 
 <template>
   <div class="h-full flex flex-col pt-4 gap-6">
-    <h1 class="text-2xl font-bold">{{ getSelectedBudget?.name }} Dashboard</h1>
+    <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
 
     <ResizablePanelGroup id="handle-demo-group-1" direction="horizontal"
       class="h-full flex !flex-col md:!flex-row gap-4">
@@ -83,13 +86,14 @@ useUpdateMenuElements([
         </div>
 
         <div class="flex flex-col gap-4 w-full">
-          <BudgetBurdownChart :data="expensesBurnDown?.expensesBurnDown || []" class="w-full" />
-          <ExpensesByCategory :data="expensesByCategory?.expensesByCategory || {}" class="w-full" />
+          <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full" />
+          <ExpensesByCategory :data="expensesByCategory || {}" class="w-full" />
         </div>
       </ResizablePanel>
       <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
       <ResizablePanel id="handle-demo-panel-2" :default-size="25" class="!basis-auto md:!basis-0">
-        <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense" class="h-[54dvh] md:h-[85dvh]"/>
+        <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
+          class="h-[54dvh] md:h-[85dvh]" />
       </ResizablePanel>
     </ResizablePanelGroup>
 

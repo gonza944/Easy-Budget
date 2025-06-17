@@ -33,7 +33,7 @@
                 </FormControl>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem v-for="category in getCategories" :key="category.id" :value="category.id">
+                    <SelectItem v-for="category in categories" :key="category.id" :value="category.id">
                       {{ category.name }}
                     </SelectItem>
                   </SelectGroup>
@@ -94,12 +94,17 @@
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { useMyExpensesStore } from '~/stores/expensesStore';
+import { useMyBudgetStoreStore } from '~/stores/budgetStore';
 import { z } from 'zod';
 import { ExpenseCreateSchema } from '~/types/expense';
+import { useSelectedDate } from '~/composables/useSelectedDate';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const store = useMyExpensesStore();
-const { getSelectedBudget, selectedDate, getCategories } = storeToRefs(store);
+const { categories } = storeToRefs(useCategoryStore());
+const { selectedDate } = useSelectedDate();
+const budgetStore = useMyBudgetStoreStore();
+const { selectedBudget } = storeToRefs(budgetStore);
 
 // Track form errors
 const categoryError = ref('');
@@ -160,12 +165,12 @@ const onNumberInput = (e: Event) => {
 };
 
 const onSubmit = form.handleSubmit(async (values) => {
-  if (!getSelectedBudget.value?.id) return;
+  if (!selectedBudget.value?.id) return;
   const date = selectedDate.value;
   const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
   const expenseData = ExpenseCreateSchema.parse({
-    budget_id: getSelectedBudget.value.id,
+    budget_id: selectedBudget.value.id,
     category_id: values.category_id,
     name: values.name,
     amount: Number(values.amount),

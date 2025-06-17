@@ -23,15 +23,26 @@ export default defineEventHandler(async (event) => {
   }
 
   // Set the user session in the cookie if authentication successful
-  if (data.user) {
+  if (data.user && data.session) {
     await setUserSession(event, {
       user: {
         id: data.user.id,
         email: data.user.email,
         name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User'
-      }
+      },
+      loggedInAt: Date.now(),
+      // Store session metadata for sync
+      expiresAt: data.session.expires_at,
+      accessToken: data.session.access_token
+    }, {
+      // Set maxAge to one year (365 days)
+      maxAge: 60 * 60 * 24 * 365 // 1 year in seconds
     })
-    return { success: true }
+    return { 
+      success: true,
+      user: data.user,
+      expiresAt: data.session.expires_at
+    }
   }
   
   throw createError({
