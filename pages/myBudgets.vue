@@ -8,8 +8,8 @@ definePageMeta({
 const { user } = useUserSession();
 const store = useMyBudgetStoreStore();
 const { fetchBudgets, deleteBudget } = store;
+const { fetchCategories } = useCategoryStore();
 const { budgets } = storeToRefs(store);
-const { fetchCategories } = useMyExpensesStore();
 const budgetName = ref('');
 const isModalOpen = ref(false);
 const isDeleteDialogOpen = ref(false);

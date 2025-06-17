@@ -1,31 +1,22 @@
 import { defineStore, storeToRefs } from "pinia";
-import type { Expense, ExpenseCreate } from "~/types/expense";
-import type { CategoriesResponse } from "~/types/category";
-import { useMyBudgetStoreStore } from "~/stores/budgetStore";
 import { useSelectedDate } from "~/composables/useSelectedDate";
-
+import { useMyBudgetStoreStore } from "~/stores/budgetStore";
+import type { Expense, ExpenseCreate } from "~/types/expense";
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const budgetStore = useMyBudgetStoreStore();
   const { selectedBudget } = storeToRefs(budgetStore);
   const { selectedDate } = useSelectedDate();
+  const { categories } = storeToRefs(useCategoryStore());
 
   // State
   const expenses = ref<Record<number, Expense[]>>({});
-  const categories = ref<CategoriesResponse>([]);
 
   const getExpensesByBudgetId = computed(() => {
     return (budgetId: number) => expenses.value[budgetId] || [];
   });
 
-  const getSelectedBudgetExpenses = computed(() => {
-    if (!selectedBudget.value?.id) return [];
-    return expenses.value[selectedBudget.value.id] || [];
-  });
-
   const getExpenses = computed(() => expenses.value);
-
-  const getCategories = computed(() => categories.value);
 
   const getCategoryFromExpense = computed(() => {
     return (expense: Expense) => {
@@ -141,18 +132,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
     fetchExpenses(budgetId);
   }
-  async function fetchCategories() {
-    const { data: fetchedCategories, error } =
-      await useFetch<CategoriesResponse>(() => `/api/categories`, {
-        key: `categories`,
-      });
-
-    if (error.value) {
-      throw new Error(error.value.message || "Failed to fetch categories");
-    }
-
-    categories.value = fetchedCategories.value || [];
-  }
 
   return {
     // State
@@ -160,15 +139,12 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
     // Getters
     getExpensesByBudgetId,
-    getSelectedBudgetExpenses,
     getExpenses,
     getRemainingDailyBudget,
-    getCategories,
     getCategoryFromExpense,
     // Actions
     fetchExpenses,
     addExpense,
     deleteExpense,
-    fetchCategories,
   };
 });

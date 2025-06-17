@@ -33,7 +33,7 @@
                 </FormControl>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem v-for="category in getCategories" :key="category.id" :value="category.id">
+                    <SelectItem v-for="category in categories" :key="category.id" :value="category.id">
                       {{ category.name }}
                     </SelectItem>
                   </SelectGroup>
@@ -101,7 +101,7 @@ import { useSelectedDate } from '~/composables/useSelectedDate';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const store = useMyExpensesStore();
-const { getCategories } = storeToRefs(store);
+const { categories } = storeToRefs(useCategoryStore());
 const { selectedDate } = useSelectedDate();
 const budgetStore = useMyBudgetStoreStore();
 const { selectedBudget } = storeToRefs(budgetStore);
