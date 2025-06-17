@@ -1,7 +1,7 @@
 import { defineStore, storeToRefs } from "pinia";
 import type { DataRecord } from "~/types/metrics";
 
-export const UseBurnDownChartStore = defineStore(
+export const useBurnDownChartStore = defineStore(
   "myUseBurnDownChartStore",
   () => {
     const expensesBurnDown = ref<DataRecord[]>([]);

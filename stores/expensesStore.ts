@@ -4,8 +4,6 @@ import { useMyBudgetStoreStore } from "~/stores/budgetStore";
 import type { Expense, ExpenseCreate } from "~/types/expense";
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
-  const budgetStore = useMyBudgetStoreStore();
-  const { selectedBudget } = storeToRefs(budgetStore);
   const { selectedDate } = useSelectedDate();
   const { categories } = storeToRefs(useCategoryStore());
 
@@ -16,8 +14,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     return (budgetId: number) => expenses.value[budgetId] || [];
   });
 
-  const getExpenses = computed(() => expenses.value);
-
   const getCategoryFromExpense = computed(() => {
     return (expense: Expense) => {
       return categories.value.find(
@@ -26,18 +22,36 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     };
   });
 
-  // Add watchers for date and budget changes to auto-fetch expenses
-  watch([selectedDate, selectedBudget], () => {
-    if (selectedBudget.value?.id) {
-      fetchExpenses(selectedBudget.value.id);
-    }
+  // Watch for changes in selectedBudget and selectedDate to auto-fetch expenses
+  // Using nextTick to avoid circular dependency during store initialization
+  nextTick(() => {
+    // Access stores within the watcher to avoid circular dependency
+    const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
+
+    // Create computed values for only the parts we care about
+    const budgetId = computed(() => selectedBudget.value?.id);
+
+    // Watch the computed values that represent meaningful changes
+    watch(
+      [budgetId, selectedDate],
+      ([currentBudgetId, _currentDate]) => {
+        if (currentBudgetId) {
+          fetchExpenses(currentBudgetId);
+        }
+      },
+      { immediate: true }
+    );
   });
 
-  // Derived getters for budget calculations now use budgetMetrics
+  // Derived getters for budget calculations
   const getRemainingDailyBudget = computed(() => {
-    if (!selectedBudget.value?.id) return 0;
+    // Access budget store within computed to avoid circular dependency
+    const budgetStore = useMyBudgetStoreStore();
+    const selectedBudget = budgetStore.selectedBudget;
 
-    const budgetId = selectedBudget.value.id;
+    if (!selectedBudget?.id) return 0;
+
+    const budgetId = selectedBudget.id;
     const budgetExpenses = expenses.value[budgetId] || [];
 
     const totalExpenses = budgetExpenses.reduce(
@@ -45,7 +59,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       0
     );
 
-    const maxDailyBudget = Number(selectedBudget.value.maxExpensesPerDay);
+    const maxDailyBudget = Number(selectedBudget.maxExpensesPerDay);
 
     return maxDailyBudget - totalExpenses;
   });
@@ -88,6 +102,10 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
   // Add/update an expense and recalculate metrics
   async function addExpense(expense: ExpenseCreate) {
+    // Access budget store within function to avoid circular dependency
+    const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
+    const { refreshAllMetrics } = useRefreshMetrics();
+
     if (!selectedBudget.value?.id) return;
 
     const budgetId = selectedBudget.value.id;
@@ -109,10 +127,14 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     });
 
     fetchExpenses(budgetId);
+    refreshAllMetrics(budgetId, selectedDate.value);
   }
 
   // Delete an expense and recalculate metrics
   async function deleteExpense(expenseId: number) {
+    const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
+    const { refreshAllMetrics } = useRefreshMetrics();
+
     if (!selectedBudget.value?.id) return;
 
     const budgetId = selectedBudget.value.id;
@@ -131,6 +153,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     });
 
     fetchExpenses(budgetId);
+    refreshAllMetrics(budgetId, selectedDate.value);
   }
 
   return {
@@ -139,7 +162,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
     // Getters
     getExpensesByBudgetId,
-    getExpenses,
     getRemainingDailyBudget,
     getCategoryFromExpense,
     // Actions
