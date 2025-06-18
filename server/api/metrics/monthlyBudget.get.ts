@@ -40,6 +40,7 @@ export default defineEventHandler(async (event) => {
     const { data: expenses, error: expensesError } = await supabase
       .from('expenses')
       .select('amount, id, budget_id, date, name')
+      .eq('user_id', session.user.id)
       .eq('budget_id', budget_id)
       .gte('date', startDate)
       .lte('date', endDate);
@@ -70,6 +71,7 @@ export default defineEventHandler(async (event) => {
       const { data: allBudgetExpenses, error: allBudgetExpensesError } = await supabase
         .from('expenses')
         .select('id, budget_id, date, amount')
+        .eq('user_id', session.user.id)
         .eq('budget_id', budget_id)
         .limit(5);
         
@@ -86,6 +88,7 @@ export default defineEventHandler(async (event) => {
     const { data: budgetData, error: budgetError } = await supabase
       .from('budgets')
       .select('maxExpensesPerDay, id, name')
+      .eq('user_id', session.user.id)
       .eq('id', budget_id)
       .single();
       

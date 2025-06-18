@@ -28,6 +28,7 @@ export default defineEventHandler(async (event) => {
     const { data: expenses, error: expensesError } = await supabase
       .from('expenses')
       .select('amount, id, budget_id, date, name')
+      .eq('user_id', session.user.id)
       .eq('budget_id', budget_id);
       
     // Log the raw response from expenses query
@@ -56,6 +57,7 @@ export default defineEventHandler(async (event) => {
       const { data: allExpenses, error: allExpensesError } = await supabase
         .from('expenses')
         .select('id, budget_id')
+        .eq('user_id', session.user.id)
         .limit(5);
         
       console.log(`[remainingBudget] Sample of all expenses in table:`, {
@@ -69,6 +71,7 @@ export default defineEventHandler(async (event) => {
     const { data: budgetData, error: budgetError } = await supabase
       .from('budgets')
       .select('startingBudget, id, name')
+      .eq('user_id', session.user.id)
       .eq('id', budget_id)
       .single();
       

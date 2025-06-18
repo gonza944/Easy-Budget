@@ -30,10 +30,14 @@ export default defineEventHandler(async (event) => {
       date
     });
 
-    // Build the query with base filters
+    // Build the query with base filters - add explicit user_id filter for RLS
     let supabaseQuery = supabase.from("expenses").select();
     
-    // Apply filters
+    // Apply user filter first (required for RLS)
+    supabaseQuery = supabaseQuery.eq('user_id', session.user.id);
+    console.log(`[expenses] Applied user_id filter: ${session.user.id}`);
+    
+    // Apply other filters
     supabaseQuery = supabaseQuery.eq('budget_id', budget_id);
     console.log(`[expenses] Applied budget_id filter: ${budget_id}`);
     
