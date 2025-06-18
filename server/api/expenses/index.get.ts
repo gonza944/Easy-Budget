@@ -1,4 +1,4 @@
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 import { ExpensesArraySchema, ExpenseQuerySchema } from "~/types/expense";
 
 export default defineEventHandler(async (event) => {
@@ -30,14 +30,21 @@ export default defineEventHandler(async (event) => {
       date
     });
 
-    // Build the query with base filters - add explicit user_id filter for RLS
-    let supabaseQuery = supabase.from("expenses").select();
+    // Create authenticated Supabase client with user's access token
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
     
-    // Apply user filter first (required for RLS)
-    supabaseQuery = supabaseQuery.eq('user_id', session.user.id);
-    console.log(`[expenses] Applied user_id filter: ${session.user.id}`);
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+    console.log(`[expenses] Created authenticated Supabase client for user: ${session.user.id}`);
+
+    // Build the query with base filters - RLS will now work with authenticated user
+    let supabaseQuery = userSupabase.from("expenses").select();
     
-    // Apply other filters
+    // Apply filters (no need for explicit user_id filter with authenticated client)
     supabaseQuery = supabaseQuery.eq('budget_id', budget_id);
     console.log(`[expenses] Applied budget_id filter: ${budget_id}`);
     
@@ -89,7 +96,7 @@ export default defineEventHandler(async (event) => {
     if (!data || data.length === 0) {
       console.log(`[expenses] No expenses found with current filters, checking for any expenses in the table...`);
       
-      const { data: allExpenses, error: allExpensesError } = await supabase
+      const { data: allExpenses, error: allExpensesError } = await userSupabase
         .from('expenses')
         .select('id, budget_id, category_id, date, name')
         .limit(10);
@@ -101,7 +108,7 @@ export default defineEventHandler(async (event) => {
       });
       
       // Also check if there are expenses for this specific budget_id
-      const { data: budgetExpenses, error: budgetExpensesError } = await supabase
+      const { data: budgetExpenses, error: budgetExpensesError } = await userSupabase
         .from('expenses')
         .select('id, budget_id, category_id, date, name')
         .eq('budget_id', budget_id)

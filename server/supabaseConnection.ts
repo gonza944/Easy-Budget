@@ -7,6 +7,7 @@ if (!process.env.SUPABASE_KEY) {
   throw new Error("Environment variable SUPABASE_KEY is not defined.");
 }
 
+// Default client with anon key (for public operations)
 export const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY,
@@ -24,6 +25,45 @@ export const supabase = createClient(
     }
   }
 );
+
+// Service role client (bypasses RLS) - add this environment variable
+export const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY 
+  ? createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        },
+        db: {
+          schema: 'public'
+        }
+      }
+    )
+  : null;
+
+// Function to create authenticated client for specific user (alternative approach)
+export function createUserSupabaseClient(accessToken: string) {
+  return createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!,
+    {
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      },
+      db: {
+        schema: 'public'
+      }
+    }
+  );
+}
 
 // Utility function to test database connection
 export async function testDatabaseConnection() {
