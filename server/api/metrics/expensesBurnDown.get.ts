@@ -8,20 +8,29 @@ import { formatDateToUTCISOString } from "~/utils/date";
 type BurnDownItem = { x: number; y: number | undefined; y2: number | null };
 
 export default defineEventHandler(async (event) => {
-  const validatedQuery = await getValidatedQuery(
-    event,
-    ExpensesBurnDownQuerySchema.parse
-  );
-
-  const initialDate = new Date(validatedQuery.initial_date);
-  const finalDate = new Date(validatedQuery.final_date);
-  const budget_id = validatedQuery.budget_id;
-
-  // Get today's date and set to the beginning of the day for comparison
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    const validatedQuery = await getValidatedQuery(
+      event,
+      ExpensesBurnDownQuerySchema.parse
+    );
+
+    const initialDate = new Date(validatedQuery.initial_date);
+    const finalDate = new Date(validatedQuery.final_date);
+    const budget_id = validatedQuery.budget_id;
+
+    // Get today's date and set to the beginning of the day for comparison
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
     const [expenses, budgetData] = await Promise.all([
       supabase
         .from("expenses")
@@ -37,7 +46,23 @@ export default defineEventHandler(async (event) => {
         .single(),
     ]);
 
-    const validatedExpenses = ExpensesArraySchema.element.pick({ amount: true, date: true }).array().parse(expenses.data);
+    if (expenses.error) {
+      console.error("Database error fetching expenses:", expenses.error);
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Failed to fetch expenses from database",
+      });
+    }
+
+    if (budgetData.error) {
+      console.error("Database error fetching budget:", budgetData.error);
+      throw createError({
+        statusCode: budgetData.error.code === 'PGRST116' ? 404 : 500,
+        statusMessage: budgetData.error.code === 'PGRST116' ? "Budget not found" : "Failed to fetch budget from database",
+      });
+    }
+
+    const validatedExpenses = ExpensesArraySchema.element.pick({ amount: true, date: true }).array().parse(expenses.data || []);
     
     if (!budgetData.data) {
       throw createError({
@@ -97,15 +122,34 @@ export default defineEventHandler(async (event) => {
       
       return acc;
     }, []);
+    
     const lastItem = expensesBurnDown[expensesBurnDown.length - 1];
-    lastItem.y = (lastItem.x > today.getTime() && lastItem.y === undefined) ? 0 : lastItem.y;
+    if (lastItem) {
+      lastItem.y = (lastItem.x > today.getTime() && lastItem.y === undefined) ? 0 : lastItem.y;
+    }
 
     return { expensesBurnDown };
+    
   } catch (error) {
-    console.error(error);
+    console.error("Error calculating expenses burn down:", error);
+    
+    // If it's already an H3Error, re-throw it
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      throw error;
+    }
+    
+    // Handle validation errors
+    if (error instanceof Error && error.name === 'ZodError') {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid query parameters or data format",
+      });
+    }
+    
+    // Generic error fallback
     throw createError({
       statusCode: 500,
-      statusMessage: "Internal Server Error",
+      statusMessage: "Internal server error",
     });
   }
 });

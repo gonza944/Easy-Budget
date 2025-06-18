@@ -2,13 +2,22 @@ import { supabase } from "../../supabaseConnection";
 import { ExpensesArraySchema, ExpenseQuerySchema } from "~/types/expense";
 
 export default defineEventHandler(async (event) => {
-  // Validate query parameters
-  const query = getQuery(event);
-  const validatedQuery = ExpenseQuerySchema.parse(query);
-  
-  const { budget_id, category_id, start_date, end_date, date } = validatedQuery;
-
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Validate query parameters
+    const query = getQuery(event);
+    const validatedQuery = ExpenseQuerySchema.parse(query);
+    
+    const { budget_id, category_id, start_date, end_date, date } = validatedQuery;
+
     // Build the query with base filters
     let supabaseQuery = supabase.from("expenses").select();
     
@@ -38,19 +47,36 @@ export default defineEventHandler(async (event) => {
     const { data, error } = await supabaseQuery;
     
     if (error) {
-      throw new Error(error.message);
+      console.error("Database error fetching expenses:", error);
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Failed to fetch expenses from database",
+      });
     }
-    
+
     // Validate and return response
-    return ExpensesArraySchema.parse(data);
+    return ExpensesArraySchema.parse(data || []);
     
   } catch (error) {
-    return {
+    console.error("Error in expenses GET endpoint:", error);
+    
+    // If it's already an H3Error, re-throw it
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      throw error;
+    }
+    
+    // Handle validation errors
+    if (error instanceof Error && error.name === 'ZodError') {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid query parameters",
+      });
+    }
+    
+    // Generic error fallback
+    throw createError({
       statusCode: 500,
-      body: { 
-        message: "Failed to fetch expenses", 
-        error: error instanceof Error ? error.message : String(error) 
-      }
-    };
+      statusMessage: "Internal server error",
+    });
   }
 }); 
