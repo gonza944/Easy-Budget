@@ -48,16 +48,6 @@ export default defineNuxtConfig({
 
   // Nitro configuration for better serverless deployment
   nitro: {
-    // Disable route rules caching for API routes in production to avoid stale data
-    routeRules: {
-      '/api/**': {
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      }
-    },
     // Enable compression
     compressPublicAssets: true,
     // Add experimental features for better serverless support
