@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { supabase } from "~/server/supabaseConnection";
+import { createUserSupabaseClient } from "~/server/supabaseConnection";
 import { ExpensesArraySchema } from "~/types/expense";
 import { ExpensesBurnDownQuerySchema } from "~/types/metrics";
 import { formatDateToUTCISOString } from "~/utils/date";
@@ -8,29 +8,48 @@ import { formatDateToUTCISOString } from "~/utils/date";
 type BurnDownItem = { x: number; y: number | undefined; y2: number | null };
 
 export default defineEventHandler(async (event) => {
-  const validatedQuery = await getValidatedQuery(
-    event,
-    ExpensesBurnDownQuerySchema.parse
-  );
-
-  const initialDate = new Date(validatedQuery.initial_date);
-  const finalDate = new Date(validatedQuery.final_date);
-  const budget_id = validatedQuery.budget_id;
-
-  // Get today's date and set to the beginning of the day for comparison
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
+    const validatedQuery = await getValidatedQuery(
+      event,
+      ExpensesBurnDownQuerySchema.parse
+    );
+
+    const initialDate = new Date(validatedQuery.initial_date);
+    const finalDate = new Date(validatedQuery.final_date);
+    const budget_id = validatedQuery.budget_id;
+
+    // Get today's date and set to the beginning of the day for comparison
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
     const [expenses, budgetData] = await Promise.all([
-      supabase
+      userSupabase
         .from("expenses")
         .select("amount, date")
         .eq("budget_id", budget_id)
         .gte("date", formatDateToUTCISOString(initialDate))
         .lte("date", formatDateToUTCISOString(finalDate))
         .order('date', { ascending: true }),
-      supabase
+      userSupabase
         .from("budgets")
         .select("maxExpensesPerDay")
         .eq("id", budget_id)

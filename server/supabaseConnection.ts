@@ -17,4 +17,25 @@ export const supabase = createClient(
       persistSession: true // Important for server-side usage
     },
   }
-);;
+);
+
+export function createUserSupabaseClient(accessToken: string) {
+  return createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!,
+    {
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      },
+      db: {
+        schema: 'public'
+      }
+    }
+  );
+}

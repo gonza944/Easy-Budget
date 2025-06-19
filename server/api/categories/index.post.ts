@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 
 // Schema for creating a new category
 export const CreateCategorySchema = z.object({
@@ -24,12 +24,31 @@ export type CategoryResponse = z.infer<typeof CategoryResponseSchema>;
 
 export default defineEventHandler(async (event) => {
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
     // Validate request body
     const validatedData = await readValidatedBody(event, CreateCategorySchema.parse);
     const { name, description } = validatedData;
 
     // Check if category with the same name already exists for this user
-    const { data: existingCategory, error: checkError } = await supabase
+    const { data: existingCategory, error: checkError } = await userSupabase
       .from("categories")
       .select('id')
       .eq('name', name)
@@ -50,7 +69,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Insert the category
-    const { data, error } = await supabase.from("categories").insert({
+    const { data, error } = await userSupabase.from("categories").insert({
       name,
       description,
     }).select().single();

@@ -1,15 +1,34 @@
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 import { DeleteExpenseSchema } from '~/types/expense';
 import type { DeleteResponse } from '~/types/expense';
 
 export default defineEventHandler(async (event) => {
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
     // Validate request body
     const validatedData = await readValidatedBody(event, DeleteExpenseSchema.parse);
     const { id } = validatedData;
 
     // Delete the expense
-    const { error } = await supabase
+    const { error } = await userSupabase
       .from("expenses")
       .delete()
       .eq('id', id);

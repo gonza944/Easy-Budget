@@ -1,16 +1,35 @@
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 import { ExpensesArraySchema, ExpenseQuerySchema } from "~/types/expense";
 
 export default defineEventHandler(async (event) => {
-  // Validate query parameters
-  const query = getQuery(event);
-  const validatedQuery = ExpenseQuerySchema.parse(query);
-  
-  const { budget_id, category_id, start_date, end_date, date } = validatedQuery;
-
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
+    // Validate query parameters
+    const query = getQuery(event);
+    const validatedQuery = ExpenseQuerySchema.parse(query);
+    
+    const { budget_id, category_id, start_date, end_date, date } = validatedQuery;
+
     // Build the query with base filters
-    let supabaseQuery = supabase.from("expenses").select();
+    let supabaseQuery = userSupabase.from("expenses").select();
     
     // Apply filters
     supabaseQuery = supabaseQuery.eq('budget_id', budget_id);

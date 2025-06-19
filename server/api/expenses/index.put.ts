@@ -1,15 +1,34 @@
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 import { UpdateExpenseSchema } from '~/types/expense';
 import type { ExpenseResponse, ExpenseUpdateData } from '~/types/expense';
 
 export default defineEventHandler(async (event) => {
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
     // Validate request body
     const validatedData = await readValidatedBody(event, UpdateExpenseSchema.parse);
     const { id, budget_id, category_id, ...otherUpdateData } = validatedData;
 
     // Check if expense exists
-    const { data: expenseData, error: expenseError } = await supabase
+    const { data: expenseData, error: expenseError } = await userSupabase
       .from("expenses")
       .select('id')
       .eq('id', id)
@@ -27,7 +46,7 @@ export default defineEventHandler(async (event) => {
     
     // If budget_id is being updated, verify it exists
     if (budget_id) {
-      const { data: budgetData, error: budgetError } = await supabase
+      const { data: budgetData, error: budgetError } = await userSupabase
         .from("budgets")
         .select('id')
         .eq('id', budget_id)
@@ -45,7 +64,7 @@ export default defineEventHandler(async (event) => {
 
     // If category_id is being updated, verify it exists
     if (category_id) {
-      const { data: categoryData, error: categoryError } = await supabase
+      const { data: categoryData, error: categoryError } = await userSupabase
         .from("categories")
         .select('id')
         .eq('id', category_id)
@@ -62,7 +81,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Update the expense
-    const { data, error } = await supabase
+    const { data, error } = await userSupabase
       .from("expenses")
       .update(updateData)
       .eq('id', id)
