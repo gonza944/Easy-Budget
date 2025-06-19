@@ -1,24 +1,43 @@
 import { z } from "zod";
-import { supabase } from "~/server/supabaseConnection";
+import { createUserSupabaseClient } from "~/server/supabaseConnection";
 import { ExpensesBurnDownQuerySchema } from "~/types/metrics";
 import { formatDateToUTCISOString } from "~/utils/date";
 
 export default defineEventHandler(async (event) => {
-  const validatedQuery = await getValidatedQuery(
-    event,
-    ExpensesBurnDownQuerySchema.parse
-  );
-
-  const initialDate = new Date(validatedQuery.initial_date);
-  const finalDate = new Date(validatedQuery.final_date);
-  const budget_id = validatedQuery.budget_id;
-
-  // Get today's date and set to the beginning of the day for comparison
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-
   try {
-    const { data, error } = await supabase
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
+    const validatedQuery = await getValidatedQuery(
+      event,
+      ExpensesBurnDownQuerySchema.parse
+    );
+
+    const initialDate = new Date(validatedQuery.initial_date);
+    const finalDate = new Date(validatedQuery.final_date);
+    const budget_id = validatedQuery.budget_id;
+
+    // Get today's date and set to the beginning of the day for comparison
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const { data, error } = await userSupabase
       .from("expenses")
       .select(`amount, category_id (name)`)
       .eq("budget_id", budget_id)

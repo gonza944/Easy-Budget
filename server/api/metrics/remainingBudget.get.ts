@@ -1,16 +1,11 @@
-import { date, z } from "zod";
+import { z } from "zod";
 
-import { supabase } from "~/server/supabaseConnection";
+import { createUserSupabaseClient } from "~/server/supabaseConnection";
 import { RemainingBudgetQuerySchema } from "~/types/metrics";
 
 export default defineEventHandler(async (event) => {
-    // Validate query parameters
-    const validatedQuery = await getValidatedQuery(event, RemainingBudgetQuerySchema.parse);
-
-    const { budget_id } = validatedQuery;
-
+    // Check authentication first
     const session = await getUserSession(event);
-
     if (!session.user) {
       throw createError({
         statusCode: 401,
@@ -18,10 +13,25 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
+    // Validate query parameters
+    const validatedQuery = await getValidatedQuery(event, RemainingBudgetQuerySchema.parse);
+
+    const { budget_id } = validatedQuery;
+
     try {
       
       // Query expenses for the month
-      const { data: expenses, error: expensesError } = await supabase
+      const { data: expenses, error: expensesError } = await userSupabase
         .from('expenses')
         .select('amount')
         .eq('budget_id', budget_id)
@@ -29,7 +39,7 @@ export default defineEventHandler(async (event) => {
       if (expensesError) throw expensesError;
       
       // Query budget information
-      const { data: budgetData, error: budgetError } = await supabase
+      const { data: budgetData, error: budgetError } = await userSupabase
         .from('budgets')
         .select('startingBudget')
         .eq('id', budget_id)

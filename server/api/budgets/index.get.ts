@@ -1,36 +1,69 @@
 import { BudgetsSchema, type BudgetsResponse } from "~/utils/budgetSchemas";
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 
-export default defineEventHandler<
-  Promise<
-    | BudgetsResponse
-    | { statusCode: number; body: { message: string; error: string } }
-  >
->(async (event) => {
-  const query = getQuery(event);
-  const nameFilter = query.name as string | undefined;
-
-  let supabaseQuery = supabase.from("budgets").select();
-
-  // Apply name filter if provided
-  if (nameFilter) {
-    supabaseQuery = supabaseQuery.ilike("name", `%${nameFilter}%`);
-  }
-
-  const { data, error } = await supabaseQuery;
+export default defineEventHandler<Promise<BudgetsResponse>>(async (event) => {
   try {
-    if (error) {
-      throw new Error(error.message);
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
     }
-    const budgets = BudgetsSchema.parse(data);
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
+    const query = getQuery(event);
+    const nameFilter = query.name as string | undefined;
+
+    let supabaseQuery = userSupabase.from("budgets").select();
+
+    // Apply name filter if provided
+    if (nameFilter) {
+      supabaseQuery = supabaseQuery.ilike("name", `%${nameFilter}%`);
+    }
+
+    const { data, error } = await supabaseQuery;
+    
+    if (error) {
+      console.error("Database error fetching budgets:", error);
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Failed to fetch budgets from database",
+      });
+    }
+
+    const budgets = BudgetsSchema.parse(data || []);
     return budgets;
   } catch (error) {
-    return {
+    console.error("Error in budgets GET endpoint:", error);
+    
+    // If it's already an H3Error, re-throw it
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      throw error;
+    }
+    
+    // Handle validation errors
+    if (error instanceof Error && error.name === 'ZodError') {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid data format",
+      });
+    }
+    
+    // Generic error fallback
+    throw createError({
       statusCode: 500,
-      body: {
-        message: "Failed to fetch budgets",
-        error: error instanceof Error ? error.message : String(error),
-      },
-    };
+      statusMessage: "Internal server error",
+    });
   }
 });

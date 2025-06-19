@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 
 // Define the schema for delete request
 const deleteBudgetSchema = z.object({
@@ -14,11 +14,30 @@ export type DeleteBudgetApiResponse = {
 
 export default defineEventHandler(async (event) => {
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
     // Validate the request body containing the budget ID
     const { id } = await readValidatedBody(event, deleteBudgetSchema.parse);
 
     // Delete the budget with the provided ID
-    const { error } = await supabase
+    const { error } = await userSupabase
       .from("budgets")
       .delete()
       .eq('id', id);

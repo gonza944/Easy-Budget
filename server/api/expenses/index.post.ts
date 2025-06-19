@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 import { ExpenseCreateSchema, ExpenseSchema } from '~/types/expense';
 
 // Define simplified session user type based on what's stored in the session
@@ -23,12 +23,22 @@ export default defineEventHandler(async (event) => {
         statusMessage: "Unauthorized: Please log in",
       });
     }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
     
     // Cast to our session user type
     const user = session.user as SessionUser;
     
     // Insert expense into database with user_id
-    const { data, error } = await supabase
+    const { data, error } = await userSupabase
       .from('expenses')
       .insert([{
         ...validatedData,

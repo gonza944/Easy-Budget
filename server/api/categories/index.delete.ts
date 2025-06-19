@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { supabase } from "../../supabaseConnection";
+import { createUserSupabaseClient } from "../../supabaseConnection";
 
 // Schema for deleting a category
 export const DeleteCategorySchema = z.object({
@@ -18,12 +18,31 @@ export type DeleteResponse = z.infer<typeof DeleteResponseSchema>;
 
 export default defineEventHandler(async (event) => {
   try {
+    // Check authentication first
+    const session = await getUserSession(event);
+    if (!session.user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Unauthorized: Please log in",
+      });
+    }
+
+    // Create authenticated Supabase client
+    if (!session.accessToken) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: "No access token found in session",
+      });
+    }
+    
+    const userSupabase = createUserSupabaseClient(session.accessToken);
+
     // Validate request body
     const validatedData = await readValidatedBody(event, DeleteCategorySchema.parse);
     const { id } = validatedData;
 
     // Check if category exists
-    const { data: categoryData, error: categoryError } = await supabase
+    const { data: categoryData, error: categoryError } = await userSupabase
       .from("categories")
       .select('id')
       .eq('id', id)
@@ -37,7 +56,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if there are any expenses using this category
-    const { count, error: countError } = await supabase
+    const { count, error: countError } = await userSupabase
       .from("expenses")
       .select('id', { count: 'exact', head: true })
       .eq('category_id', id);
@@ -57,7 +76,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete the category
-    const { error } = await supabase
+    const { error } = await userSupabase
       .from("categories")
       .delete()
       .eq('id', id);
