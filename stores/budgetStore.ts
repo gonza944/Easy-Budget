@@ -21,17 +21,78 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
         })),
     });
     budgets.value = data.value || [];
+    
+    // Auto-set the selected budget from the fetched data
+    const selected = budgets.value.find(budget => budget.selected);
+    if (selected) {
+      selectedBudget.value = selected;
+    }
   };
 
-  const setSelectedBudget = (budgetId: number) => {
+  // Fetch only the selected budget for faster loading
+  const fetchSelectedBudget = async () => {
+    const { data } = await useFetch<Budget | null>('/api/budgets/selected', {
+      key: 'selected-budget',
+      transform: (budget: Budget | null) =>
+        budget ? {
+          ...budget,
+          startingBudget: Number(budget.startingBudget),
+          maxExpensesPerDay: Number(budget.maxExpensesPerDay),
+        } : null,
+    });
+    
+    if (data.value) {
+      selectedBudget.value = data.value;
+    }
+    
+    return data.value;
+  };
+
+  const setSelectedBudget = async (budgetId: number) => {
     if (selectedBudget.value?.id === budgetId) return;
+    
     const budget = budgets.value?.find((budget) => budget.id === budgetId);
     if (!budget) return;
-    selectedBudget.value = budget;
+
+    let previousBudgets: Budget[] = [];
+    let previousSelected: Budget | null = null;
+
+    return await $fetch('/api/budgets/select', {
+      method: 'PATCH',
+      body: { budgetId },
+      onRequest() {
+        // Store the previously cached values to restore if fetch fails
+        previousBudgets = budgets.value || [];
+        previousSelected = selectedBudget.value;
+
+        // Optimistically update local state
+        if (selectedBudget.value) {
+          selectedBudget.value.selected = false;
+        }
+        budget.selected = true;
+        selectedBudget.value = budget;
+
+        // Update the budgets array to reflect the change
+        budgets.value = previousBudgets.map(b => ({
+          ...b,
+          selected: b.id === budgetId
+        }));
+      },
+      onResponseError() {
+        // Rollback the data if the request failed
+        budgets.value = previousBudgets;
+        selectedBudget.value = previousSelected;
+      },
+      async onResponse() {
+        // Invalidate budgets in the background if the request succeeded
+        await fetchBudgets();
+      },
+    });
   };
 
   const deleteBudget = async (budgetId: number) => {
     let previousBudgets: Budget[] = [];
+    let previousSelected: Budget | null = null;
 
     return await $fetch("/api/budgets", {
       method: "DELETE",
@@ -39,13 +100,20 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
       onRequest() {
         // Store the previously cached value to restore if fetch fails
         previousBudgets = budgets.value || [];
+        previousSelected = selectedBudget.value;
 
         // Optimistically remove the budget from the list
         budgets.value = previousBudgets.filter((budget) => budget.id !== budgetId);
+        
+        // Clear selected budget if it was the one being deleted
+        if (selectedBudget.value?.id === budgetId) {
+          selectedBudget.value = null;
+        }
       },
       onResponseError() {
         // Rollback the data if the request failed
         budgets.value = previousBudgets;
+        selectedBudget.value = previousSelected;
       },
       async onResponse() {
         // Invalidate budgets in the background if the request succeeded
@@ -71,6 +139,7 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
           startDate: formatDateToUTCISOString(budget.startDate),
           startingBudget: Number(budget.startingBudget),
           maxExpensesPerDay: Number(budget.maxExpensesPerDay),
+          selected: false, // New budgets are not selected by default
         };
 
         budgets.value = [optimisticBudget,...previousBudgets];
@@ -88,6 +157,7 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
 
   return {
     fetchBudgets,
+    fetchSelectedBudget,
     budgets,
     selectedBudget,
     setSelectedBudget,

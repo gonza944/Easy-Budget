@@ -8,14 +8,13 @@ definePageMeta({
 const { user } = useUserSession();
 const store = useMyBudgetStoreStore();
 const { fetchBudgets, deleteBudget } = store;
-const { fetchCategories } = useCategoryStore();
 const { budgets } = storeToRefs(store);
 const budgetName = ref('');
 const isModalOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
 const budgetToDelete = ref<number | null>(null);
-await callOnce(fetchBudgets);
-await callOnce(fetchCategories);
+
+callOnce(fetchBudgets);
 
 useUpdateMenuElements([
   {

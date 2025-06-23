@@ -10,6 +10,17 @@ import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
 import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
 import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
 import { useSelectedDate } from '~/composables/useSelectedDate';
+import { useCategoryStore } from '~/stores/categoryStore';
+
+definePageMeta({
+  middleware: ['authenticated'],
+})
+
+const { fetchCategories } = useCategoryStore();
+const { fetchSelectedBudget } = useMyBudgetStoreStore();
+
+callOnce(fetchCategories);
+callOnce(fetchSelectedBudget);
 
 const router = useRouter();
 const store = useMyExpensesStore();
@@ -23,9 +34,6 @@ const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
 const showExpenseForm = ref(false);
 
 const getRemainingDailyBudget = computed(() => store.getRemainingDailyBudget);
-if (!selectedBudget.value) {
-  router.push('/myBudgets');
-}
 const expenses = computed(() => selectedBudget.value?.id ? getExpensesByBudgetId(selectedBudget.value?.id) : []);
 
 const handleAddExpense = () => {
