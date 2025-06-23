@@ -12,6 +12,10 @@ import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
 import { useSelectedDate } from '~/composables/useSelectedDate';
 import { useCategoryStore } from '~/stores/categoryStore';
 
+definePageMeta({
+  middleware: ['authenticated'],
+})
+
 const { fetchCategories } = useCategoryStore();
 const { fetchSelectedBudget } = useMyBudgetStoreStore();
 
