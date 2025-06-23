@@ -23,6 +23,7 @@ export const BudgetSchema =  z.object({
   startingBudget: z.number().min(1),
   maxExpensesPerDay: z.number().min(1),
   startDate: z.string().optional().default(new Date().toLocaleDateString()),
+  selected: z.boolean().default(false),
 });
 
 export const NewBudgetSchema = BudgetSchema.omit({ id: true }).extend({

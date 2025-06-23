@@ -25,7 +25,7 @@ export default defineEventHandler<Promise<BudgetsResponse>>(async (event) => {
     const query = getQuery(event);
     const nameFilter = query.name as string | undefined;
 
-    let supabaseQuery = userSupabase.from("budgets").select();
+    let supabaseQuery = userSupabase.from("budgets").select().order("created_at", { ascending: false });
 
     // Apply name filter if provided
     if (nameFilter) {
