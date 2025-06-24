@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { toast } from "vue-sonner";
 import type { BudgetApiResponse } from "~/server/api/budgets/index.post";
 import type { Budget, NewBudgetSchema } from "~/utils/budgetSchemas";
 
@@ -8,6 +9,10 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
   const selectedBudget = ref<Budget | null>(null);
   const queryString = ref("");
   const loading = ref(false);
+
+  const showErrorToast = (message: string) => {
+    toast.error(message);
+  }
 
   const fetchBudgets = async (name?: string) => {
     queryString.value = name ? `?name=${name}` : "";
@@ -84,6 +89,7 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
         // Rollback the data if the request failed
         budgets.value = previousBudgets;
         selectedBudget.value = previousSelected;
+        showErrorToast("Failed to select budget");
       },
       async onResponse() {
         // Invalidate budgets in the background if the request succeeded
@@ -116,6 +122,7 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
         // Rollback the data if the request failed
         budgets.value = previousBudgets;
         selectedBudget.value = previousSelected;
+        showErrorToast("Failed to delete budget");
       },
       async onResponse() {
         // Invalidate budgets in the background if the request succeeded
@@ -149,6 +156,7 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
       onResponseError() {
         // Rollback the data if the request failed
         budgets.value = previousBudgets;
+        showErrorToast("Failed to create budget");
       },
       async onResponse() {
         // Invalidate budgets in the background if the request succeeded

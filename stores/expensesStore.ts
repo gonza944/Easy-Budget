@@ -2,11 +2,14 @@ import { defineStore, storeToRefs } from "pinia";
 import { useSelectedDate } from "~/composables/useSelectedDate";
 import { useMyBudgetStoreStore } from "~/stores/budgetStore";
 import type { Expense, ExpenseCreate } from "~/types/expense";
+import { toast } from "vue-sonner";
 
 export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const { selectedDate } = useSelectedDate();
   const { categories } = storeToRefs(useCategoryStore());
-
+  const showErrorToast = (message: string) => {
+    toast.error(message);
+  }
   // State
   const expenses = ref<Record<number, Expense[]>>({});
   const loading = ref(false);
@@ -97,8 +100,9 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       };
 
       // All calculated data is now handled by individual store watchers
-    } catch (err) {
-      console.error("Error fetching expenses:", err);
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+      showErrorToast("Failed to fetch expenses");
     } finally {
       loading.value = false;
     }
@@ -113,25 +117,40 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     if (!selectedBudget.value?.id) return;
 
     const budgetId = selectedBudget.value.id;
-    const currentExpenses = [...(expenses.value[budgetId] || [])];
+    let previousExpenses: Expense[] = [];
 
-    currentExpenses.push({
-      ...expense,
-      id: currentExpenses.length + 1,
-    });
-
-    expenses.value = {
-      ...expenses.value,
-      [budgetId]: currentExpenses,
-    };
-
-    await $fetch<Expense>("/api/expenses", {
+    return await $fetch<Expense>("/api/expenses", {
       method: "POST",
       body: expense,
-    });
+      onRequest() {
+        // Store the previously cached value to restore if fetch fails
+        previousExpenses = expenses.value[budgetId] || [];
 
-    fetchExpenses(budgetId);
-    refreshAllMetrics(budgetId, selectedDate.value);
+        // Optimistically add the expense with a temporary ID
+        const optimisticExpense: Expense = {
+          ...expense,
+          id: Date.now(), // Temporary ID
+        };
+
+        expenses.value = {
+          ...expenses.value,
+          [budgetId]: [...previousExpenses, optimisticExpense],
+        };
+      },
+      onResponseError() {
+        // Rollback the data if the request failed
+        expenses.value = {
+          ...expenses.value,
+          [budgetId]: previousExpenses,
+        };
+        showErrorToast("Failed to add expense");
+      },
+      async onResponse() {
+        // Revalidate data on success
+        fetchExpenses(budgetId);
+        refreshAllMetrics(budgetId, selectedDate.value);
+      },
+    });
   }
 
   // Delete an expense and recalculate metrics
@@ -142,22 +161,37 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     if (!selectedBudget.value?.id) return;
 
     const budgetId = selectedBudget.value.id;
-    const currentExpenses = expenses.value[budgetId] || [];
+    let previousExpenses: Expense[] = [];
 
-    expenses.value = {
-      ...expenses.value,
-      [budgetId]: currentExpenses.filter((e) => e.id !== expenseId),
-    };
-
-    await $fetch<Expense>("/api/expenses", {
+    return await $fetch<Expense>("/api/expenses", {
       method: "DELETE",
       body: {
         id: expenseId,
       },
-    });
+      onRequest() {
+        // Store the previously cached value to restore if fetch fails
+        previousExpenses = expenses.value[budgetId] || [];
 
-    fetchExpenses(budgetId);
-    refreshAllMetrics(budgetId, selectedDate.value);
+        // Optimistically remove the expense from the list
+        expenses.value = {
+          ...expenses.value,
+          [budgetId]: previousExpenses.filter((e) => e.id !== expenseId),
+        };
+      },
+      onResponseError() {
+        // Rollback the data if the request failed
+        expenses.value = {
+          ...expenses.value,
+          [budgetId]: previousExpenses,
+        };
+        showErrorToast("Failed to delete expense");
+      },
+      async onResponse() {
+        // Revalidate data on success
+        fetchExpenses(budgetId);
+        refreshAllMetrics(budgetId, selectedDate.value);
+      },
+    });
   }
 
   return {
