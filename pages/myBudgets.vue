@@ -8,7 +8,7 @@ definePageMeta({
 const { user } = useUserSession();
 const store = useMyBudgetStoreStore();
 const { fetchBudgets, deleteBudget } = store;
-const { budgets } = storeToRefs(store);
+const { budgets, loading } = storeToRefs(store);
 const budgetName = ref('');
 const isModalOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
@@ -60,9 +60,16 @@ const handleDeleteConfirm = async () => {
     <div class="relative w-full flex justify-center">
       <ScrollArea class="w-full" v-if="budgets && budgets.length > 0">
         <div class="flex gap-4 pb-4 overflow-x-auto justify-center" :class="budgets?.length > 0 ? 'px-4' : ''">
-          <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
-            <BudgetCard :budget="budget" :onDeleteClick="() => handleDeleteClick(budget.id)" />
+          <div v-if="loading">
+            <div v-for="n in 4" :key="`skeleton-${n}`" class="w-xs flex-shrink-0">
+              <Skeleton class="w-full h-10 rounded-full" />
+            </div>
           </div>
+          <template v-else>
+          <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
+              <BudgetCard :budget="budget" :onDeleteClick="() => handleDeleteClick(budget.id)" />
+            </div>
+          </template>
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>

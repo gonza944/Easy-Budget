@@ -3,11 +3,13 @@ import { defineStore, storeToRefs } from "pinia";
 export const UseExpensesTotalsStore = defineStore(
   "myUseExpensesTotalsStore",
   () => {
-    const monthlyBudget = ref<number>(0);
-    const remainingBudget = ref<number>(0);
+    const monthlyBudget = ref<number>();
+    const remainingBudget = ref<number>();
+    const loading = ref(false);
 
     const fetchMonthlyBudget = async (budget_id: number, target_date: Date) => {
       const parsedDate = formatDateToUTCISOString(target_date);
+      loading.value = !remainingBudget.value;
 
       const { data } = await useFetch<number>("/api/metrics/monthlyBudget", {
         query: {
@@ -18,6 +20,7 @@ export const UseExpensesTotalsStore = defineStore(
       });
 
       monthlyBudget.value = data.value || 0;
+      loading.value = false;
     };
 
     const fetchRemainingBudget = async (budget_id: number) => {
@@ -63,6 +66,7 @@ export const UseExpensesTotalsStore = defineStore(
       remainingBudget,
       fetchMonthlyBudget,
       fetchRemainingBudget,
+      loading,
     };
   }
 );

@@ -25,8 +25,9 @@ callOnce(fetchSelectedBudget);
 const router = useRouter();
 const store = useMyExpensesStore();
 const { getExpensesByBudgetId } = store;
+const { loading: expensesLoading } = storeToRefs(useMyExpensesStore());
 const { selectedDate } = useSelectedDate();
-const { monthlyBudget } = storeToRefs(UseExpensesTotalsStore());
+const { monthlyBudget, loading: monthlyBudgetLoading } = storeToRefs(UseExpensesTotalsStore());
 const { expensesBurnDown } = storeToRefs(useBurnDownChartStore());
 const { expensesByCategory } = storeToRefs(UseExpensesByCategoryStore());
 const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
@@ -76,20 +77,34 @@ useUpdateMenuElements([
             <CardHeader>
               <CardTitle>Monthly Budget</CardTitle>
             </CardHeader>
-            <CardContent
-              :class="{ 'text-destructive-foreground': (monthlyBudget || 0) < 0, 'text-success': (monthlyBudget || 0) >= 0 }">
-              {{ Number(monthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-            </CardContent>
+            <template v-if="monthlyBudgetLoading">
+              <CardContent>
+                <Skeleton class="w-[30%] h-10 rounded-full" />
+              </CardContent>
+            </template>
+            <template v-else>
+              <CardContent
+                :class="{ 'text-destructive-foreground': (monthlyBudget || 0) < 0, 'text-success': (monthlyBudget || 0) >= 0 }">
+                {{ Number(monthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+              </CardContent>
+            </template>
           </Card>
 
           <Card class="w-full">
             <CardHeader>
               <CardTitle>Daily Budget</CardTitle>
             </CardHeader>
-            <CardContent
-              :class="{ 'text-destructive-foreground': getRemainingDailyBudget < 0, 'text-success': getRemainingDailyBudget >= 0 }">
-              {{ getRemainingDailyBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-            </CardContent>
+            <template v-if="monthlyBudgetLoading">
+              <CardContent>
+                <Skeleton class="w-[30%] h-10 rounded-full" />
+              </CardContent>
+            </template>
+            <template v-else>
+              <CardContent
+                :class="{ 'text-destructive-foreground': getRemainingDailyBudget < 0, 'text-success': getRemainingDailyBudget >= 0 }">
+                {{ getRemainingDailyBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+              </CardContent>
+            </template>
           </Card>
         </div>
 
@@ -101,6 +116,7 @@ useUpdateMenuElements([
       <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
       <ResizablePanel id="handle-demo-panel-2" :default-size="25" class="!basis-auto md:!basis-0">
         <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
+          :loading="expensesLoading"
           class="h-[54dvh] md:h-[85dvh]" />
       </ResizablePanel>
     </ResizablePanelGroup>

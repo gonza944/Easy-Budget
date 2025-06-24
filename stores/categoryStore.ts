@@ -5,7 +5,7 @@ export const useCategoryStore = defineStore("categoryStore", () => {
 
   async function fetchCategories() {
     const { data: fetchedCategories } =
-      await useFetch<CategoriesResponse>(() => `/api/categories`, {
+      await useLazyFetch<CategoriesResponse>(() => `/api/categories`, {
         key: `categories`,
       });
 
