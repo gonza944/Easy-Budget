@@ -27,6 +27,7 @@ interface ExpensesTableProps<TData, TValue> {
   data: TData[]
   title: string
   handleAddExpense: () => void
+  loading: boolean
 }
 
 const columnVisibility = ref<VisibilityState>({
@@ -54,7 +55,8 @@ const { toggleDescriptionColumnVisibility } = useColumnVisibility(table)
     <CardHeader>
       <CardTitle>{{ title }}</CardTitle>
       <div class="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
-        <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer text-muted-foreground" @click="toggleDescriptionColumnVisibility">
+        <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer text-muted-foreground"
+          @click="toggleDescriptionColumnVisibility">
           <EyeIcon class="h-4 w-4" />
         </Button>
       </div>
@@ -70,7 +72,24 @@ const { toggleDescriptionColumnVisibility } = useColumnVisibility(table)
           </TableRow>
         </TableHeader>
         <TableBody>
-          <template v-if="table.getRowModel().rows?.length">
+          <template v-if="loading">
+            <TableRow v-for="n in 4" :key="`skeleton-${n}`">
+              <TableCell class="w-[70%]">
+                <Skeleton class="w-full h-6 rounded" />
+              </TableCell>
+              <TableCell class="w-[30%]">
+                <Skeleton class="w-full h-6 rounded" />
+              </TableCell>
+            </TableRow>
+          </template>
+          <template v-else-if="!loading && table.getRowModel().rows?.length === 0">
+            <TableRow>
+              <TableCell :colspan="columns.length" class="h-24 text-center">
+                No Expenses yet.
+              </TableCell>
+            </TableRow>
+          </template>
+          <template v-else>
             <TableRow v-for="row in table.getRowModel().rows" :key="row.id"
               :data-state="row.getIsSelected() ? 'selected' : undefined">
               <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
@@ -78,15 +97,8 @@ const { toggleDescriptionColumnVisibility } = useColumnVisibility(table)
               </TableCell>
             </TableRow>
           </template>
-          <template v-else>
-            <TableRow>
-              <TableCell :colspan="columns.length" class="h-24 text-center">
-                No Expenses yet.
-              </TableCell>
-            </TableRow>
-          </template>
         </TableBody>
-        <TableFooter>
+        <TableFooter v-if="!loading">
           <TableRow>
             <TableCell :colspan="columns.length" class="h-24 text-center">
               <Button size="iconLg" class="cursor-pointer" @click="handleAddExpense">

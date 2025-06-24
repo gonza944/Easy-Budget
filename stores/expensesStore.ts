@@ -9,6 +9,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
   // State
   const expenses = ref<Record<number, Expense[]>>({});
+  const loading = ref(false);
 
   const getExpensesByBudgetId = computed(() => {
     return (budgetId: number) => expenses.value[budgetId] || [];
@@ -66,6 +67,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
 
   async function fetchExpenses(budgetId: number) {
     try {
+      loading.value = !expenses.value[budgetId];
       const date = selectedDate.value;
 
       // Format date as YYYY-MM-DD (without time component)
@@ -97,6 +99,8 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       // All calculated data is now handled by individual store watchers
     } catch (err) {
       console.error("Error fetching expenses:", err);
+    } finally {
+      loading.value = false;
     }
   }
 
@@ -164,6 +168,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     getExpensesByBudgetId,
     getRemainingDailyBudget,
     getCategoryFromExpense,
+    loading,
     // Actions
     fetchExpenses,
     addExpense,
