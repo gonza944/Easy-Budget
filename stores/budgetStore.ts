@@ -4,13 +4,14 @@ import type { Budget, NewBudgetSchema } from "~/utils/budgetSchemas";
 
 
 export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
-  const budgets = ref<Budget[]>([]);
+  const budgets = ref<Budget[]>();
   const selectedBudget = ref<Budget | null>(null);
   const queryString = ref("");
+  const loading = ref(false);
 
   const fetchBudgets = async (name?: string) => {
     queryString.value = name ? `?name=${name}` : "";
-
+    loading.value = !budgets.value;
     const { data } = await useFetch<Budget[]>(() => `/api/budgets${queryString.value}`, {
       key: `budgets`, // Use string directly instead of computed
       transform: (data) =>
@@ -27,6 +28,7 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
     if (selected) {
       selectedBudget.value = selected;
     }
+    loading.value = false;
   };
 
   // Fetch only the selected budget for faster loading
@@ -163,5 +165,6 @@ export const useMyBudgetStoreStore = defineStore("myBudgetStoreStore", () => {
     setSelectedBudget,
     deleteBudget,
     createBudget,
+    loading,
   };
 });
