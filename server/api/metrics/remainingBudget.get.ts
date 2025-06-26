@@ -29,22 +29,23 @@ export default defineEventHandler(async (event) => {
     const { budget_id } = validatedQuery;
 
     try {
+      // Execute both queries in parallel
+      const [expensesResult, budgetResult] = await Promise.all([
+        userSupabase
+          .from('expenses')
+          .select('amount')
+          .eq('budget_id', budget_id),
+        userSupabase
+          .from('budgets')
+          .select('startingBudget')
+          .eq('id', budget_id)
+          .single()
+      ]);
+
+      const { data: expenses, error: expensesError } = expensesResult;
+      const { data: budgetData, error: budgetError } = budgetResult;
       
-      // Query expenses for the month
-      const { data: expenses, error: expensesError } = await userSupabase
-        .from('expenses')
-        .select('amount')
-        .eq('budget_id', budget_id)
-        
       if (expensesError) throw expensesError;
-      
-      // Query budget information
-      const { data: budgetData, error: budgetError } = await userSupabase
-        .from('budgets')
-        .select('startingBudget')
-        .eq('id', budget_id)
-        .single();
-        
       if (budgetError) throw budgetError;
       const validateStartingBudget = z.number().parse(budgetData.startingBudget); 
       
