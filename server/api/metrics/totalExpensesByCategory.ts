@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { createUserSupabaseClient } from "~/server/supabaseConnection";
 import { ExpensesBurnDownQuerySchema } from "~/types/metrics";
 import { formatDateToUTCISOString } from "~/utils/date";
@@ -24,59 +23,44 @@ export default defineEventHandler(async (event) => {
     
     const userSupabase = createUserSupabaseClient(session.accessToken);
 
+    // Validate query parameters
     const validatedQuery = await getValidatedQuery(
       event,
       ExpensesBurnDownQuerySchema.parse
     );
 
-    const initialDate = new Date(validatedQuery.initial_date);
-    const finalDate = new Date(validatedQuery.final_date);
-    const budget_id = validatedQuery.budget_id;
-
-    // Get today's date and set to the beginning of the day for comparison
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    const { data, error } = await userSupabase
-      .from("expenses")
-      .select(`amount, category_id (name)`)
-      .eq("budget_id", budget_id)
-      .gte("date", formatDateToUTCISOString(initialDate))
-      .lte("date", formatDateToUTCISOString(finalDate))
-      .order("category_id", { ascending: true });
-
-    if (error) throw error;
-
-    const validatedData = z
-      .object({
-        amount: z.number(),
-        category_id: z
-          .object({
-            name: z.string(),
-          })
-          .transform((data) => data.name),
-      })
-      .array()
-      .parse(data);
-
-    const expensesByCategory = validatedData.reduce(
-      (
-        acc: Record<string, number>,
-        expense: { amount: number; category_id: string }
-      ) => {
-        const categoryName = expense.category_id;
-        acc[categoryName] = (acc[categoryName] || 0) + expense.amount;
-        return acc;
+    // Call the edge function with the validated parameters
+    const { data, error } = await userSupabase.functions.invoke('total-expenses-by-category', {
+      body: {
+        initial_date: formatDateToUTCISOString(validatedQuery.initial_date),
+        final_date: formatDateToUTCISOString(validatedQuery.final_date),
+        budget_id: validatedQuery.budget_id,
       },
-      {} as Record<string, number>
-    );
+    });
 
-    return { expensesByCategory };
+    if (error) {
+      console.error('Edge function error:', error);
+      throw createError({
+        statusCode: 500,
+        statusMessage: `Error calling edge function: ${error.message}`,
+      });
+    }
+
+    // Return the data from the edge function
+    return data;
+    
   } catch (error) {
-    console.error(error);
+    console.error('Error in total expenses by category API:', error);
+    
+    // If it's already a createError, re-throw it
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      throw error;
+    }
+    
+    // Otherwise, create a generic error
     throw createError({
       statusCode: 500,
-      statusMessage: "Internal Server Error",
+      statusMessage: `Failed to fetch total expenses by category: ${error instanceof Error ? error.message : String(error)}`,
     });
   }
 });
