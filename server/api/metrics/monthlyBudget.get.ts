@@ -31,24 +31,25 @@ export default defineEventHandler(async (event) => {
     try {
       const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(date);
 
+      // Execute both queries in parallel
+      const [expensesResult, budgetResult] = await Promise.all([
+        userSupabase
+          .from('expenses')
+          .select('amount')
+          .eq('budget_id', budget_id)
+          .gte('date', startDate)
+          .lte('date', endDate),
+        userSupabase
+          .from('budgets')
+          .select('maxExpensesPerDay')
+          .eq('id', budget_id)
+          .single()
+      ]);
+
+      const { data: expenses, error: expensesError } = expensesResult;
+      const { data: budgetData, error: budgetError } = budgetResult;
       
-      // Query expenses for the month
-      const { data: expenses, error: expensesError } = await userSupabase
-        .from('expenses')
-        .select('amount')
-        .eq('budget_id', budget_id)
-        .gte('date', startDate)
-        .lte('date', endDate);
-        
       if (expensesError) throw expensesError;
-      
-      // Query budget information
-      const { data: budgetData, error: budgetError } = await userSupabase
-        .from('budgets')
-        .select('maxExpensesPerDay')
-        .eq('id', budget_id)
-        .single();
-        
       if (budgetError) throw budgetError;
       
       // Calculate days in month
