@@ -25,20 +25,48 @@
           <FormField v-slot="{ componentField, errorMessage: categoryError }" name="category_id" class="flex-1">
             <FormItem class="h-full flex flex-col">
               <FormLabel>Category</FormLabel>
-              <Select v-bind="componentField">
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
+              <Combobox 
+                :model-value="componentField.modelValue"
+                @update:model-value="componentField.onChange"
+              >
+                <FormControl class="w-full">
+                  <ComboboxAnchor>
+                    <div class="relative w-full items-center">
+                      <ComboboxInput 
+                        placeholder="Select category"
+                        :display-value="(val: number) => {
+                          if (!val) return '';
+                          const category = categories.find(cat => cat.id === val);
+                          return category ? category.name : '';
+                        }"
+                      />
+                      <ComboboxTrigger class="absolute end-0 inset-y-0 flex items-center justify-center px-3">
+                        <ChevronsUpDown class="size-4 text-muted-foreground" />
+                      </ComboboxTrigger>
+                    </div>
+                  </ComboboxAnchor>
                 </FormControl>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem v-for="category in categories" :key="category.id" :value="category.id">
+
+                <ComboboxList>
+                  <ComboboxEmpty>
+                    Nothing found.
+                  </ComboboxEmpty>
+
+                  <ComboboxGroup>
+                    <ComboboxItem 
+                      v-for="category in categories" 
+                      :key="category.id" 
+                      :value="category.id"
+                    >
                       {{ category.name }}
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+
+                      <ComboboxItemIndicator>
+                        <Check class="ml-auto h-4 w-4" />
+                      </ComboboxItemIndicator>
+                    </ComboboxItem>
+                  </ComboboxGroup>
+                </ComboboxList>
+              </Combobox>
               <Transition name="slide-fade">
                 <FormMessage v-if="categoryError" :class="{ 'opacity-0': !categoryError }">
                   {{ categoryError || ' ' }}
@@ -98,6 +126,7 @@ import { useMyBudgetStoreStore } from '~/stores/budgetStore';
 import { z } from 'zod';
 import { ExpenseCreateSchema } from '~/types/expense';
 import { useSelectedDate } from '~/composables/useSelectedDate';
+import { ChevronsUpDown, Check } from 'lucide-vue-next';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const store = useMyExpensesStore();
