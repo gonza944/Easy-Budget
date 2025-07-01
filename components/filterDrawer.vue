@@ -6,6 +6,8 @@
       </DrawerHeader>
 
       <DateSelector v-model:selectedDate="selectedDate" />
+      <Button variant="default" class="w-xs" @click="selectedDate = new Date()">Today</Button>
+
     </DrawerContent>
   </Drawer>
 </template>

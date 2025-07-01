@@ -73,6 +73,7 @@ useUpdateMenuElements([
           <Card class="hidden md:block">
             <CardContent>
               <DateSelector v-model:selectedDate="selectedDate" />
+              <Button variant="default" class="w-full" @click="selectedDate = new Date()">Today</Button>
             </CardContent>
           </Card>
           <ExpensesByCategory :data="expensesByCategory || {}" />
