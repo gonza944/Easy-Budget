@@ -61,9 +61,7 @@ useUpdateMenuElements([
 
 <template>
   <div class="h-full flex flex-col pt-4 gap-6">
-    <div class="flex flex-row gap-4 align-middle">
       <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
-    </div>
 
 
     <ResizablePanelGroup id="handle-demo-group-1" direction="horizontal"
