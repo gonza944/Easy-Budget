@@ -5,7 +5,7 @@
         <DialogTitle class="text-2xl font-bold">Add Expense</DialogTitle>
       </DialogHeader>
 
-      <form class="flex flex-col gap-4" @submit.prevent="onSubmit">
+      <form class="flex flex-col gap-4" @submit.prevent="handleFormSubmit">
         <!-- Name field -->
         <FormField v-slot="{ componentField, errorMessage }" name="name">
           <FormItem>
@@ -110,6 +110,7 @@
       </form>
 
       <DialogFooter class="mt-4">
+        <Button variant="outline" @click="onSubmit(false)" :disabled="!isFormValid">Add Another Expense</Button>
         <Button type="submit" @click="onSubmit" :disabled="!isFormValid">
           Add Expense
         </Button>
@@ -193,23 +194,30 @@ const onNumberInput = (e: Event) => {
   input.dispatchEvent(new Event('change', { bubbles: true }));
 };
 
-const onSubmit = form.handleSubmit(async (values) => {
-  if (!selectedBudget.value?.id) return;
-  const date = selectedDate.value;
-  const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+const onSubmit = async (closeModal = true) => {
+  return form.handleSubmit(async (values, { resetForm }) => {
+    if (!selectedBudget.value?.id) return;
+    const date = selectedDate.value;
+    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-  const expenseData = ExpenseCreateSchema.parse({
-    budget_id: selectedBudget.value.id,
-    category_id: values.category_id,
-    name: values.name,
-    amount: Number(values.amount),
-    description: values.description || '',
-    date: formattedDate,
-  });
+    const expenseData = ExpenseCreateSchema.parse({
+      budget_id: selectedBudget.value.id,
+      category_id: values.category_id,
+      name: values.name,
+      amount: Number(values.amount),
+      description: values.description || '',
+      date: formattedDate,
+    });
 
-  store.addExpense(expenseData);
-  isOpen.value = false;
-});
+    store.addExpense(expenseData);
+    if (closeModal) {
+      isOpen.value = false;
+    }
+    resetForm();
+  })();
+};
+
+const handleFormSubmit = () => onSubmit(true);
 </script>
 
 <style scoped>

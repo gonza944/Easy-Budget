@@ -43,7 +43,7 @@ const colorAccessor = (d: { category: string, amount: number }, i: number) => {
     </CardHeader>
     <CardContent>
       <VisSingleContainer :data="chartData">
-        <VisDonut :value="amountAccessor" :arcLabel="categoryAccessor" :arcWidth="50" :color="colorAccessor" :padAngle="0.01"/>
+        <VisDonut :value="amountAccessor" :arcLabel="categoryAccessor" :arcWidth="40" :color="colorAccessor" :padAngle="0.01"/>
         <VisTooltip :triggers="{
           [Donut.selectors.segment]: tooltipHtml
         }" />

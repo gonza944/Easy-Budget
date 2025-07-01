@@ -15,6 +15,16 @@ const onClickWrapper = (onClick: () => void) => {
   onClick();
 }
 
+const { logout: authLogout } = useAuth()
+
+async function logout() {
+  // Use the enhanced logout function from useAuth
+  await authLogout()
+  
+  // Navigate to login after logout
+  await navigateTo('/login')
+}
+
 </script>
 
 <template>
@@ -24,7 +34,7 @@ const onClickWrapper = (onClick: () => void) => {
       leave-active-class="transition duration-200 ease-in" enter-from-class="opacity-0" enter-to-class="opacity-100"
       leave-from-class="opacity-100" leave-to-class="opacity-0">
       <div v-if="isOpen" class="fixed inset-0 bg-secondary-foreground/20 backdrop-blur-md z-[-1]"
-        @click="isOpen = false"></div>
+        @click="isOpen = false"/>
     </Transition>
 
     <Transition enter-active-class="transition duration-500 ease-out"
@@ -36,6 +46,10 @@ const onClickWrapper = (onClick: () => void) => {
           <Button v-for="element in elements" :key="element.label" variant="ghost"
             @click="onClickWrapper(element.onClick)" class="w-full py-6 text-sm text-left justify-start">
             {{ element.label }}
+          </Button>
+          <Divider class="text-primary" />
+          <Button variant="ghost" @click="logout" class="w-full py-6 text-sm text-left justify-start text-destructive-foreground">
+            Logout
           </Button>
         </CardContent>
       </Card>

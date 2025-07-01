@@ -1,6 +1,5 @@
 <template>
   <div class="w-full h-screen bg-main-gradient text-foreground px-4">
-    <NavBar />
     <main>
       <slot />
     </main>
