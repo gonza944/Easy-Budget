@@ -56,12 +56,15 @@ useUpdateMenuElements([
 
 <template>
   <div class="h-full flex flex-col pt-4 gap-6">
-    <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
+    <div class="flex flex-row gap-4 align-middle">
+      <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
+      <DateSelector v-model:selectedDate="selectedDate" />
+    </div>
+
 
     <ResizablePanelGroup id="handle-demo-group-1" direction="horizontal"
       class="h-full flex !flex-col md:!flex-row gap-4">
       <ResizablePanel id="handle-demo-panel-1" :default-size="60" class="flex flex-col gap-4 !basis-auto md:!basis-0">
-        <DateSelector v-model:selectedDate="selectedDate" />
         <div class="flex flex-row gap-4 w-full">
           <!-- TODO: Add remaining budget card whenever I have a way to top up the budget -->
           <!-- <Card class="w-full">
@@ -72,7 +75,6 @@ useUpdateMenuElements([
               {{ Number(remainingBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
             </CardContent>
           </Card> -->
-
           <Card class="w-full">
             <CardHeader>
               <CardTitle>Monthly Budget</CardTitle>
@@ -116,8 +118,7 @@ useUpdateMenuElements([
       <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
       <ResizablePanel id="handle-demo-panel-2" :default-size="25" class="!basis-auto md:!basis-0">
         <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
-          :loading="expensesLoading"
-          class="h-[54dvh] md:h-[85dvh]" />
+          :loading="expensesLoading" class="h-[54dvh] md:h-[85dvh]" />
       </ResizablePanel>
     </ResizablePanelGroup>
 
