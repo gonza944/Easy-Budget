@@ -47,7 +47,7 @@ async function logout() {
             @click="onClickWrapper(element.onClick)" class="w-full py-6 text-sm text-left justify-start">
             {{ element.label }}
           </Button>
-          <Divider class="text-primary" />
+          <Separator />
           <Button variant="ghost" @click="logout" class="w-full py-6 text-sm text-left justify-start text-destructive-foreground">
             Logout
           </Button>
