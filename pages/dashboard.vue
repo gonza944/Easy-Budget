@@ -61,7 +61,33 @@ useUpdateMenuElements([
 </script>
 
 <template>
-  <div class="h-full flex flex-col pt-4 gap-4">
+  <div class="pt-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="flex flex-col gap-4 col-span-2">
+        <BudgetBurdownChart :data="expensesBurnDown || []" />
+
+        <div class="flex flex-col md:flex-row gap-4 w-full">
+          <BudgetSummaryCard :monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
+            :remaining-daily-budget="getRemainingDailyBudget" />
+          <DateSelector v-model:selectedDate="selectedDate" />
+          <!-- <ExpensesByCategory :data="expensesByCategory || {}" /> -->
+        </div>
+      </div>
+
+      <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
+        :loading="expensesLoading" />
+    </div>
+
+
+    <NewExpenseForm v-model="showExpenseForm" />
+    <FilterDrawer v-model:isOpen="showDateSelector" v-model:selectedDate="selectedDate" />
+  </div>
+
+</template>
+
+
+
+<!-- <div class="h-full flex flex-col pt-4 gap-4">
     <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
 
 
@@ -91,8 +117,6 @@ useUpdateMenuElements([
       </div>
     </div>
 
-    <!-- New Expense Form Dialog -->
     <NewExpenseForm v-model="showExpenseForm" />
     <FilterDrawer v-model:isOpen="showDateSelector" v-model:selectedDate="selectedDate" />
-  </div>
-</template>
+  </div> -->
