@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import DateSelector from '@/components/DateSelector.vue';
 import ExpensesTable from '~/components/ui/expenses-table/ExpensesTable.vue';
-import { Card, CardContent } from '@/components/ui/card';
 import { useRouter } from 'vue-router';
 import NewExpenseForm from '~/components/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
@@ -18,6 +17,7 @@ definePageMeta({
 
 const { fetchCategories } = useCategoryStore();
 const { fetchSelectedBudget } = useMyBudgetStoreStore();
+const { updateMenuElements, updateMenuTitle } = useMenuElements();
 
 callOnce(fetchCategories);
 callOnce(fetchSelectedBudget);
@@ -41,21 +41,24 @@ const handleAddExpense = () => {
   showExpenseForm.value = !showExpenseForm.value;
 };
 
-useUpdateMenuElements([
-  {
-    label: "Add Expense",
-    onClick: () => { handleAddExpense() },
-  },
-  {
-    label: "Select Date",
-    onClick: () => { showDateSelector.value = !showDateSelector.value },
-  },
-  {
-    label: "Go to My Budgets",
-    onClick: () => { router.push('/myBudgets') },
-  },
-], `${selectedBudget?.value?.name} Dashboard`);
+onMounted(() => {
+  updateMenuElements([
+    {
+      label: "Add Expense",
+      onClick: () => { handleAddExpense() },
+    },
+    {
+      label: "Select Date",
+      onClick: () => { showDateSelector.value = !showDateSelector.value },
+    },
+    {
+      label: "Go to My Budgets",
+      onClick: () => { router.push('/myBudgets') },
+    },
+  ]);
 
+  updateMenuTitle(`${selectedBudget?.value?.name} Dashboard`);
+})
 </script>
 
 <template>
