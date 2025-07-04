@@ -37,7 +37,7 @@ const todayDay = computed(() => {
 <template>
     <TooltipProvider>
         <Tooltip>
-            <Card class="relative aspect-square group">
+            <Card class="relative group">
                 <CardContent>
                     <TooltipTrigger
                         class="absolute right-3 top-3 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">

@@ -66,11 +66,10 @@ useUpdateMenuElements([
       <div class="flex flex-col gap-4 col-span-2">
         <BudgetBurdownChart :data="expensesBurnDown || []" />
 
-        <div class="flex flex-col md:flex-row gap-4 w-full">
+        <div class="flex flex-col md:flex-row gap-4 w-full justify-center">
+          <DateSelector v-model:selectedDate="selectedDate" />
           <BudgetSummaryCard :monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
             :remaining-daily-budget="getRemainingDailyBudget" />
-          <DateSelector v-model:selectedDate="selectedDate" />
-          <!-- <ExpensesByCategory :data="expensesByCategory || {}" /> -->
           <ExpensesByCategoryList />
         </div>
       </div>

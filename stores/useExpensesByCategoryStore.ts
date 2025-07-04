@@ -17,6 +17,15 @@ export const UseExpensesByCategoryStore = defineStore(
           budget_id,
         },
         key: `expensesByCategory-${budget_id}-${startDate}-${endDate}`,
+        transform: (data) => {
+          if (!data || !data.expensesByCategory) {
+            return { expensesByCategory: {} };
+          }
+          const sortedEntries = Object.entries(data.expensesByCategory).sort(
+            (a, b) => b[1] - a[1]
+          );
+          return { expensesByCategory: Object.fromEntries(sortedEntries) };
+        },
       });
 
       expensesByCategory.value = data.value?.expensesByCategory || {};
