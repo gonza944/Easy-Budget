@@ -7,7 +7,6 @@ import NewExpenseForm from '~/components/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
 import { storeToRefs } from 'pinia';
 import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
-import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
 import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
 import { useSelectedDate } from '~/composables/useSelectedDate';
 import { useCategoryStore } from '~/stores/categoryStore';
@@ -30,7 +29,6 @@ const { loading: expensesLoading } = storeToRefs(useMyExpensesStore());
 const { selectedDate } = useSelectedDate();
 const { monthlyBudget, loading: monthlyBudgetLoading } = storeToRefs(UseExpensesTotalsStore());
 const { expensesBurnDown } = storeToRefs(useBurnDownChartStore());
-const { expensesByCategory } = storeToRefs(UseExpensesByCategoryStore());
 const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
 
 const showExpenseForm = ref(false);
@@ -56,7 +54,7 @@ useUpdateMenuElements([
     label: "Go to My Budgets",
     onClick: () => { router.push('/myBudgets') },
   },
-]);
+], `${selectedBudget?.value?.name} Dashboard`);
 
 </script>
 
