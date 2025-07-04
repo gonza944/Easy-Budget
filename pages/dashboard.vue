@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DateSelector from '@/components/DateSelector.vue';
 import ExpensesTable from '~/components/ui/expenses-table/ExpensesTable.vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useRouter } from 'vue-router';
 import NewExpenseForm from '~/components/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
@@ -11,6 +11,7 @@ import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore'
 import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
 import { useSelectedDate } from '~/composables/useSelectedDate';
 import { useCategoryStore } from '~/stores/categoryStore';
+import BudgetSummaryCard from '~/components/BudgetSummaryCard.vue';
 
 definePageMeta({
   middleware: ['authenticated'],
@@ -60,16 +61,16 @@ useUpdateMenuElements([
 </script>
 
 <template>
-  <div class="h-full flex flex-col pt-4 gap-6">
-      <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
+  <div class="h-full flex flex-col pt-4 gap-4">
+    <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
 
 
-    <ResizablePanelGroup id="handle-demo-group-1" direction="horizontal"
-      class="h-full flex !flex-col md:!flex-row gap-4">
-      <ResizablePanel id="handle-demo-panel-1" :default-size="60" class="flex flex-col gap-4 !basis-auto md:!basis-0">
-        <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full" />
+    <div
+      class="h-full flex flex-col md:flex-row gap-4">
+      <div class="flex flex-col gap-4">
+        <BudgetBurdownChart :data="expensesBurnDown || []" />
 
-        <div class="flex flex-col md:flex-row gap-4 w-full">
+        <div class="flex flex-col md:flex-row gap-4 w-full justify-center">
           <Card class="hidden md:block">
             <CardContent>
               <DateSelector v-model:selectedDate="selectedDate" />
@@ -77,49 +78,18 @@ useUpdateMenuElements([
             </CardContent>
           </Card>
           <ExpensesByCategory :data="expensesByCategory || {}" />
-          <div class="flex flex-row md:flex-col gap-4">
-            <Card class="w-full">
-              <CardHeader>
-                <CardTitle>Monthly Budget</CardTitle>
-              </CardHeader>
-              <template v-if="monthlyBudgetLoading">
-                <CardContent>
-                  <Skeleton class="w-[30%] h-10 rounded-full" />
-                </CardContent>
-              </template>
-              <template v-else>
-                <CardContent
-                  :class="{ 'text-destructive-foreground': (monthlyBudget || 0) < 0, 'text-success': (monthlyBudget || 0) >= 0 }">
-                  {{ Number(monthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-                </CardContent>
-              </template>
-            </Card>
-
-            <Card class="w-full">
-              <CardHeader>
-                <CardTitle>Daily Budget</CardTitle>
-              </CardHeader>
-              <template v-if="monthlyBudgetLoading">
-                <CardContent>
-                  <Skeleton class="w-[30%] h-10 rounded-full" />
-                </CardContent>
-              </template>
-              <template v-else>
-                <CardContent
-                  :class="{ 'text-destructive-foreground': getRemainingDailyBudget < 0, 'text-success': getRemainingDailyBudget >= 0 }">
-                  {{ getRemainingDailyBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-                </CardContent>
-              </template>
-            </Card>
-          </div>
+            <BudgetSummaryCard 
+              :monthly-budget="monthlyBudget ?? null" 
+              :monthly-budget-loading="monthlyBudgetLoading"
+              :remaining-daily-budget="getRemainingDailyBudget" 
+            />
         </div>
-      </ResizablePanel>
-      <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
-      <ResizablePanel id="handle-demo-panel-2" :default-size="25" class="!basis-auto md:!basis-0">
+      </div>
+      <div class="flex-1 min-w-0">
         <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
           :loading="expensesLoading" class="h-[54dvh] md:h-[85dvh]" />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+      </div>
+    </div>
 
     <!-- New Expense Form Dialog -->
     <NewExpenseForm v-model="showExpenseForm" />
