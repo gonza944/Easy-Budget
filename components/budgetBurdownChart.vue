@@ -3,8 +3,12 @@ import { VisXYContainer, VisLine, VisAxis, VisCrosshair, VisTooltip } from '@uno
 import type { DataRecord } from '~/types/metrics'
 import { utcFormat } from 'd3-time-format'
 import type { HTMLAttributes } from 'vue';
+import { ChevronDownIcon } from 'lucide-vue-next';
 
-defineProps<{ data: DataRecord[], class?: HTMLAttributes['class'] }>()
+defineProps<{ data: DataRecord[], className?: HTMLAttributes['class'] }>()
+
+const isOpen = ref(true)
+
 const x = (d: DataRecord) => d.x
 const y = [
   (d: DataRecord) => d.y,
@@ -21,18 +25,28 @@ const lineDashArray = (d: DataRecord, i: number) => i === 1 ? [3] : []
 </script>
 
 <template>
-  <Card :class="class">
-    <CardHeader>
-      <CardTitle>Budget Burdown</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <VisXYContainer :data="data" class="budget-chart">
-        <VisAxis :gridLine="false" type="x" :tickFormat="utcFormat('%b %d')" tickTextColor="var(--muted-foreground)" />
-        <VisAxis :gridLine="false" type="y" tickTextColor="var(--muted-foreground)" />
-        <VisLine :x="x" :y="y" :lineDashArray="lineDashArray" interpolateMissingData="true" :color="color" />
-        <VisCrosshair :color="color" :template="template" />
-        <VisTooltip />
-      </VisXYContainer>
-    </CardContent>
-  </Card>
+  <Collapsible v-model:open="isOpen">
+    <Card :class="className">
+      <CardHeader>
+        <CollapsibleTriggerResponsive :is-open="isOpen">
+          <CardTitle>
+            <span>Budget Burndown Chart</span>
+          </CardTitle>
+        </CollapsibleTriggerResponsive>
+      </CardHeader>
+
+      <CollapsibleContent>
+        <CardContent>
+          <VisXYContainer :data="data" class="budget-chart">
+            <VisAxis :gridLine="false" type="x" :tickFormat="utcFormat('%b %d')"
+              tickTextColor="var(--muted-foreground)" />
+            <VisAxis :gridLine="false" type="y" tickTextColor="var(--muted-foreground)" />
+            <VisLine :x="x" :y="y" :lineDashArray="lineDashArray" interpolateMissingData="true" :color="color" />
+            <VisCrosshair :color="color" :template="template" />
+            <VisTooltip />
+          </VisXYContainer>
+        </CardContent>
+      </CollapsibleContent>
+    </Card>
+  </Collapsible>
 </template>

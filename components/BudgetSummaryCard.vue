@@ -12,7 +12,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <Card class="w-xs aspect-square items-baseline justify-end">
+  <Card class="w-full md:w-xs 2xl:w-md md:aspect-square items-baseline justify-end">
     <CardHeader>
       <CardTitle>Budgets</CardTitle>
     </CardHeader>

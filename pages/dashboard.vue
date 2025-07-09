@@ -62,12 +62,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="pt-4">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="pt-4 flex flex-col items-center justify-center md:h-[87dvh]">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full md:w-auto px-2">
       <div class="flex flex-col gap-4 col-span-2">
-        <BudgetBurdownChart :data="expensesBurnDown || []" />
+        <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full order-2 md:order-none"/>
 
-        <div class="flex flex-col md:flex-row gap-4 w-full justify-center">
+        <div class="flex flex-col md:flex-row gap-4 w-full justify-center order-1 md:order-none">
           <DateSelector v-model:selectedDate="selectedDate" />
           <BudgetSummaryCard :monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
             :remaining-daily-budget="getRemainingDailyBudget" />
