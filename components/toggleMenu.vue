@@ -57,7 +57,7 @@ async function logout() {
     </Transition>
 
     <Button variant="outline" @click="isOpen = !isOpen"
-      class="w-full flex justify-between py-6 text-sm hover:bg-primary hover:text-primary-foreground">
+      class="w-full flex justify-between py-6 text-sm hover:bg-primary hover:text-primary-foreground font-headings backdrop-blur-md">
       {{ menuTitle }}
       <Transition mode="out-in" enter-active-class="transition-transform duration-300 ease-in-out"
         leave-active-class="transition-transform duration-300 ease-in-out" enter-from-class="rotate-0 scale-100"
