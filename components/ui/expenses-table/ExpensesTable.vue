@@ -51,7 +51,7 @@ const { toggleDescriptionColumnVisibility } = useColumnVisibility(table)
 </script>
 
 <template>
-  <Card class="flex flex-col h-full group relative">
+  <Card class="flex flex-col group relative w-full">
     <CardHeader>
       <CardTitle>{{ title }}</CardTitle>
       <div class="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">

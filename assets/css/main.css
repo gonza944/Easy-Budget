@@ -95,6 +95,7 @@
   --font-sans: Roboto Mono, Montserrat, sans-serif;
   --font-serif: Roboto Mono, sans-serif;
   --font-mono: Roboto Mono, monospace;
+  --font-headings: Comfortaa, sans-serif;
   --radius: 1.425rem;
   --shadow-2xs: 0 1px 9.5px 1px hsl(0 0% 0% / 0.07);
   --shadow-xs: 0 1px 9.5px 1px hsl(0 0% 0% / 0.07);
@@ -157,6 +158,7 @@
     --font-sans: Montserrat, sans-serif;
     --font-serif: Roboto, sans-serif;
     --font-mono: Roboto Mono, monospace;
+    --font-headings: Comfortaa, sans-serif;
     --radius: 1.425rem;
     --shadow-2xs: 0 1px 9.5px 1px hsl(0 0% 0% / 0.07);
     --shadow-xs: 0 1px 9.5px 1px hsl(0 0% 0% / 0.07);
@@ -207,4 +209,11 @@
 
 .bg-main-gradient {
   background: var(--main-gradient);
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .font-headings {
+    font-family: var(--font-headings);
+  }
 }

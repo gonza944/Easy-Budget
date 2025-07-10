@@ -4,12 +4,14 @@ export const UseExpensesByCategoryStore = defineStore(
   "myUseExpensesByCategoryStore",
   () => {
     const expensesByCategory = ref<Record<string, number>>({});
+    const loading = ref(false);
 
     const fetchExpensesByCategory = async (
       budget_id: number,
       startDate: string,
       endDate: string
     ) => {
+      loading.value = true;
       const { data } = await useFetch<{expensesByCategory: Record<string, number>}>("/api/metrics/totalExpensesByCategory", {
         query: {
           initial_date: startDate,
@@ -17,9 +19,19 @@ export const UseExpensesByCategoryStore = defineStore(
           budget_id,
         },
         key: `expensesByCategory-${budget_id}-${startDate}-${endDate}`,
+        transform: (data) => {
+          if (!data || !data.expensesByCategory) {
+            return { expensesByCategory: {} };
+          }
+          const sortedEntries = Object.entries(data.expensesByCategory).sort(
+            (a, b) => b[1] - a[1]
+          );
+          return { expensesByCategory: Object.fromEntries(sortedEntries) };
+        },
       });
 
       expensesByCategory.value = data.value?.expensesByCategory || {};
+      loading.value = false;
     };
 
     // Watch for changes in selectedBudget and selectedDate to auto-fetch data
@@ -52,6 +64,7 @@ export const UseExpensesByCategoryStore = defineStore(
     return {
       expensesByCategory,
       fetchExpensesByCategory,
+      loading,
     };
   }
 ); 

@@ -16,12 +16,7 @@ const budgetToDelete = ref<number | null>(null);
 
 callOnce(fetchBudgets);
 
-useUpdateMenuElements([
-  {
-    label: "New Budget",
-    onClick: () => { isModalOpen.value = true },
-  },
-]);
+const { updateMenuElements, updateMenuTitle } = useMenuElements();
 
 watch(budgetName, async () => {
   if (budgetName.value.length === 0 || budgetName.value.length > 2) {
@@ -40,6 +35,15 @@ const handleDeleteConfirm = async () => {
     isDeleteDialogOpen.value = false;
   }
 };
+
+onMounted(() => {
+  updateMenuElements([
+    {
+      label: "Add Budget",
+      onClick: () => { isModalOpen.value = true },
+    },
+  ]);
+});
 </script>
 
 

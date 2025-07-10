@@ -3,13 +3,22 @@ export interface MenuItem {
   onClick: () => void;
 }
 
-export const useUpdateMenuElements = (items: MenuItem[]) => {
+export const useMenuElements = () => {
   const menuElements = useState<MenuItem[]>('menuElements', () => []);
-  
-  // Update menu elements only on client-side to avoid serialization issues
-  onMounted(() => {
+  const menuTitle = useState<string>('menuTitle', () => 'Menu');
+
+  const updateMenuElements = (items: MenuItem[]) => {
     menuElements.value = items;
-  });
-  
-  return menuElements;
+  }
+
+  const updateMenuTitle = (title: string) => {
+    menuTitle.value = title;
+  }
+
+  return {
+    menuElements,
+    menuTitle,
+    updateMenuElements,
+    updateMenuTitle,
+  };
 };

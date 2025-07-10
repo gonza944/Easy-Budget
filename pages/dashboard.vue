@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import DateSelector from '@/components/DateSelector.vue';
 import ExpensesTable from '~/components/ui/expenses-table/ExpensesTable.vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'vue-router';
 import NewExpenseForm from '~/components/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
 import { storeToRefs } from 'pinia';
 import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
-import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
 import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
 import { useSelectedDate } from '~/composables/useSelectedDate';
 import { useCategoryStore } from '~/stores/categoryStore';
+import BudgetSummaryCard from '~/components/BudgetSummaryCard.vue';
 
 definePageMeta({
   middleware: ['authenticated'],
@@ -18,6 +17,7 @@ definePageMeta({
 
 const { fetchCategories } = useCategoryStore();
 const { fetchSelectedBudget } = useMyBudgetStoreStore();
+const { updateMenuElements, updateMenuTitle } = useMenuElements();
 
 callOnce(fetchCategories);
 callOnce(fetchSelectedBudget);
@@ -29,7 +29,6 @@ const { loading: expensesLoading } = storeToRefs(useMyExpensesStore());
 const { selectedDate } = useSelectedDate();
 const { monthlyBudget, loading: monthlyBudgetLoading } = storeToRefs(UseExpensesTotalsStore());
 const { expensesBurnDown } = storeToRefs(useBurnDownChartStore());
-const { expensesByCategory } = storeToRefs(UseExpensesByCategoryStore());
 const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
 
 const showExpenseForm = ref(false);
@@ -42,87 +41,47 @@ const handleAddExpense = () => {
   showExpenseForm.value = !showExpenseForm.value;
 };
 
-useUpdateMenuElements([
-  {
-    label: "Add Expense",
-    onClick: () => { handleAddExpense() },
-  },
-  {
-    label: "Select Date",
-    onClick: () => { showDateSelector.value = !showDateSelector.value },
-  },
-  {
-    label: "Go to My Budgets",
-    onClick: () => { router.push('/myBudgets') },
-  },
-]);
+onMounted(() => {
+  updateMenuElements([
+    {
+      label: "Add Expense",
+      onClick: () => { handleAddExpense() },
+    },
+    {
+      label: "Select Date",
+      onClick: () => { showDateSelector.value = !showDateSelector.value },
+    },
+    {
+      label: "Go to My Budgets",
+      onClick: () => { router.push('/myBudgets') },
+    },
+  ]);
 
+  updateMenuTitle(`${selectedBudget?.value?.name} Dashboard`);
+})
 </script>
 
 <template>
-  <div class="h-full flex flex-col pt-4 gap-6">
-      <h1 class="text-2xl font-bold">{{ selectedBudget?.name }} Dashboard</h1>
+  <div class="pt-4 flex flex-col items-center justify-center md:h-[87dvh]">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full md:w-auto px-2">
+      <div class="flex flex-col gap-4 md:col-span-2">
+        <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full order-2 md:order-none"/>
 
-
-    <ResizablePanelGroup id="handle-demo-group-1" direction="horizontal"
-      class="h-full flex !flex-col md:!flex-row gap-4">
-      <ResizablePanel id="handle-demo-panel-1" :default-size="60" class="flex flex-col gap-4 !basis-auto md:!basis-0">
-        <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full" />
-
-        <div class="flex flex-col md:flex-row gap-4 w-full">
-          <Card class="hidden md:block">
-            <CardContent>
-              <DateSelector v-model:selectedDate="selectedDate" />
-              <Button variant="default" class="w-full" @click="selectedDate = new Date()">Today</Button>
-            </CardContent>
-          </Card>
-          <ExpensesByCategory :data="expensesByCategory || {}" />
-          <div class="flex flex-row md:flex-col gap-4">
-            <Card class="w-full">
-              <CardHeader>
-                <CardTitle>Monthly Budget</CardTitle>
-              </CardHeader>
-              <template v-if="monthlyBudgetLoading">
-                <CardContent>
-                  <Skeleton class="w-[30%] h-10 rounded-full" />
-                </CardContent>
-              </template>
-              <template v-else>
-                <CardContent
-                  :class="{ 'text-destructive-foreground': (monthlyBudget || 0) < 0, 'text-success': (monthlyBudget || 0) >= 0 }">
-                  {{ Number(monthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-                </CardContent>
-              </template>
-            </Card>
-
-            <Card class="w-full">
-              <CardHeader>
-                <CardTitle>Daily Budget</CardTitle>
-              </CardHeader>
-              <template v-if="monthlyBudgetLoading">
-                <CardContent>
-                  <Skeleton class="w-[30%] h-10 rounded-full" />
-                </CardContent>
-              </template>
-              <template v-else>
-                <CardContent
-                  :class="{ 'text-destructive-foreground': getRemainingDailyBudget < 0, 'text-success': getRemainingDailyBudget >= 0 }">
-                  {{ getRemainingDailyBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-                </CardContent>
-              </template>
-            </Card>
-          </div>
+        <div class="flex flex-col md:flex-row gap-4 w-full justify-center order-1 md:order-none">
+          <DateSelector v-model:selectedDate="selectedDate" />
+          <BudgetSummaryCard :monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
+            :remaining-daily-budget="getRemainingDailyBudget" />
+          <ExpensesByCategoryList />
         </div>
-      </ResizablePanel>
-      <ResizableHandle id="handle-demo-handle-1" class="hidden md:flex" />
-      <ResizablePanel id="handle-demo-panel-2" :default-size="25" class="!basis-auto md:!basis-0">
-        <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
-          :loading="expensesLoading" class="h-[54dvh] md:h-[85dvh]" />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+      </div>
 
-    <!-- New Expense Form Dialog -->
+      <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
+        :loading="expensesLoading" />
+    </div>
+
+
     <NewExpenseForm v-model="showExpenseForm" />
     <FilterDrawer v-model:isOpen="showDateSelector" v-model:selectedDate="selectedDate" />
   </div>
+
 </template>
