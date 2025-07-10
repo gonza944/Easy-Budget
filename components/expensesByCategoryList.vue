@@ -16,20 +16,22 @@ const isOpen = ref(true)
           </CardTitle>
         </CollapsibleTriggerResponsive>
       </CardHeader>
-      <CollapsibleContent class="w-full">
-        <CardContent class="flex flex-col gap-4 w-full overflow-y-auto flex-1">
-          <div v-if="loading">
-            <div class="flex flex-col gap-4">
-              <Skeleton v-for="i in 5" :key="i" class="w-full h-8" />
+                  <CollapsibleContent class="w-full flex-1 flex flex-col min-h-0">
+        <CardContent class="flex-1 overflow-y-auto min-h-0">
+          <div class="flex flex-col gap-4">
+            <div v-if="loading">
+              <div class="flex flex-col gap-4">
+                <Skeleton v-for="i in 5" :key="i" class="w-full h-8" />
+              </div>
             </div>
-          </div>
-          <div v-for="(amount, category) in expensesByCategory" v-else :key="category"
-            class="flex flex-row justify-between">
-            <p>{{ category }}:</p>
-            <p class="text-destructive-foreground">{{ Number(amount).toLocaleString('en-US', {
-              style: 'currency', currency:
-                'USD'
-              }) }}</p>
+            <div v-for="(amount, category) in expensesByCategory" v-else :key="category"
+              class="flex flex-row justify-between">
+              <p>{{ category }}:</p>
+              <p class="text-destructive-foreground">{{ Number(amount).toLocaleString('en-US', {
+                style: 'currency', currency:
+                  'USD'
+                }) }}</p>
+            </div>
           </div>
         </CardContent>
       </CollapsibleContent>

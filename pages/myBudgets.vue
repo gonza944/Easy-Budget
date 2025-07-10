@@ -43,6 +43,7 @@ onMounted(() => {
       onClick: () => { isModalOpen.value = true },
     },
   ]);
+  updateMenuTitle("My Budgets");
 });
 </script>
 
