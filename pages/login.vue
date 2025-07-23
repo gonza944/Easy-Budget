@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { gsap } from "gsap";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
+import Circle3D from "~/assets/Circle3D.vue";
 
 
 const generateDistributedPositions = (count: number) => {
@@ -75,12 +76,15 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col items-center h-screen relative overflow-hidden">
-    <div v-for="(position, i) in circlePositions" :id="`orb-${i}`" :key="i"
-      class="2xl:w-120 xl:w-96 md:w-72 w-48 aspect-square rounded-full absolute bg-primary" :style="{
+    <Circle3D v-for="(position, i) in circlePositions" 
+      :id="i" 
+      :key="i"
+      class="2xl:w-120 xl:w-96 md:w-72 w-48 aspect-square absolute text-primary" 
+      :style="{
         top: `${position.top}%`,
         left: `${position.left}%`
-      }">
-    </div>
+      }" 
+    />
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-full h-screen ">
       <LoginForm />
     </div>
