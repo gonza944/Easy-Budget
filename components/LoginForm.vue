@@ -43,15 +43,15 @@ async function login() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-6 items-center justify-center h-full" :class="props.class">
-    <Card class="w-full max-w-md">
+  <div class="flex flex-col gap-6 items-baseline justify-end md:items-center md:justify-center h-screen backdrop-blur-md" :class="props.class">
+    <Card class="w-full max-w-md rounded-none md:rounded-lg md:h-auto">
       <CardHeader>
         <CardTitle>Login to your account</CardTitle>
         <CardDescription>
           Enter your email below to login to your account
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent class="h-full">
         <form @submit.prevent="login">
           <div class="flex flex-col gap-6">
             <div class="grid gap-3">

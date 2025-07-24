@@ -216,4 +216,13 @@
   .font-headings {
     font-family: var(--font-headings);
   }
+  
+  .dynamic-position {
+    top: var(--position-top);
+    left: var(--position-left);
+  }
+  
+  .w-120 {
+    width: 30rem; /* 480px - triple of w-40 (160px) */
+  }
 }
