@@ -4,16 +4,23 @@ export const useCategoryStore = defineStore("categoryStore", () => {
   const categories = ref<Category[]>([]);
 
   async function fetchCategories() {
-    const { data: fetchedCategories } =
-      await useLazyFetch<CategoriesResponse>(() => `/api/categories`, {
-        key: `categories`,
-      });
+    const { data: fetchedCategories, pending } = useLazyFetch<CategoriesResponse>(
+      () => `/api/categories`, 
+      { key: `categories` }
+    );
 
-    categories.value = fetchedCategories.value || [];
+    // Watch for data changes and update categories
+    watch(fetchedCategories, (newData) => {
+      if (newData) {
+        categories.value = newData;
+      }
+    }, { immediate: true });
+
+    return { pending };
   }
 
   return {
     categories,
-    fetchCategories,
+    fetchCategories
   };
 });
