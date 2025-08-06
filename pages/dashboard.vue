@@ -8,19 +8,19 @@ import { storeToRefs } from 'pinia';
 import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
 import { UseExpensesTotalsStore } from '~/stores/useExpensesTotalsStore';
 import { useSelectedDate } from '~/composables/useSelectedDate';
-import { useCategoryStore } from '~/stores/categoryStore';
 import BudgetSummaryCard from '~/components/BudgetSummaryCard.vue';
 
 definePageMeta({
   middleware: ['authenticated'],
 })
 
-const { fetchCategories } = useCategoryStore();
 const { fetchSelectedBudget } = useMyBudgetStoreStore();
+const { fetchCategories } = useCategoryStore();
 const { updateMenuElements, updateMenuTitle } = useMenuElements();
 
+await callOnce(fetchSelectedBudget);
+// We shouldn't ever await this, as it's a useLazyFetch
 callOnce(fetchCategories);
-callOnce(fetchSelectedBudget);
 
 const router = useRouter();
 const store = useMyExpensesStore();
@@ -80,8 +80,8 @@ onMounted(() => {
     </div>
 
 
-    <NewExpenseForm v-model="showExpenseForm" />
-    <FilterDrawer v-model:isOpen="showDateSelector" v-model:selectedDate="selectedDate" />
+    <NewExpenseForm v-if="showExpenseForm" v-model="showExpenseForm" />
+    <FilterDrawer v-if="showDateSelector" v-model:isOpen="showDateSelector" v-model:selectedDate="selectedDate" />
   </div>
 
 </template>
