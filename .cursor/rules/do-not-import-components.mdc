@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+
+---
+
+- Do not add imports from @components folder

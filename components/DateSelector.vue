@@ -5,12 +5,12 @@ import {
     getLocalTimeZone,
 } from '@internationalized/date'
 
-import { Calendar } from '@/components/ui/calendar'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-
-
 const { selectedDate } = useSelectedDate();
+const { className } = withDefaults(defineProps<{
+    className?: string
+}>(), {
+    className: ''
+})
 
 // Convert between Date and DateValue for internal calendar use
 const internalValue = computed({
@@ -37,7 +37,7 @@ const todayDay = computed(() => {
 <template>
     <TooltipProvider>
         <Tooltip>
-            <Card class="relative group items-center justify-center hidden md:block">
+            <Card class="relative group items-center justify-center" :class="className">
                 <CardContent>
                     <TooltipTrigger
                         class="absolute right-3 top-3 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
