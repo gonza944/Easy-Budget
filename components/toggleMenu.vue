@@ -26,6 +26,10 @@ async function logout() {
   await navigateTo('/login')
 }
 
+onBeforeUnmount(() => {
+  isOpen.value = false;
+});
+
 </script>
 
 <template>
