@@ -2,7 +2,7 @@
 import DateSelector from '@/components/DateSelector.vue';
 import ExpensesTable from '~/components/ui/expenses-table/ExpensesTable.vue';
 import { useRouter } from 'vue-router';
-import NewExpenseForm from '~/components/newExpenseForm.vue';
+import NewExpenseForm from '~/components/newExpenseForm/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
 import { storeToRefs } from 'pinia';
 import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
