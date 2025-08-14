@@ -48,7 +48,7 @@
                 Nothing found.
               </ComboboxEmpty>
 
-              <ComboboxGroup>
+              <ComboboxGroup class="overflow-y-auto max-h-48 md:max-h-72">
                 <ComboboxItem 
                   v-for="category in categories" 
                   :key="category.id" 
