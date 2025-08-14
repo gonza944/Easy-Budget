@@ -43,7 +43,7 @@ async function login() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-6 items-baseline justify-end md:items-center md:justify-center h-screen backdrop-blur-md" :class="props.class">
+  <div class="flex flex-col gap-6 items-baseline justify-end md:items-center md:justify-center h-[100dvh] backdrop-blur-md" :class="props.class">
     <Card class="w-full md:max-w-md rounded-none md:rounded-lg md:h-auto">
       <CardHeader>
         <CardTitle>Login to your account</CardTitle>
