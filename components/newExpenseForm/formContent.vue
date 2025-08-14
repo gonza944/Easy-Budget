@@ -26,7 +26,7 @@
           >
             <FormControl class="w-full">
               <ComboboxAnchor>
-                <div class="relative w-full items-center">
+                <div class="relative w-full items-center text-base">
                   <ComboboxInput 
                     placeholder="Select category"
                     :display-value="(val: number) => {
