@@ -26,8 +26,9 @@
           >
             <FormControl class="w-full">
               <ComboboxAnchor>
-                <div class="relative w-full items-center text-base">
+                <div class="relative w-full items-center">
                   <ComboboxInput 
+                    class="text-base md:text-sm"
                     placeholder="Select category"
                     :display-value="(val: number) => {
                       if (!val) return '';
@@ -52,6 +53,7 @@
                   v-for="category in categories" 
                   :key="category.id" 
                   :value="category.id"
+                  class="text-base md:text-sm"
                 >
                   {{ category.name }}
 
