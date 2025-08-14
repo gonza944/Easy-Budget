@@ -84,7 +84,7 @@ onMounted(() => {
         <PlusIcon />
       </Button>
     </div>
-    <NewBudgetForm v-model="isModalOpen" />
+    <NewBudget v-model="isModalOpen" />
 
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
