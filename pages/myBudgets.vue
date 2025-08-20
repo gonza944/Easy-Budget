@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { PlusIcon, SearchIcon } from 'lucide-vue-next';
+import { ConfirmationDialog } from '~/components/ui/confirmation-dialog';
 
 definePageMeta({
   middleware: ['authenticated'],
@@ -32,8 +33,11 @@ const handleDeleteClick = (budgetId: number) => {
 const handleDeleteConfirm = async () => {
   if (budgetToDelete.value) {
     await deleteBudget(budgetToDelete.value);
-    isDeleteDialogOpen.value = false;
   }
+};
+
+const handleDeleteCancel = () => {
+  budgetToDelete.value = null;
 };
 
 onMounted(() => {
@@ -63,7 +67,7 @@ onMounted(() => {
 
 
     <div class="relative w-full flex justify-center">
-      <ScrollArea class="w-full" v-if="budgets && budgets.length > 0">
+      <ScrollArea v-if="budgets && budgets.length > 0" class="w-full">
         <div class="flex gap-4 pb-4 overflow-x-auto justify-center" :class="budgets?.length > 0 ? 'px-4' : ''">
           <div v-if="loading">
             <div v-for="n in 4" :key="`skeleton-${n}`" class="w-xs flex-shrink-0">
@@ -72,33 +76,31 @@ onMounted(() => {
           </div>
           <template v-else>
           <div v-for="budget in budgets" :key="budget.id" class="w-xs flex-shrink-0">
-              <BudgetCard :budget="budget" :onDeleteClick="() => handleDeleteClick(budget.id)" />
+              <BudgetCard :budget="budget" :on-delete-click="() => handleDeleteClick(budget.id)" />
             </div>
           </template>
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <Button v-if="budgets?.length === 0" size="iconLg"
-        class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg" @click="isModalOpen = true">
+      <Button
+        v-if="budgets?.length === 0"
+        size="iconLg"
+        class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg"
+        @click="isModalOpen = true"
+      >
         <PlusIcon />
       </Button>
     </div>
     <NewBudget v-model="isModalOpen" />
 
-    <AlertDialog v-model:open="isDeleteDialogOpen">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Budget</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete this budget? This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false">Cancel</AlertDialogCancel>
-          <AlertDialogAction @click="handleDeleteConfirm">Delete</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmationDialog
+      v-model:open="isDeleteDialogOpen"
+      title="Delete Budget"
+      description="Are you sure you want to delete this budget? This action cannot be undone."
+      action-text="Delete"
+      :on-cancel="handleDeleteCancel"
+      :on-confirm="handleDeleteConfirm"
+    />
   </div>
 </template>

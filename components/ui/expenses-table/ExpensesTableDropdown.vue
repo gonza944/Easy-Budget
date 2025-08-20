@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { MoreHorizontal } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
+import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { useMyExpensesStore } from '~/stores/expensesStore'
 
 const expensesStore = useMyExpensesStore()
@@ -19,7 +20,6 @@ const handleDelete = () => {
 
 const handleDeleteConfirm = () => {
   expensesStore.deleteExpense(props.expense.id)
-  isDeleteDialogOpen.value = false
 }
 
 </script>
@@ -38,18 +38,11 @@ const handleDeleteConfirm = () => {
   </DropdownMenu>
 
 
-  <AlertDialog v-model:open="isDeleteDialogOpen">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Expense</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete this expense? This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false">Cancel</AlertDialogCancel>
-          <AlertDialogAction @click="handleDeleteConfirm">Delete</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+  <ConfirmationDialog
+    v-model:open="isDeleteDialogOpen"
+    title="Delete Expense"
+    description="Are you sure you want to delete this expense? This action cannot be undone."
+    action-text="Delete"
+    :on-confirm="handleDeleteConfirm"
+  />
 </template>
