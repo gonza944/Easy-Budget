@@ -53,9 +53,9 @@ onMounted(() => {
 
 
 <template>
-  <div class="h-full flex flex-col gap-8 items-center pt-[10dvh] md:pt-[20vh]">
+  <div class="h-[100dvh] flex flex-col gap-8 items-center md:justify-center pt-10 md:pt-0">
     <div class="flex flex-col items-center md:flex-row md:items-center md:gap-4 mb-8">
-      <NuxtImg src="/Logo.png" alt="Easy Budget Logo" class="h-20 md:h-16 w-auto mb-3 md:mb-0" />
+      <NuxtImg src="/Logo.png" alt="Easy Budget Logo" class="h-24 md:h-24 w-auto mb-0" />
       <h1 class="text-2xl md:text-4xl font-bold text-center">Welcome Back, {{ user?.name }}</h1>
     </div>
     <div class="flex w-full md:w-xl items-center gap-1.5">
