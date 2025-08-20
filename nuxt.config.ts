@@ -34,6 +34,7 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@nuxtjs/google-fonts',
     '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
   ],
 
   googleFonts: {
