@@ -4,12 +4,14 @@
       <slot />
     </main>
     <ToggleMenu v-if="loggedIn" />
+    <LoadingScreen v-if="isLoading" />
   </div>
 
 </template>
 
 <script lang="ts" setup>
 const { loggedIn } = useUserSession();
+const { isLoading } = useLoadingScreen();
 </script>
 
 <style></style>

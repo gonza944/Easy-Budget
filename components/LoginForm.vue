@@ -10,13 +10,13 @@ const credentials = reactive({
   password: '',
 })
 
-const isLoading = ref(false)
+const { setIsLoading, isLoading } = useLoadingScreen()
 const errorMessage = ref('')
 
 async function login() {
   if (isLoading.value) return
 
-  isLoading.value = true
+  setIsLoading(true)
   errorMessage.value = ''
 
   try {
@@ -35,12 +35,12 @@ async function login() {
   } catch (error) {
     console.error('Login error:', error)
     errorMessage.value = 'Bad credentials'
-    isLoading.value = false
+    setIsLoading(false)
   }
 }
 
 onUnmounted(() => {
-  isLoading.value = false
+    setIsLoading(false)
 })
 
 </script>
@@ -88,6 +88,7 @@ onUnmounted(() => {
             </a>
           </div>
         </form>
+
       </CardContent>
     </Card>
   </div>
