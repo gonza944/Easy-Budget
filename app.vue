@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/sonner'
 </script>
 
 <template>
+   <NuxtLoadingIndicator :height="4" color="#d87757" />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

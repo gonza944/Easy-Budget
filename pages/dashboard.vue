@@ -2,7 +2,7 @@
 import DateSelector from '@/components/DateSelector.vue';
 import ExpensesTable from '~/components/ui/expenses-table/ExpensesTable.vue';
 import { useRouter } from 'vue-router';
-import NewExpenseForm from '~/components/newExpenseForm.vue';
+import NewExpenseForm from '~/components/newExpenseForm/newExpenseForm.vue';
 import { columns } from '~/components/ui/expenses-table/columns';
 import { storeToRefs } from 'pinia';
 import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
@@ -68,7 +68,7 @@ onMounted(() => {
         <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full order-2 md:order-none"/>
 
         <div class="flex flex-col md:flex-row gap-4 w-full justify-center order-1 md:order-none">
-          <DateSelector v-model:selectedDate="selectedDate" />
+          <DateSelector className="hidden md:block" v-model:selectedDate="selectedDate" />
           <BudgetSummaryCard :monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
             :remaining-daily-budget="getRemainingDailyBudget" />
           <ExpensesByCategoryList />

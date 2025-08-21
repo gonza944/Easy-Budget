@@ -10,21 +10,21 @@ const credentials = reactive({
   password: '',
 })
 
-const isLoading = ref(false)
+const { setIsLoading, isLoading } = useLoadingScreen()
 const errorMessage = ref('')
 
 async function login() {
   if (isLoading.value) return
-  
-  isLoading.value = true
+
+  setIsLoading(true)
   errorMessage.value = ''
-  
+
   try {
     const result = await $fetch('/api/auth/login', {
       method: 'POST',
       body: credentials
     })
-    
+
     if (result.success) {
       // Refresh the session on client-side and redirect to the home page
       await refreshSession()
@@ -35,15 +35,20 @@ async function login() {
   } catch (error) {
     console.error('Login error:', error)
     errorMessage.value = 'Bad credentials'
-  } finally {
-    isLoading.value = false
+    setIsLoading(false)
   }
 }
+
+onUnmounted(() => {
+    setIsLoading(false)
+})
 
 </script>
 
 <template>
-  <div class="flex flex-col gap-6 items-baseline justify-end md:items-center md:justify-center h-screen backdrop-blur-md" :class="props.class">
+  <div
+    class="flex flex-col gap-6 items-baseline justify-end md:items-center md:justify-center h-[100dvh] backdrop-blur-md"
+    :class="props.class">
     <Card class="w-full md:max-w-md rounded-none md:rounded-lg md:h-auto">
       <CardHeader>
         <CardTitle>Login to your account</CardTitle>
@@ -83,7 +88,9 @@ async function login() {
             </a>
           </div>
         </form>
+
       </CardContent>
     </Card>
   </div>
+
 </template>
