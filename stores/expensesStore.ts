@@ -14,6 +14,11 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   const expenses = ref<Record<number, Expense[]>>({});
   const loading = ref(false);
 
+  const clearExpenses = () => {
+    expenses.value = {};
+    loading.value = false;
+  };
+
   const getExpensesByBudgetId = computed(() => {
     return (budgetId: number) => expenses.value[budgetId] || [];
   });
@@ -69,6 +74,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   });
 
   async function fetchExpenses(budgetId: number) {
+    debugger;
     try {
       loading.value = !expenses.value[budgetId];
       const date = selectedDate.value;
@@ -204,6 +210,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     getCategoryFromExpense,
     loading,
     // Actions
+    clearExpenses,
     fetchExpenses,
     addExpense,
     deleteExpense,

@@ -6,6 +6,10 @@ export const useBurnDownChartStore = defineStore(
   () => {
     const expensesBurnDown = ref<DataRecord[]>([]);
 
+    const clearExpensesBurnDown = () => {
+      expensesBurnDown.value = [];
+    };
+
     const fetchExpensesBurnDown = async (
       budget_id: number,
       startDate: string,
@@ -52,6 +56,7 @@ export const useBurnDownChartStore = defineStore(
 
     return {
       expensesBurnDown,
+      clearExpensesBurnDown,
       fetchExpensesBurnDown,
     };
   }

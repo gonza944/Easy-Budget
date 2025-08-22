@@ -15,6 +15,13 @@ export const useMyBudgetStoreStore = defineStore(
       toast.error(message);
     };
 
+    const clearBudgets = () => {
+      budgets.value = [];
+      selectedBudget.value = null;
+      queryString.value = "";
+      loading.value = false;
+    };
+
     const fetchBudgets = async (name?: string) => {
       queryString.value = name ? `?name=${name}` : "";
       loading.value = !budgets.value;
@@ -174,6 +181,7 @@ export const useMyBudgetStoreStore = defineStore(
     };
 
     return {
+      clearBudgets,
       fetchBudgets,
       fetchSelectedBudget,
       budgets,
