@@ -47,16 +47,24 @@ export default defineEventHandler(async (event) => {
       
       if (expensesError) throw expensesError;
       if (budgetError) throw budgetError;
+      
+      if (!budgetData) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: `Budget with ID ${budget_id} not found`,
+        });
+      }
+      
       const validateStartingBudget = z.number().parse(budgetData.startingBudget); 
       
       // Sum up all expenses
-      const monthlyExpenses = expenses.reduce(
+      const totalExpenses = expenses.reduce(
         (sum, expense) => sum + (Number(expense.amount) || 0), 
         0
       );
       
-      // Calculate remaining budget
-      const remainingBudget = validateStartingBudget - monthlyExpenses;
+      // Calculate remaining budget from total starting budget
+      const remainingBudget = validateStartingBudget - totalExpenses;
       
       return z.number().parse(remainingBudget);
     } catch (error) {

@@ -14,3 +14,33 @@ export const formatDateToUTCISOString = (date: Date) => {
   const day = date.getUTCDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+/**
+ * Calculate daily and monthly budget amounts based on user input type
+ * @param budgetType - "daily" or "monthly" 
+ * @param budgetAmount - The amount the user entered
+ * @param year - Year for calculating days in month
+ * @param month - Month for calculating days in month (1-12)
+ * @returns Object with dailyAmount and monthlyAmount
+ */
+export const calculateBudgetAmounts = (
+  budgetType: "daily" | "monthly",
+  budgetAmount: number,
+  year: number,
+  month: number
+) => {
+  // Get number of days in the specified month
+  const daysInMonth = new Date(year, month, 0).getDate();
+  
+  if (budgetType === "daily") {
+    return {
+      dailyAmount: budgetAmount,
+      monthlyAmount: budgetAmount * daysInMonth
+    };
+  } else {
+    return {
+      dailyAmount: budgetAmount / daysInMonth,
+      monthlyAmount: budgetAmount
+    };
+  }
+};
