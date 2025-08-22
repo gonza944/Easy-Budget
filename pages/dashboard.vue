@@ -20,7 +20,7 @@ const { updateMenuElements, updateMenuTitle } = useMenuElements();
 
 await callOnce(fetchSelectedBudget, { mode: 'navigation' });
 // We shouldn't ever await this, as it's a useLazyFetch
-callOnce(fetchCategories,{ mode: 'navigation' });
+callOnce(fetchCategories, { mode: 'navigation' });
 
 const router = useRouter();
 const store = useMyExpensesStore();

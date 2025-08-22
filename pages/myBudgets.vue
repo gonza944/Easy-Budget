@@ -15,7 +15,7 @@ const isModalOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
 const budgetToDelete = ref<number | null>(null);
 
-callOnce(fetchBudgets,{ mode: 'navigation' });
+callOnce(fetchBudgets, { mode: 'navigation' });
 
 const { updateMenuElements, updateMenuTitle } = useMenuElements();
 

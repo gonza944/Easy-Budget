@@ -74,7 +74,6 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   });
 
   async function fetchExpenses(budgetId: number) {
-    debugger;
     try {
       loading.value = !expenses.value[budgetId];
       const date = selectedDate.value;
