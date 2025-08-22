@@ -68,7 +68,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       0
     );
 
-    const maxDailyBudget = Number(selectedBudget.maxExpensesPerDay);
+    const maxDailyBudget = Number(selectedBudget.currentPeriod?.dailyAmount);
 
     return maxDailyBudget - totalExpenses;
   });

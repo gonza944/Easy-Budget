@@ -16,7 +16,7 @@ export const newBudgetSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   startingBudget: z.number().min(1),
-  budgetType: z.enum(["daily", "monthly"]),
+  budgetType: z.enum(["daily", "monthly"]).default("monthly"),
   budgetAmount: z.number().min(1),
   startDate: z.string().optional().default(new Date().toLocaleDateString()),
 });
