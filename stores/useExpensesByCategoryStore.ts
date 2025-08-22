@@ -6,6 +6,11 @@ export const UseExpensesByCategoryStore = defineStore(
     const expensesByCategory = ref<Record<string, number>>({});
     const loading = ref(false);
 
+    const clearExpensesByCategory = () => {
+      expensesByCategory.value = {};
+      loading.value = false;
+    };
+
     const fetchExpensesByCategory = async (
       budget_id: number,
       startDate: string,
@@ -64,6 +69,7 @@ export const UseExpensesByCategoryStore = defineStore(
     return {
       expensesByCategory,
       fetchExpensesByCategory,
+      clearExpensesByCategory,
       loading,
     };
   }

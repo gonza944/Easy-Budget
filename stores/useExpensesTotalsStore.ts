@@ -7,6 +7,12 @@ export const UseExpensesTotalsStore = defineStore(
     const remainingBudget = ref<number>();
     const loading = ref(false);
 
+    const clearExpensesTotals = () => {
+      monthlyBudget.value = undefined;
+      remainingBudget.value = undefined;
+      loading.value = false;
+    };
+
     const fetchMonthlyBudget = async (budget_id: number, target_date: Date) => {
       const parsedDate = formatDateToUTCISOString(target_date);
       loading.value = !remainingBudget.value;
@@ -64,6 +70,7 @@ export const UseExpensesTotalsStore = defineStore(
     return {
       monthlyBudget,
       remainingBudget,
+      clearExpensesTotals,
       fetchMonthlyBudget,
       fetchRemainingBudget,
       loading,
