@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PencilIcon } from 'lucide-vue-next';
+
 
 type Props = {
   monthlyBudget: number | null;
@@ -9,10 +11,18 @@ type Props = {
 };
 
 defineProps<Props>();
+
+const isEditing = ref(false);
+
 </script>
 
 <template>
-  <Card class="w-full md:w-xs 2xl:w-md md:aspect-square items-baseline justify-end">
+  <Card class="w-full md:w-xs 2xl:w-md md:aspect-square items-baseline justify-end relative group">
+    <div class="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
+      <Button variant="ghost" size="icon" class="h-8 w-8" @click="isEditing = !isEditing">
+        <PencilIcon class="h-4 w-4" />
+      </Button>
+    </div>
     <CardHeader>
       <CardTitle>Budgets</CardTitle>
     </CardHeader>
@@ -24,7 +34,7 @@ defineProps<Props>();
         </template>
         <template v-else>
           <p :class="{
-            'text-destructive-foreground': (monthlyBudget || 0) < 0, 
+            'text-destructive-foreground': (monthlyBudget || 0) < 0,
             'text-success': (monthlyBudget || 0) >= 0
           }">
             {{ Number(monthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
@@ -38,9 +48,9 @@ defineProps<Props>();
           <Skeleton class="w-[30%] h-10 rounded-full" />
         </template>
         <template v-else>
-          <p :class="{ 
-            'text-destructive-foreground': remainingDailyBudget < 0, 
-            'text-success': remainingDailyBudget >= 0 
+          <p :class="{
+            'text-destructive-foreground': remainingDailyBudget < 0,
+            'text-success': remainingDailyBudget >= 0
           }">
             {{ remainingDailyBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
           </p>
@@ -48,4 +58,5 @@ defineProps<Props>();
       </div>
     </CardContent>
   </Card>
-</template> 
+  <EditBudget v-if="isEditing" v-model="isEditing" />
+</template>

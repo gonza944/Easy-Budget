@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { toast } from "vue-sonner";
-import type { BudgetApiResponse } from "~/server/api/budgets/index.post";
 import type { Budget, NewBudgetSchema } from "~/utils/budgetSchemas";
 
 export const useMyBudgetStoreStore = defineStore(
@@ -33,7 +32,6 @@ export const useMyBudgetStoreStore = defineStore(
             data.map((budget) => ({
               ...budget,
               startingBudget: Number(budget.startingBudget),
-              maxExpensesPerDay: Number(budget.maxExpensesPerDay),
             })),
         }
       );
@@ -56,7 +54,6 @@ export const useMyBudgetStoreStore = defineStore(
             ? {
                 ...budget,
                 startingBudget: Number(budget.startingBudget),
-                maxExpensesPerDay: Number(budget.maxExpensesPerDay),
               }
             : null,
       });
@@ -149,7 +146,7 @@ export const useMyBudgetStoreStore = defineStore(
     const createBudget = async (budget: NewBudgetSchema) => {
       let previousBudgets: Budget[] = [];
 
-      return await $fetch<BudgetApiResponse>("/api/budgets", {
+      return await $fetch<CreateBudgetApiResponse>("/api/budgets", {
         method: "POST",
         body: budget,
         onRequest() {
@@ -162,7 +159,6 @@ export const useMyBudgetStoreStore = defineStore(
             id: Date.now(), // Use timestamp as temporary ID to avoid conflicts
             startDate: formatDateToUTCISOString(budget.startDate),
             startingBudget: Number(budget.startingBudget),
-            maxExpensesPerDay: Number(budget.maxExpensesPerDay),
             selected: false, // New budgets are not selected by default
           };
 

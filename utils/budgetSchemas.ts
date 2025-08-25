@@ -1,15 +1,18 @@
 import { z } from "zod";
 
+// Reusable schema for budget type and amount fields
+export const budgetTypeAmountSchema = z.object({
+  budgetType: z.enum(["daily", "monthly"]),
+  budgetAmount: z.string().min(1, { message: "Required" }).transform((val) => parseFloat(val)),
+});
+
 // Form schema for frontend (accepts either daily or monthly input)
 export const newBudgetSchemaForm = z.object({
   name: z.string().min(1, { message: "Required" }),
   description: z.string().optional(),
   startingBudget: z.string().min(1, { message: "Required" }).transform((val) => parseFloat(val)),
-  // User can set either daily OR monthly budget
-  budgetType: z.enum(["daily", "monthly"]),
-  budgetAmount: z.string().min(1, { message: "Required" }).transform((val) => parseFloat(val)),
   startDate: z.date().optional().default(new Date()),
-});
+}).extend(budgetTypeAmountSchema.shape);
 
 // API schema for backend processing
 export const newBudgetSchema = z.object({
@@ -97,6 +100,10 @@ export const DeleteBudgetApiResponseSchema = z.object({
   error: z.string().optional(),
 });
 
+export const EditBudgetSchema = z.object({
+  startDate: z.date().optional().default(new Date()),
+}).extend(budgetTypeAmountSchema.shape);
+
 // Export types
 export type NewBudgetSchema = z.infer<typeof NewBudgetSchema>;
 export type Budget = z.infer<typeof BudgetSchema>;
@@ -106,3 +113,4 @@ export type BudgetsResponse = z.infer<typeof BudgetsSchema>;
 export type BudgetApiResponse = z.infer<typeof BudgetApiResponseSchema>;
 export type CreateBudgetApiResponse = z.infer<typeof CreateBudgetApiResponseSchema>;
 export type DeleteBudgetApiResponse = z.infer<typeof DeleteBudgetApiResponseSchema>;
+export type EditBudgetApiResponse = z.infer<typeof EditBudgetSchema>;
