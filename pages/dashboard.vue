@@ -69,7 +69,7 @@ onMounted(() => {
 
         <div class="flex flex-col md:flex-row gap-4 w-full justify-center order-1 md:order-none">
           <DateSelector className="hidden md:block" v-model:selectedDate="selectedDate" />
-          <BudgetSummaryCard :monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
+          <BudgetSummaryCard :remaining-monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
             :remaining-daily-budget="getRemainingDailyBudget" />
           <ExpensesByCategoryList />
         </div>

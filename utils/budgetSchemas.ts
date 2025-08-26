@@ -33,6 +33,7 @@ export const BudgetSchema = z.object({
   startDate: z.string().optional().default(new Date().toLocaleDateString()),
   selected: z.boolean().default(false),
   currentPeriod: z.object({
+    id: z.number(),
     dailyAmount: z.number(),
     monthlyAmount: z.number(),
     validFromYear: z.number(),
@@ -100,10 +101,6 @@ export const DeleteBudgetApiResponseSchema = z.object({
   error: z.string().optional(),
 });
 
-export const EditBudgetSchema = z.object({
-  startDate: z.date().optional().default(new Date()),
-}).extend(budgetTypeAmountSchema.shape);
-
 // Export types
 export type NewBudgetSchema = z.infer<typeof NewBudgetSchema>;
 export type Budget = z.infer<typeof BudgetSchema>;
@@ -113,4 +110,6 @@ export type BudgetsResponse = z.infer<typeof BudgetsSchema>;
 export type BudgetApiResponse = z.infer<typeof BudgetApiResponseSchema>;
 export type CreateBudgetApiResponse = z.infer<typeof CreateBudgetApiResponseSchema>;
 export type DeleteBudgetApiResponse = z.infer<typeof DeleteBudgetApiResponseSchema>;
-export type EditBudgetApiResponse = z.infer<typeof EditBudgetSchema>;
+export type EditCurrentPeriodBudget = z.infer<typeof budgetTypeAmountSchema>;
+
+

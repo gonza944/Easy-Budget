@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import { toast } from "vue-sonner";
-import type { Budget, NewBudgetSchema } from "~/utils/budgetSchemas";
+import type {
+  Budget,
+  NewBudgetSchema,
+  BudgetPeriod,
+} from "~/utils/budgetSchemas";
 
 export const useMyBudgetStoreStore = defineStore(
   "myBudgetStoreStore",
@@ -176,6 +180,22 @@ export const useMyBudgetStoreStore = defineStore(
       });
     };
 
+    const editCurrentPeriodBudget = async (
+      budgetPeriod: EditCurrentPeriodBudget
+    ) => {
+      if (selectedBudget.value?.currentPeriod?.id) {
+        loading.value = true;
+        await $fetch<BudgetApiResponse>(
+          `/api/budget-periods/${selectedBudget.value?.currentPeriod.id}`,
+          {
+            method: "PATCH",
+            body: budgetPeriod,
+          }
+        );
+        loading.value = false;
+      }
+    };
+
     return {
       clearBudgets,
       fetchBudgets,
@@ -185,6 +205,7 @@ export const useMyBudgetStoreStore = defineStore(
       setSelectedBudget,
       deleteBudget,
       createBudget,
+      editCurrentPeriodBudget,
       loading,
     };
   },

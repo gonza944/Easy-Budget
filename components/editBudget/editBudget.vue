@@ -2,25 +2,25 @@
 import { useMediaQuery } from '@vueuse/core';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { EditBudgetSchema } from '~/utils/budgetSchemas';
+import { budgetTypeAmountSchema } from '~/utils/budgetSchemas';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const isMobile = useMediaQuery('(max-width: 768px)');
 
-const formSchema = toTypedSchema(EditBudgetSchema);
+const formSchema = toTypedSchema(budgetTypeAmountSchema);
 
 const form = useForm({
   validationSchema: formSchema,
 });
 
-/* const { editBudget } = useMyBudgetStoreStore(); */
+const { editCurrentPeriodBudget } = useMyBudgetStoreStore();
 
 const isFormValid = computed(() => {
   return Object.keys(form.errors.value).length === 0 && form.meta.value.touched;
 });
 
 const onSubmit = form.handleSubmit(async (values) => {
-  /* editBudget(values); */
+  editCurrentPeriodBudget(values);
   isOpen.value = false;
 });
 </script>

@@ -5,7 +5,7 @@ import { PencilIcon } from 'lucide-vue-next';
 
 
 type Props = {
-  monthlyBudget: number | null;
+  remainingMonthlyBudget: number | null;
   monthlyBudgetLoading: boolean;
   remainingDailyBudget: number;
 };
@@ -28,16 +28,16 @@ const isEditing = ref(false);
     </CardHeader>
     <CardContent class="flex flex-col gap-4 w-full">
       <div class="flex flex-row gap-2 justify-between">
-        <p>Monthly Budget:</p>
+        <p>Remaining Monthly Budget:</p>
         <template v-if="monthlyBudgetLoading">
           <Skeleton class="w-[30%] h-10 rounded-full" />
         </template>
         <template v-else>
           <p :class="{
-            'text-destructive-foreground': (monthlyBudget || 0) < 0,
-            'text-success': (monthlyBudget || 0) >= 0
+            'text-destructive-foreground': (remainingMonthlyBudget || 0) < 0,
+            'text-success': (remainingMonthlyBudget || 0) >= 0
           }">
-            {{ Number(monthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+            {{ Number(remainingMonthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
           </p>
         </template>
       </div>
