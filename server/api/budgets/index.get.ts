@@ -37,6 +37,7 @@ export default defineEventHandler<Promise<BudgetsResponse>>(async (event) => {
         selected,
         created_at,
         budget_periods!inner(
+          id,
           daily_amount,
           monthly_amount,
           valid_from_year,
@@ -71,6 +72,7 @@ export default defineEventHandler<Promise<BudgetsResponse>>(async (event) => {
       startDate: budget.startDate,
       selected: budget.selected,
       currentPeriod: budget.budget_periods[0] ? {
+        id: budget.budget_periods[0].id,
         dailyAmount: budget.budget_periods[0].daily_amount,
         monthlyAmount: budget.budget_periods[0].monthly_amount,
         validFromYear: budget.budget_periods[0].valid_from_year,
@@ -93,7 +95,7 @@ export default defineEventHandler<Promise<BudgetsResponse>>(async (event) => {
     if (error instanceof Error && error.name === 'ZodError') {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid data format",
+        statusMessage: error.message || "Invalid data format",
       });
     }
     
