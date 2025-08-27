@@ -1,12 +1,6 @@
 import { z } from "zod";
-import { BudgetPeriodSchema, type BudgetPeriod } from "~/utils/budgetSchemas";
+import { BudgetPeriodSchema, budgetTypeAmountSchema, type BudgetPeriod } from "~/utils/budgetSchemas";
 import { createUserSupabaseClient } from "../../supabaseConnection";
-
-// Schema for update request body
-const UpdateBudgetPeriodSchema = z.object({
-  budgetType: z.enum(["daily", "monthly"]),
-  budgetAmount: z.number().min(0.01),
-});
 
 export default defineEventHandler<Promise<{ success: boolean; data?: BudgetPeriod; error?: string }>>(async (event) => {
   try {
@@ -37,7 +31,7 @@ export default defineEventHandler<Promise<{ success: boolean; data?: BudgetPerio
       });
     }
 
-    const { budgetType, budgetAmount } = await readValidatedBody(event, UpdateBudgetPeriodSchema.parse);
+    const { budgetType, budgetAmount } = await readValidatedBody(event, budgetTypeAmountSchema.parse);
 
     // Use a Supabase RPC function to update budget period with calculated amounts
     // This avoids the extra query and handles calculation in the database

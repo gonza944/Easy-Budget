@@ -180,20 +180,19 @@ export const useMyBudgetStoreStore = defineStore(
       });
     };
 
-    const editCurrentPeriodBudget = async (
-      budgetPeriod: EditCurrentPeriodBudget
-    ) => {
-      if (selectedBudget.value?.currentPeriod?.id) {
-        loading.value = true;
-        await $fetch<BudgetApiResponse>(
-          `/api/budget-periods/${selectedBudget.value?.currentPeriod.id}`,
-          {
-            method: "PATCH",
-            body: budgetPeriod,
-          }
-        );
-        loading.value = false;
-      }
+    const addPeriodBudget = async (budgetPeriod: EditCurrentPeriodBudget) => {
+      loading.value = true;
+      const { selectedDate } = useSelectedDate();
+      await $fetch<BudgetApiResponse>(`/api/budget-periods`, {
+        method: "POST",
+          body: {
+            ...budgetPeriod,
+            validFromYear: selectedDate.value.getFullYear(),
+            validFromMonth: selectedDate.value.getMonth() + 1,
+            budgetId: selectedBudget.value?.id,
+        },
+      });
+      loading.value = false;
     };
 
     return {
@@ -205,7 +204,7 @@ export const useMyBudgetStoreStore = defineStore(
       setSelectedBudget,
       deleteBudget,
       createBudget,
-      editCurrentPeriodBudget,
+      addPeriodBudget,
       loading,
     };
   },

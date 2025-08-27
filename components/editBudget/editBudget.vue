@@ -13,14 +13,14 @@ const form = useForm({
   validationSchema: formSchema,
 });
 
-const { editCurrentPeriodBudget } = useMyBudgetStoreStore();
+const { addPeriodBudget } = useMyBudgetStoreStore();
 
 const isFormValid = computed(() => {
   return Object.keys(form.errors.value).length === 0 && form.meta.value.touched;
 });
 
 const onSubmit = form.handleSubmit(async (values) => {
-  editCurrentPeriodBudget(values);
+  addPeriodBudget(values);
   isOpen.value = false;
 });
 </script>
