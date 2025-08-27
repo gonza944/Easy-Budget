@@ -60,7 +60,8 @@ export const UseExpensesTotalsStore = defineStore(
         ([currentBudgetId, _currentMonthYear]) => {
           if (currentBudgetId) {
             fetchMonthlyBudget(currentBudgetId, selectedDate.value);
-            fetchRemainingBudget(currentBudgetId);
+            //TODO Uncoment when total budget is implemented
+            /* fetchRemainingBudget(currentBudgetId); */
           }
         },
         { immediate: true }

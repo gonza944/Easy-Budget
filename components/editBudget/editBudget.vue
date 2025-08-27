@@ -13,14 +13,14 @@ const form = useForm({
   validationSchema: formSchema,
 });
 
-const { addPeriodBudget } = useMyBudgetStoreStore();
+const { setCurrentPeriodBudget } = useMyBudgetStoreStore();
 
 const isFormValid = computed(() => {
   return Object.keys(form.errors.value).length === 0 && form.meta.value.touched;
 });
 
 const onSubmit = form.handleSubmit(async (values) => {
-  addPeriodBudget(values);
+  setCurrentPeriodBudget(values);
   isOpen.value = false;
 });
 </script>
@@ -29,7 +29,7 @@ const onSubmit = form.handleSubmit(async (values) => {
   <Drawer v-if="isMobile" :open="isOpen" @update:open="isOpen = $event">
     <DrawerContent class="p-4">
       <DrawerHeader>
-        <DrawerTitle class="text-2xl font-bold">Edit Budget</DrawerTitle>
+        <DrawerTitle class="text-2xl font-bold">Set Budget</DrawerTitle>
       </DrawerHeader>
       <EditBudgetForm :form="form" :on-submit="onSubmit" />
       <DrawerFooter>
@@ -43,7 +43,7 @@ const onSubmit = form.handleSubmit(async (values) => {
   <Dialog v-else :open="isOpen" @update:open="isOpen = $event">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle class="text-2xl font-bold">Edit Budget</DialogTitle>
+        <DialogTitle class="text-2xl font-bold">Set Budget</DialogTitle>
       </DialogHeader>
       <EditBudgetForm :form="form" :on-submit="onSubmit" />
       <DialogFooter>

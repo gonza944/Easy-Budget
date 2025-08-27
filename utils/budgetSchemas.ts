@@ -1,19 +1,5 @@
 import { z } from "zod";
 
-// Reusable schema for budget type and amount fields
-export const budgetTypeAmountSchema = z.object({
-  budgetType: z.enum(["daily", "monthly"]),
-  budgetAmount: z.string().min(1, { message: "Required" }).transform((val) => parseFloat(val)),
-});
-
-// Form schema for frontend (accepts either daily or monthly input)
-export const newBudgetSchemaForm = z.object({
-  name: z.string().min(1, { message: "Required" }),
-  description: z.string().optional(),
-  startingBudget: z.string().min(1, { message: "Required" }).transform((val) => parseFloat(val)),
-  startDate: z.date().optional().default(new Date()),
-}).extend(budgetTypeAmountSchema.shape);
-
 // API schema for backend processing
 export const newBudgetSchema = z.object({
   name: z.string(),
@@ -32,14 +18,16 @@ export const BudgetSchema = z.object({
   startingBudget: z.number().min(1),
   startDate: z.string().optional().default(new Date().toLocaleDateString()),
   selected: z.boolean().default(false),
-  currentPeriod: z.object({
-    id: z.number(),
-    dailyAmount: z.number(),
-    monthlyAmount: z.number(),
-    validFromYear: z.number(),
-    validFromMonth: z.number(),
-    isCurrent: z.boolean(),
-  }).optional(),
+  currentPeriod: z
+    .object({
+      id: z.number(),
+      dailyAmount: z.number(),
+      monthlyAmount: z.number(),
+      validFromYear: z.number(),
+      validFromMonth: z.number(),
+      isCurrent: z.boolean(),
+    })
+    .optional(),
 });
 
 export const BudgetPeriodSchema = z.object({
@@ -64,6 +52,28 @@ export const CreateBudgetPeriodSchema = z.object({
   validFromMonth: z.number(),
 });
 
+// Reusable schema for budget type and amount fields
+export const budgetTypeAmountSchema = z.object({
+  budgetType: CreateBudgetPeriodSchema.shape.budgetType,
+  budgetAmount: z.union([
+    z.string().min(1, { message: "Required" }).transform((val) => parseFloat(val)),
+    z.number().min(1, { message: "Required" })
+  ]),
+});
+
+// Form schema for frontend (accepts either daily or monthly input)
+export const newBudgetSchemaForm = z
+  .object({
+    name: z.string().min(1, { message: "Required" }),
+    description: z.string().optional(),
+    startingBudget: z
+      .string()
+      .min(1, { message: "Required" })
+      .transform((val) => parseFloat(val)),
+    startDate: z.date().optional().default(new Date()),
+  })
+  .extend(budgetTypeAmountSchema.shape);
+
 export const NewBudgetSchema = BudgetSchema.omit({ id: true }).extend({
   startDate: z.date().optional().default(new Date()),
 });
@@ -79,20 +89,22 @@ export const BudgetApiResponseSchema = z.object({
 
 export const CreateBudgetApiResponseSchema = z.object({
   success: z.boolean(),
-  data: z.object({
-    id: z.number(),
-    name: z.string(),
-    description: z.string().optional().nullable(),
-    startingBudget: z.number(),
-    startDate: z.string(),
-    currentPeriod: z.object({
-      dailyAmount: z.number(),
-      monthlyAmount: z.number(),
-      validFromYear: z.number(),
-      validFromMonth: z.number(),
-      isCurrent: z.boolean(),
-    }),
-  }).optional(),
+  data: z
+    .object({
+      id: z.number(),
+      name: z.string(),
+      description: z.string().optional().nullable(),
+      startingBudget: z.number(),
+      startDate: z.string(),
+      currentPeriod: BudgetPeriodSchema.pick({
+        dailyAmount: true,
+        monthlyAmount: true,
+        validFromYear: true,
+        validFromMonth: true,
+        isCurrent: true,
+      }),
+    })
+    .optional(),
   error: z.string().optional(),
 });
 
@@ -108,8 +120,10 @@ export type BudgetPeriod = z.infer<typeof BudgetPeriodSchema>;
 export type CreateBudgetPeriod = z.infer<typeof CreateBudgetPeriodSchema>;
 export type BudgetsResponse = z.infer<typeof BudgetsSchema>;
 export type BudgetApiResponse = z.infer<typeof BudgetApiResponseSchema>;
-export type CreateBudgetApiResponse = z.infer<typeof CreateBudgetApiResponseSchema>;
-export type DeleteBudgetApiResponse = z.infer<typeof DeleteBudgetApiResponseSchema>;
+export type CreateBudgetApiResponse = z.infer<
+  typeof CreateBudgetApiResponseSchema
+>;
+export type DeleteBudgetApiResponse = z.infer<
+  typeof DeleteBudgetApiResponseSchema
+>;
 export type EditCurrentPeriodBudget = z.infer<typeof budgetTypeAmountSchema>;
-
-

@@ -44,7 +44,7 @@ export default defineEventHandler<Promise<{ success: boolean; data?: BudgetPerio
         monthly_amount: monthlyAmount,
         valid_from_year: validFromYear,
         valid_from_month: validFromMonth,
-        is_current: validFromYear === new Date().getFullYear() && validFromMonth === new Date().getMonth() + 1,
+        is_current: false,
       })
       .select()
       .single();
