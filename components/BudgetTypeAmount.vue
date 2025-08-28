@@ -104,7 +104,7 @@ onMounted(() => {
       </FormField>
     </div>
 
-    <p v-if="budgetAmount > 0" class="text-sm text-muted-foreground">
+    <p v-if="Number(budgetAmount) > 0" class="text-sm text-muted-foreground">
       The {{ budgetType === 'daily' ? 'monthly' : 'daily' }} budget amount is {{ theOtherBudgetAmount }}
     </p>
   </div>

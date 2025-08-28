@@ -3,7 +3,9 @@ import { toast } from "vue-sonner";
 import type {
   Budget,
   NewBudgetSchema,
-  BudgetPeriod,
+  CreateBudgetApiResponse,
+  BudgetApiResponse,
+  EditCurrentPeriodBudget,
 } from "~/utils/budgetSchemas";
 
 export const useMyBudgetStoreStore = defineStore(
