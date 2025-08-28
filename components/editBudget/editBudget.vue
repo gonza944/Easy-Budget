@@ -13,14 +13,20 @@ const form = useForm({
   validationSchema: formSchema,
 });
 
-const { setCurrentPeriodBudget } = useMyBudgetStoreStore();
+const { setCurrentPeriodBudget, setFuturePeriodBudget } = useMyBudgetStoreStore();
+const { selectedDate } = useSelectedDate();
 
 const isFormValid = computed(() => {
   return Object.keys(form.errors.value).length === 0 && form.meta.value.touched;
 });
 
 const onSubmit = form.handleSubmit(async (values) => {
-  setCurrentPeriodBudget(values);
+  if (selectedDate.value.getMonth() > new Date().getMonth()) {
+    setFuturePeriodBudget(values);
+  } else {
+    setCurrentPeriodBudget(values);
+  }
+
   isOpen.value = false;
 });
 </script>

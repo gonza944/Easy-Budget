@@ -13,9 +13,12 @@ type Props = {
 defineProps<Props>();
 
 const { selectedDate } = useSelectedDate();
-const isCurrentMonth = computed(() => {
-  return selectedDate.value.getFullYear() === new Date().getFullYear() &&
-    selectedDate.value.getMonth() === new Date().getMonth();
+const isDateEqualOrFuture = computed(() => {
+  const now = new Date();
+  const selected = selectedDate.value;
+  
+  return selected.getFullYear() > now.getFullYear() ||
+    (selected.getFullYear() === now.getFullYear() && selected.getMonth() >= now.getMonth());
 });
 
 const isEditing = ref(false);
@@ -25,16 +28,16 @@ const isEditing = ref(false);
 <template>
   <Card class="w-full md:w-xs 2xl:w-md md:aspect-square items-baseline justify-end relative group">
     <div class="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
-      <Button v-if="isCurrentMonth" variant="ghost" size="icon" class="h-8 w-8" @click="isEditing = !isEditing">
+      <Button v-if="isDateEqualOrFuture" variant="ghost" size="icon" class="h-8 w-8" @click="isEditing = !isEditing">
         <PencilIcon class="h-4 w-4" />
       </Button>
     </div>
-    <CardHeader>
-      <CardTitle>Budgets</CardTitle>
+    <CardHeader class="w-full">
+      <CardTitle>Remaining Budgets</CardTitle>
     </CardHeader>
     <CardContent class="flex flex-col gap-4 w-full">
       <div class="flex flex-row gap-2 justify-between">
-        <p>Remaining Monthly Budget:</p>
+        <p>Monthly Budget:</p>
         <template v-if="monthlyBudgetLoading">
           <Skeleton class="w-[30%] h-10 rounded-full" />
         </template>

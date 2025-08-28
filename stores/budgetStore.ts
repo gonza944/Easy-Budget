@@ -207,6 +207,27 @@ export const useMyBudgetStoreStore = defineStore(
       }
     };
 
+    const setFuturePeriodBudget = async (
+      budgetPeriod: EditCurrentPeriodBudget
+    ) => {
+      const { selectedDate } = useSelectedDate();
+
+      loading.value = true;
+
+      const body = CreateBudgetPeriodSchema.parse({
+        ...budgetPeriod,
+        validFromYear: selectedDate.value.getFullYear(),
+        validFromMonth: selectedDate.value.getMonth() + 1,
+        budgetId: selectedBudget.value?.id,
+      });
+
+      await $fetch<BudgetApiResponse>(`/api/budget-periods`, {
+        method: "POST",
+        body,
+      });
+      loading.value = false;
+    };
+
     return {
       clearBudgets,
       fetchBudgets,
@@ -217,6 +238,7 @@ export const useMyBudgetStoreStore = defineStore(
       deleteBudget,
       createBudget,
       setCurrentPeriodBudget,
+      setFuturePeriodBudget,
       loading,
     };
   },
