@@ -30,14 +30,13 @@ export const UseExpensesTotalsStore = defineStore(
     };
 
     const fetchRemainingBudget = async (budget_id: number) => {
-      const { data } = await useFetch<number>("/api/metrics/remainingBudget", {
+      const data = await $fetch<number>("/api/metrics/remainingBudget", {
         query: {
           budget_id,
         },
-        key: `remainingBudget-${budget_id}`,
       });
 
-      remainingBudget.value = data.value || 0;
+      remainingBudget.value = data || 0;
     };
 
     // Watch for changes in selectedBudget and selectedDate to auto-fetch data
@@ -46,7 +45,7 @@ export const UseExpensesTotalsStore = defineStore(
       // Use storeToRefs to get reactive refs from the stores
       const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
       const { selectedDate } = useSelectedDate();
-      
+
       // Create computed values for only the parts we care about
       const budgetId = computed(() => selectedBudget.value?.id);
       const monthYear = computed(() => {
@@ -60,7 +59,8 @@ export const UseExpensesTotalsStore = defineStore(
         ([currentBudgetId, _currentMonthYear]) => {
           if (currentBudgetId) {
             fetchMonthlyBudget(currentBudgetId, selectedDate.value);
-            fetchRemainingBudget(currentBudgetId);
+            //TODO Uncomment when total budget is implemented
+            /* fetchRemainingBudget(currentBudgetId); */
           }
         },
         { immediate: true }

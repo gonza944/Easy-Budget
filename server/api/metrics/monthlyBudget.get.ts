@@ -31,35 +31,46 @@ export default defineEventHandler(async (event) => {
     try {
       const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(date);
 
+      const queryYear = date.getFullYear();
+      const queryMonth = date.getMonth() + 1;
+
       // Execute both queries in parallel
-      const [expensesResult, budgetResult] = await Promise.all([
+      const [expensesResult, budgetPeriodResult] = await Promise.all([
         userSupabase
           .from('expenses')
           .select('amount')
           .eq('budget_id', budget_id)
           .gte('date', startDate)
           .lte('date', endDate),
+        // NEW: Get budget period for the specific month
         userSupabase
-          .from('budgets')
-          .select('maxExpensesPerDay')
-          .eq('id', budget_id)
+          .from('budget_periods')
+          .select('daily_amount, monthly_amount')
+          .eq('budget_id', budget_id)
+          .lte('valid_from_year', queryYear)
+          .lte('valid_from_month', queryMonth)
+          .or(`valid_until_year.is.null,valid_until_year.gt.${queryYear},and(valid_until_year.eq.${queryYear},valid_until_month.gte.${queryMonth})`)
+          .order('valid_from_year', { ascending: false })
+          .order('valid_from_month', { ascending: false })
+          .limit(1)
           .single()
       ]);
 
       const { data: expenses, error: expensesError } = expensesResult;
-      const { data: budgetData, error: budgetError } = budgetResult;
+      const { data: budgetPeriod, error: budgetError } = budgetPeriodResult;
       
       if (expensesError) throw expensesError;
       if (budgetError) throw budgetError;
       
-      // Calculate days in month
-      const getDaysInMonth = (year: number, month: number) => {
-        return new Date(year, month + 1, 0).getDate();
-      };
+      if (!budgetPeriod) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: `No budget period found for budget ${budget_id} in ${queryMonth}/${queryYear}`,
+        });
+      }
       
-      // Calculate max monthly budget
-      const maxMonthlyBudget = budgetData.maxExpensesPerDay * 
-        getDaysInMonth(date.getFullYear(), date.getMonth());
+      // Use stored monthly amount from budget_periods
+      const maxMonthlyBudget = budgetPeriod.monthly_amount;
       
       // Sum up all expenses
       const monthlyExpenses = expenses.reduce(

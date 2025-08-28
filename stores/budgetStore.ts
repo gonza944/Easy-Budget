@@ -1,7 +1,12 @@
 import { defineStore } from "pinia";
 import { toast } from "vue-sonner";
-import type { BudgetApiResponse } from "~/server/api/budgets/index.post";
-import type { Budget, NewBudgetSchema } from "~/utils/budgetSchemas";
+import type {
+  Budget,
+  NewBudgetSchema,
+  CreateBudgetApiResponse,
+  BudgetApiResponse,
+  EditCurrentPeriodBudget,
+} from "~/utils/budgetSchemas";
 
 export const useMyBudgetStoreStore = defineStore(
   "myBudgetStoreStore",
@@ -33,7 +38,6 @@ export const useMyBudgetStoreStore = defineStore(
             data.map((budget) => ({
               ...budget,
               startingBudget: Number(budget.startingBudget),
-              maxExpensesPerDay: Number(budget.maxExpensesPerDay),
             })),
         }
       );
@@ -56,7 +60,6 @@ export const useMyBudgetStoreStore = defineStore(
             ? {
                 ...budget,
                 startingBudget: Number(budget.startingBudget),
-                maxExpensesPerDay: Number(budget.maxExpensesPerDay),
               }
             : null,
       });
@@ -149,7 +152,7 @@ export const useMyBudgetStoreStore = defineStore(
     const createBudget = async (budget: NewBudgetSchema) => {
       let previousBudgets: Budget[] = [];
 
-      return await $fetch<BudgetApiResponse>("/api/budgets", {
+      return await $fetch<CreateBudgetApiResponse>("/api/budgets", {
         method: "POST",
         body: budget,
         onRequest() {
@@ -162,7 +165,6 @@ export const useMyBudgetStoreStore = defineStore(
             id: Date.now(), // Use timestamp as temporary ID to avoid conflicts
             startDate: formatDateToUTCISOString(budget.startDate),
             startingBudget: Number(budget.startingBudget),
-            maxExpensesPerDay: Number(budget.maxExpensesPerDay),
             selected: false, // New budgets are not selected by default
           };
 
@@ -180,6 +182,54 @@ export const useMyBudgetStoreStore = defineStore(
       });
     };
 
+    const setCurrentPeriodBudget = async (
+      budgetPeriod: EditCurrentPeriodBudget
+    ) => {
+      const { selectedDate } = useSelectedDate();
+      const { fetchMonthlyBudget } = UseExpensesTotalsStore();
+
+      if (selectedBudget.value?.currentPeriod?.id) {
+        loading.value = true;
+        await $fetch<BudgetApiResponse>(
+          `/api/budget-periods/${selectedBudget.value?.currentPeriod.id}`,
+          {
+            method: "PATCH",
+            body: budgetPeriod,
+          }
+        );
+        selectedBudget.value = {
+          ...selectedBudget.value,
+          currentPeriod: {
+            ...selectedBudget.value?.currentPeriod,
+            ...budgetPeriod,
+          },
+        };
+        loading.value = false;
+        await fetchMonthlyBudget(selectedBudget.value?.id, selectedDate.value);
+      }
+    };
+
+    const setFuturePeriodBudget = async (
+      budgetPeriod: EditCurrentPeriodBudget
+    ) => {
+      const { selectedDate } = useSelectedDate();
+
+      loading.value = true;
+
+      const body = CreateBudgetPeriodSchema.parse({
+        ...budgetPeriod,
+        validFromYear: selectedDate.value.getFullYear(),
+        validFromMonth: selectedDate.value.getMonth() + 1,
+        budgetId: selectedBudget.value?.id,
+      });
+
+      await $fetch<BudgetApiResponse>(`/api/budget-periods`, {
+        method: "POST",
+        body,
+      });
+      loading.value = false;
+    };
+
     return {
       clearBudgets,
       fetchBudgets,
@@ -189,6 +239,8 @@ export const useMyBudgetStoreStore = defineStore(
       setSelectedBudget,
       deleteBudget,
       createBudget,
+      setCurrentPeriodBudget,
+      setFuturePeriodBudget,
       loading,
     };
   },

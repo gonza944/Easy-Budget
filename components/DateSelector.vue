@@ -6,11 +6,9 @@ import {
 } from '@internationalized/date'
 
 const { selectedDate } = useSelectedDate();
-const { className } = withDefaults(defineProps<{
+const { className = '' } = defineProps<{
     className?: string
-}>(), {
-    className: ''
-})
+}>()
 
 // Convert between Date and DateValue for internal calendar use
 const internalValue = computed({
