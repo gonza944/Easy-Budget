@@ -183,6 +183,9 @@ export const useMyBudgetStoreStore = defineStore(
     const setCurrentPeriodBudget = async (
       budgetPeriod: EditCurrentPeriodBudget
     ) => {
+      const { selectedDate } = useSelectedDate();
+      const { fetchMonthlyBudget } = UseExpensesTotalsStore();
+
       if (selectedBudget.value?.currentPeriod?.id) {
         loading.value = true;
         await $fetch<BudgetApiResponse>(
@@ -192,7 +195,15 @@ export const useMyBudgetStoreStore = defineStore(
             body: budgetPeriod,
           }
         );
+        selectedBudget.value = {
+          ...selectedBudget.value,
+          currentPeriod: {
+            ...selectedBudget.value?.currentPeriod,
+            ...budgetPeriod,
+          },
+        };
         loading.value = false;
+        await fetchMonthlyBudget(selectedBudget.value?.id, selectedDate.value);
       }
     };
 

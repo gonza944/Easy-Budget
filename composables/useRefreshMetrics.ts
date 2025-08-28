@@ -8,14 +8,13 @@ export const useRefreshMetrics = () => {
     
     const { fetchExpensesBurnDown } = useBurnDownChartStore();
     const { fetchExpensesByCategory } = UseExpensesByCategoryStore();
-    const { fetchMonthlyBudget, fetchRemainingBudget } = UseExpensesTotalsStore();
+    const { fetchMonthlyBudget } = UseExpensesTotalsStore();
 
     // Fetch all calculated data in parallel for better performance
     await Promise.all([
       fetchExpensesBurnDown(budgetId, startDate, endDate),
       fetchExpensesByCategory(budgetId, startDate, endDate),
       fetchMonthlyBudget(budgetId, selectedDate),
-      fetchRemainingBudget(budgetId),
     ]);
   };
 

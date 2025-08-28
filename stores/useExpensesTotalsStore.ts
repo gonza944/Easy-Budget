@@ -30,14 +30,13 @@ export const UseExpensesTotalsStore = defineStore(
     };
 
     const fetchRemainingBudget = async (budget_id: number) => {
-      const { data } = await useFetch<number>("/api/metrics/remainingBudget", {
+      const data = await $fetch<number>("/api/metrics/remainingBudget", {
         query: {
           budget_id,
         },
-        key: `remainingBudget-${budget_id}`,
       });
 
-      remainingBudget.value = data.value || 0;
+      remainingBudget.value = data || 0;
     };
 
     // Watch for changes in selectedBudget and selectedDate to auto-fetch data
