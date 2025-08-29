@@ -8,7 +8,7 @@ const isOpen = ref(true)
 
 <template>
   <Collapsible v-model:open="isOpen">
-    <Card class="w-full md:w-xs 2xl:w-md h-xs 2xl:h-md md:aspect-square items-baseline justify-end">
+    <Card class="w-full md:min-w-xs md:min-h-xs 2xl:min-w-md h-auto md:aspect-square items-baseline justify-end">
       <CardHeader class="w-full flex-shrink-0">
         <CollapsibleTriggerResponsive :is-open="isOpen">
           <CardTitle>

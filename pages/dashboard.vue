@@ -67,7 +67,7 @@ onMounted(() => {
       <div class="flex flex-col gap-4 md:col-span-2">
         <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full order-2 md:order-none" />
 
-        <div class="flex flex-col md:flex-row gap-4 w-full justify-center order-1 md:order-none">
+        <div class="flex flex-col md:flex-row gap-4 w-full order-1 md:order-none md:overflow-x-auto">
           <DateSelector className="hidden md:block" v-model:selectedDate="selectedDate" />
           <BudgetSummaryCard :remaining-monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
             :remaining-daily-budget="getRemainingDailyBudget" />

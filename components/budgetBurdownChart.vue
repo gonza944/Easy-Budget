@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { VisXYContainer, VisLine, VisAxis, VisCrosshair, VisTooltip } from '@unovis/vue'
+import { VisXYContainer, VisLine, VisAxis, VisCrosshair, VisTooltip, VisPlotline } from '@unovis/vue'
 import type { DataRecord } from '~/types/metrics'
 import { utcFormat } from 'd3-time-format'
 import type { HTMLAttributes } from 'vue';
-import { ChevronDownIcon } from 'lucide-vue-next';
+
 
 defineProps<{ data: DataRecord[], className?: HTMLAttributes['class'] }>()
 
@@ -42,7 +42,8 @@ const lineDashArray = (d: DataRecord, i: number) => i === 1 ? [3] : []
               tickTextColor="var(--muted-foreground)" />
             <VisAxis :gridLine="false" type="y" tickTextColor="var(--muted-foreground)" />
             <VisLine :x="x" :y="y" :lineDashArray="lineDashArray" interpolateMissingData="true" :color="color" />
-            <VisCrosshair :color="color" :template="template" />
+            <VisPlotline axis="y" :value="0" lineStyle="dash" :lineWidth="1" :lineOpacity="0.5" color="var(--muted-foreground)"/>
+            <VisCrosshair :template="template" color="black"/>
             <VisTooltip />
           </VisXYContainer>
         </CardContent>
