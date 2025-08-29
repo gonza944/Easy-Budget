@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
+import { useMediaQuery } from '@vueuse/core';
 
 const { expensesByCategory, loading } = storeToRefs(UseExpensesByCategoryStore());
 
-const isOpen = ref(true)
+const isMobile = useMediaQuery('(max-width: 768px)');
+
+const isOpen = ref(!isMobile.value)
 </script>
 
 <template>
