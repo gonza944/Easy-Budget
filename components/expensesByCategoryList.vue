@@ -11,7 +11,7 @@ const isOpen = ref(!isMobile.value)
 
 <template>
   <Collapsible v-model:open="isOpen">
-    <Card class="w-full md:min-w-xs md:min-h-xs 2xl:min-w-md h-auto md:aspect-square items-baseline justify-end">
+    <Card class="w-full md:h-80 2xl:h-96 md:aspect-square items-baseline justify-end">
       <CardHeader class="w-full flex-shrink-0">
         <CollapsibleTriggerResponsive :is-open="isOpen">
           <CardTitle>
