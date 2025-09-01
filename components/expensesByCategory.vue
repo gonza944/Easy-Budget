@@ -3,7 +3,7 @@ import { VisSingleContainer, VisDonut, VisTooltip } from '@unovis/vue'
 import { Donut } from '@unovis/ts'
 import type { HTMLAttributes } from 'vue';
 import { computed } from 'vue';
-import { cn } from '@/lib/utils';
+import { cn } from '@sglara/cn';
 
 const props = defineProps<{ data: Record<string, number>, class?: HTMLAttributes['class'] }>()
 
