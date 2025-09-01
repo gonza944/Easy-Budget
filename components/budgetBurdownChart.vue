@@ -5,7 +5,6 @@ import { utcFormat } from 'd3-time-format'
 import type { HTMLAttributes } from 'vue';
 import { useMediaQuery } from '@vueuse/core';
 
-
 defineProps<{ data: DataRecord[], className?: HTMLAttributes['class'] }>()
 
 const isMobile = useMediaQuery('(max-width: 768px)');
