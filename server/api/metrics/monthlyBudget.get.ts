@@ -31,8 +31,8 @@ export default defineEventHandler(async (event) => {
     try {
       const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(date);
 
-      const queryYear = date.getFullYear();
-      const queryMonth = date.getMonth() + 1;
+      const queryYear = date.getUTCFullYear();
+      const queryMonth = date.getUTCMonth() + 1;
 
       // Execute both queries in parallel
       const [expensesResult, budgetPeriodResult] = await Promise.all([
