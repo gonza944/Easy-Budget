@@ -1,14 +1,17 @@
 <script lang="ts" setup>
 import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore';
+import { useMediaQuery } from '@vueuse/core';
 
 const { expensesByCategory, loading } = storeToRefs(UseExpensesByCategoryStore());
 
-const isOpen = ref(true)
+const isMobile = useMediaQuery('(max-width: 768px)');
+
+const isOpen = ref(!isMobile.value)
 </script>
 
 <template>
   <Collapsible v-model:open="isOpen">
-    <Card class="w-full md:w-xs 2xl:w-md h-xs 2xl:h-md md:aspect-square items-baseline justify-end">
+    <Card class="w-full md:h-80 2xl:h-96 md:aspect-square items-baseline justify-end">
       <CardHeader class="w-full flex-shrink-0">
         <CollapsibleTriggerResponsive :is-open="isOpen">
           <CardTitle>

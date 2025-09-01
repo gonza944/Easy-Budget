@@ -26,7 +26,7 @@ const isEditing = ref(false);
 </script>
 
 <template>
-  <Card class="w-full md:w-xs 2xl:w-md md:aspect-square items-baseline justify-end relative group">
+  <Card class="w-full md:h-80 2xl:h-96 md:aspect-square items-baseline justify-end relative group">
     <div class="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
       <Button v-if="isDateEqualOrFuture" variant="ghost" size="icon" class="h-8 w-8" @click="isEditing = !isEditing">
         <PencilIcon class="h-4 w-4" />
