@@ -2,7 +2,7 @@
 import type { HTMLAttributes } from 'vue'
 import { reactiveOmit } from '@vueuse/core'
 import { CalendarGrid, type CalendarGridProps, useForwardProps } from 'reka-ui'
-import { cn } from '@/lib/utils'
+import { cn } from '@sglara/cn'
 
 const props = defineProps<CalendarGridProps & { class?: HTMLAttributes['class'] }>()
 
