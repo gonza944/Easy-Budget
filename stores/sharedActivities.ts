@@ -16,9 +16,11 @@ export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', (
     selectedSharedActivitySettlements.value = null;
   }
 
-  const fetchSharedActivities = async () => {
+  const fetchSharedActivities = async (nameFilter?: string) => {
+    const query = nameFilter ? { name: nameFilter } : {};
     const { data } = await useFetch<SharedActivityWithMembers[]>('/api/shared-activities', {
-      key: 'shared-activities',
+      key: nameFilter ? `shared-activities-${nameFilter}` : 'shared-activities',
+      query,
     });
     sharedActivities.value = new Map(data.value?.map((sharedActivity) => [sharedActivity.id, sharedActivity]) || []);
   }

@@ -26,8 +26,11 @@ export default defineEventHandler(async (event) => {
     
     const userSupabase = createUserSupabaseClient(session.accessToken as string);
 
+    const query = getQuery(event);
+    const nameFilter = query.name as string | undefined;
+
     // Get all shared activities where the user is a participant
-    const { data, error } = await userSupabase
+    let supabaseQuery = userSupabase
       .from("shared_activities")
       .select(`
         id,
@@ -50,6 +53,13 @@ export default defineEventHandler(async (event) => {
       `)
       .eq('is_active', true)
       .order("created_at", { ascending: false });
+
+    // Apply name filter if provided
+    if (nameFilter) {
+      supabaseQuery = supabaseQuery.ilike("name", `%${nameFilter}%`);
+    }
+
+    const { data, error } = await supabaseQuery;
     
     if (error) {
       console.error("Database error fetching shared activities:", error);

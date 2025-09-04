@@ -11,7 +11,17 @@ const sharedActivitiesStore = useMySharedActivitiesStore();
 const { sharedActivities } = storeToRefs(sharedActivitiesStore);
 const { updateMenuElements, updateMenuTitle } = useMenuElements();
 
+const sharedActivityName = ref('');
 
+const fetchSharedActivities = async () => {
+  await sharedActivitiesStore.fetchSharedActivities(sharedActivityName.value);
+};
+
+watch(sharedActivityName, async () => {
+  if (sharedActivityName.value.length === 0 || sharedActivityName.value.length > 2) {
+    await fetchSharedActivities();
+  }
+});
 
 onMounted(() => {
   updateMenuElements([
@@ -40,8 +50,9 @@ onMounted(() => {
       <h1 class="text-2xl md:text-4xl font-bold text-center">Join the Fun: Revisit Your Shared Activities!</h1>
     </div>
     <div class="flex w-full md:w-xl items-center gap-1.5">
-      <Input id="shared-activity-name" type="text" placeholder="Shared Activity Name" class="h-12 bg-background" />
-      <Button type="submit" size="iconLg">
+      <Input id="shared-activity-name" v-model="sharedActivityName" type="text" placeholder="Shared Activity Name"
+        class="h-12 bg-background" />
+      <Button type="submit" size="iconLg" @click="fetchSharedActivities()">
         <SearchIcon />
       </Button>
     </div>
