@@ -33,6 +33,10 @@ export const CreateSharedActivitySchema = z.object({
   description: z.string().optional().nullable(),
 });
 
+export const DeleteSharedActivitySchema = z.object({
+  id: z.number(),
+});
+
 // ===== ACTIVITY PARTICIPATIONS TABLE =====
 export const ActivityParticipationSchema = z.object({
   id: z.number(),
@@ -184,12 +188,18 @@ export const MemberApiResponseSchema = z.object({
   error: z.string().optional(),
 });
 
+export const DeleteSharedActivityResponseSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+
 // ===== EXPORT TYPES =====
 export type Member = z.infer<typeof MemberSchema>;
 export type CreateMember = z.infer<typeof CreateMemberSchema>;
 
 export type SharedActivity = z.infer<typeof SharedActivitySchema>;
 export type CreateSharedActivity = z.infer<typeof CreateSharedActivitySchema>;
+export type DeleteSharedActivity = z.infer<typeof DeleteSharedActivitySchema>;
 
 export type ActivityParticipation = z.infer<typeof ActivityParticipationSchema>;
 export type CreateActivityParticipation = z.infer<typeof CreateActivityParticipationSchema>;
@@ -218,4 +228,5 @@ export type SharedActivityApiResponse = z.infer<typeof SharedActivityApiResponse
 export type SharedExpenseApiResponse = z.infer<typeof SharedExpenseApiResponseSchema>;
 export type SettlementApiResponse = z.infer<typeof SettlementApiResponseSchema>;
 export type MemberApiResponse = z.infer<typeof MemberApiResponseSchema>;
+export type DeleteSharedActivityResponse = z.infer<typeof DeleteSharedActivityResponseSchema>;
 

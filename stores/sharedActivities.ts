@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toast } from 'vue-sonner'
 import type { ActivityBalances, SettlementTransactionWithMembers, SharedActivityWithMembers, SharedExpenseWithMember } from '~/types/sharedExpenses';
 
 export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', () => {
@@ -55,6 +56,53 @@ export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', (
     selectedSharedActivityExpenses.value = data.value || [];
   }
 
+  const deleteSharedActivity = async (activityId: number) => {
+    let previousActivities = new Map(sharedActivities.value);
+    let previousSelected: SharedActivityWithMembers | null = null;
+    let previousSelectedBalances: ActivityBalances | null = null;
+    let previousSelectedExpenses: SharedExpenseWithMember[] | null = null;
+    let previousSelectedSettlements: SettlementTransactionWithMembers[] | null = null;
+
+    return await $fetch("/api/shared-activities", {
+      method: "DELETE",
+      body: { id: Number(activityId) },
+      onRequest() {
+        // Store the previously cached values to restore if fetch fails
+        previousActivities = new Map(sharedActivities.value);
+        previousSelected = selectedSharedActivity.value;
+        previousSelectedBalances = selectedSharedActivityBalances.value;
+        previousSelectedExpenses = selectedSharedActivityExpenses.value;
+        previousSelectedSettlements = selectedSharedActivitySettlements.value;
+
+        // Optimistically remove the activity from the map
+        sharedActivities.value = new Map(
+          Array.from(previousActivities.entries()).filter(([_, activity]) => activity.id !== activityId)
+        );
+
+        // Clear selected activity if it was the one being deleted
+        if (selectedSharedActivity.value?.id === activityId) {
+          selectedSharedActivity.value = null;
+          selectedSharedActivityBalances.value = null;
+          selectedSharedActivityExpenses.value = null;
+          selectedSharedActivitySettlements.value = null;
+        }
+      },
+      onResponseError() {
+        // Rollback the data if the request failed
+        sharedActivities.value = previousActivities;
+        selectedSharedActivity.value = previousSelected;
+        selectedSharedActivityBalances.value = previousSelectedBalances;
+        selectedSharedActivityExpenses.value = previousSelectedExpenses;
+        selectedSharedActivitySettlements.value = previousSelectedSettlements;
+        toast.error("Failed to delete shared activity");
+      },
+      async onResponse() {
+        // Invalidate shared activities in the background if the request succeeded
+        await fetchSharedActivities();
+      },
+    });
+  };
+
   return {
     sharedActivities,
     clearSharedActivities,
@@ -67,5 +115,6 @@ export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', (
     fetchSelectedSharedActivityExpenses,
     selectedSharedActivitySettlements,
     fetchSelectedSharedActivitySettlements,
+    deleteSharedActivity,
   }
 })
