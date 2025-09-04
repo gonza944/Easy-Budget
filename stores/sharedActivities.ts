@@ -2,14 +2,14 @@ import { defineStore } from 'pinia'
 import type { ActivityBalances, SettlementTransactionWithMembers, SharedActivityWithMembers, SharedExpenseWithMember } from '~/types/sharedExpenses';
 
 export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', () => {
-  const sharedActivities = ref<SharedActivityWithMembers[]>([]);
+  const sharedActivities = ref<Map<number, SharedActivityWithMembers>>(new Map());
   const selectedSharedActivity = ref<SharedActivityWithMembers | null>(null);
   const selectedSharedActivityBalances = ref<ActivityBalances | null>(null);
   const selectedSharedActivityExpenses = ref<SharedExpenseWithMember[] | null>(null);
   const selectedSharedActivitySettlements = ref<SettlementTransactionWithMembers[] | null>(null);
 
   const clearSharedActivities = () => {
-    sharedActivities.value = [];
+    sharedActivities.value = new Map();
     selectedSharedActivity.value = null;
     selectedSharedActivityBalances.value = null;
     selectedSharedActivityExpenses.value = null;
@@ -20,11 +20,11 @@ export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', (
     const { data } = await useFetch<SharedActivityWithMembers[]>('/api/shared-activities', {
       key: 'shared-activities',
     });
-    sharedActivities.value = data.value || [];
+    sharedActivities.value = new Map(data.value?.map((sharedActivity) => [sharedActivity.id, sharedActivity]) || []);
   }
 
-  const setSelectedSharedActivity = async (sharedActivity: SharedActivityWithMembers) => {
-    selectedSharedActivity.value = sharedActivity;
+  const setSelectedSharedActivity = async (sharedActivityId: number) => {
+    selectedSharedActivity.value = sharedActivities.value.get(sharedActivityId) || null;
     await Promise.all([
       fetchSelectedSharedActivityBalances(),
       fetchSelectedSharedActivityExpenses(),

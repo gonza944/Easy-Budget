@@ -5,7 +5,7 @@ import { ConfirmationDialog } from '~/components/ui/confirmation-dialog';
 definePageMeta({
   middleware: ['authenticated'],
 })
-
+const router = useRouter();
 const { user } = useUserSession();
 const store = useMyBudgetStoreStore();
 const { fetchBudgets, deleteBudget } = store;
@@ -45,6 +45,10 @@ onMounted(() => {
     {
       label: "Add Budget",
       onClick: () => { isModalOpen.value = true },
+    },
+    {
+      label: "Go to Shared Activities",
+      onClick: () => { router.push('/sharedActivities') },
     },
   ]);
   updateMenuTitle("My Budgets");
