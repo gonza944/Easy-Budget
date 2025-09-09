@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import FallbackTemplate from './FallbackTemplate.vue';
+
 
 </script>
 

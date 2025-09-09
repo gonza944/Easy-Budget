@@ -8,6 +8,7 @@ export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', (
   const selectedSharedActivityBalances = ref<ActivityBalances | null>(null);
   const selectedSharedActivityExpenses = ref<SharedExpenseWithMember[] | null>(null);
   const selectedSharedActivitySettlements = ref<SettlementTransactionWithMembers[] | null>(null);
+  const loadingSharedActivities = ref(false);
 
   const clearSharedActivities = () => {
     sharedActivities.value = new Map();
@@ -18,12 +19,14 @@ export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', (
   }
 
   const fetchSharedActivities = async (nameFilter?: string) => {
+    loadingSharedActivities.value = true;
     const query = nameFilter ? { name: nameFilter } : {};
     const { data } = await useFetch<SharedActivityWithMembers[]>('/api/shared-activities', {
       key: nameFilter ? `shared-activities-${nameFilter}` : 'shared-activities',
       query,
     });
     sharedActivities.value = new Map(data.value?.map((sharedActivity) => [sharedActivity.id, sharedActivity]) || []);
+    loadingSharedActivities.value = false;
   }
 
   const setSelectedSharedActivity = async (sharedActivityId: number) => {
@@ -116,5 +119,6 @@ export const useMySharedActivitiesStore = defineStore('sharedActivitiesStore', (
     selectedSharedActivitySettlements,
     fetchSelectedSharedActivitySettlements,
     deleteSharedActivity,
+    loadingSharedActivities,
   }
 })

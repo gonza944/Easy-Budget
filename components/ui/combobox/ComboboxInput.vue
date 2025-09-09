@@ -11,6 +11,7 @@ defineOptions({
 
 const props = defineProps<ComboboxInputProps & {
   class?: HTMLAttributes['class']
+  noBorder?: boolean
 }>()
 
 const emits = defineEmits<ComboboxInputEmits>()
@@ -23,7 +24,8 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
 <template>
   <div
     data-slot="command-input-wrapper"
-    class="flex h-9 items-center gap-2 rounded-md border border-input bg-transparent px-3 shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]"
+    class="flex h-9 items-center gap-2 rounded-md border border-input bg-transparent px-3 shadow-xs transition-[color,box-shadow]"
+    :class="{ 'border-none': props.noBorder, 'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]': !props.noBorder }"
   >
     <SearchIcon class="size-4 shrink-0 opacity-50" />
     <ComboboxInput

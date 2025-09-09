@@ -31,6 +31,7 @@ export const SharedActivitySchema = z.object({
 export const CreateSharedActivitySchema = z.object({
   name: z.string().min(1, "Activity name is required"),
   description: z.string().optional().nullable(),
+  participants: z.array(MemberSchema),
 });
 
 export const DeleteSharedActivitySchema = z.object({

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { PlusIcon, SearchIcon } from 'lucide-vue-next';
 import SharedExpenseCards from '~/components/sharedExpenses/SharedExpenseCards.vue';
+import CreateSharedActivityModal from '~/components/sharedExpenses/CreateSharedActivityModal.vue';
 
 definePageMeta({
   middleware: ['authenticated'],
@@ -8,8 +9,9 @@ definePageMeta({
 
 const router = useRouter();
 const sharedActivitiesStore = useMySharedActivitiesStore();
-const { sharedActivities } = storeToRefs(sharedActivitiesStore);
+const { sharedActivities, loadingSharedActivities } = storeToRefs(sharedActivitiesStore);
 const { updateMenuElements, updateMenuTitle } = useMenuElements();
+const isCreateSharedActivityModalOpen = ref(false);
 
 const sharedActivityName = ref('');
 
@@ -27,7 +29,7 @@ onMounted(() => {
   updateMenuElements([
     {
       label: "Create Shared Activity",
-      onClick: () => { },
+      onClick: () => { isCreateSharedActivityModalOpen.value = !isCreateSharedActivityModalOpen.value },
     },
     {
       label: "Go to My Expenses",
@@ -65,11 +67,14 @@ onMounted(() => {
         </template>
       </AsyncScrollableArea>
 
-      <Button v-if="sharedActivities?.size === 0" size="iconLg"
-        class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg">
+      <Button v-if="sharedActivities?.size === 0 && !loadingSharedActivities" size="iconLg"
+        class="cursor-pointer md:static fixed bottom-8 right-8 z-10 shadow-lg"
+        @click="isCreateSharedActivityModalOpen = !isCreateSharedActivityModalOpen">
         <PlusIcon />
       </Button>
     </div>
+
+    <CreateSharedActivityModal v-if="isCreateSharedActivityModalOpen" v-model="isCreateSharedActivityModalOpen" />
 
   </div>
 </template>
