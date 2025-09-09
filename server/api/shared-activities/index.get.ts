@@ -46,6 +46,7 @@ export default defineEventHandler(async (event) => {
             email,
             display_name,
             user_id,
+            member_id,
             created_at,
             updated_at
           )
@@ -96,7 +97,7 @@ export default defineEventHandler(async (event) => {
     if (error instanceof Error && error.name === 'ZodError') {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid data format",
+        statusMessage: error.message,
       });
     }
     

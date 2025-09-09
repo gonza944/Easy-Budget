@@ -6,6 +6,12 @@ import CreateSharedActivityForm from './CreateSharedActivityForm.vue';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 
+const { fetchMembers } = useMyMembersStore();
+
+callOnce(async () => {
+    fetchMembers();
+}, { mode: 'navigation' });
+
 const form = useForm({
     validationSchema: toTypedSchema(CreateSharedActivitySchema),
 });

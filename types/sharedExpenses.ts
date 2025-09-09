@@ -6,7 +6,8 @@ export const MemberSchema = z.object({
   id: z.number(),
   email: z.string().email(),
   display_name: z.string(),
-  user_id: z.string().uuid().nullable(),
+  user_id: z.string().uuid(), // Security: tracks which user created this member record
+  member_id: z.string().uuid().nullable(), // Links to a user account if this member is a logged-in user
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -14,7 +15,8 @@ export const MemberSchema = z.object({
 export const CreateMemberSchema = z.object({
   email: z.string().email(),
   display_name: z.string(),
-  user_id: z.string().uuid().optional().nullable(),
+  member_id: z.string().uuid().optional().nullable(), // Links to a user account if this member is a logged-in user
+  // user_id will be automatically set to the authenticated user's ID
 });
 
 // ===== SHARED ACTIVITIES TABLE =====
