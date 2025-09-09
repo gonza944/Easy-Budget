@@ -24,7 +24,7 @@ export const SharedActivitySchema = z.object({
   id: z.number(),
   name: z.string(),
   description: z.string().nullable(),
-  created_by: z.string().uuid(),
+  user_id: z.string().uuid(),
   created_at: z.string(),
   updated_at: z.string(),
   is_active: z.boolean(),

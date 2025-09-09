@@ -7,6 +7,7 @@ import CreateSharedActivityForm from './CreateSharedActivityForm.vue';
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 
 const { fetchMembers } = useMyMembersStore();
+const { createSharedActivity } = useMySharedActivitiesStore();
 
 callOnce(async () => {
     fetchMembers();
@@ -17,7 +18,8 @@ const form = useForm({
 });
 
 const onSubmit = form.handleSubmit(async (values) => {
-    console.log(values);
+    createSharedActivity(values);
+    isOpen.value = false;
 });
 
 const isFormValid = computed(() => {

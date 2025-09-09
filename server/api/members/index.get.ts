@@ -1,12 +1,7 @@
 import { createUserSupabaseClient } from "../../supabaseConnection";
 import { z } from "zod";
 import { MemberSchema } from "~/types/sharedExpenses";
-
-// Type for session user
-type SessionUser = {
-  id: string;
-  email: string;
-};
+import type { SessionUser } from "~/types/auth";
 
 // Response schema for array of members
 const MembersArraySchema = z.array(MemberSchema);
