@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import DateSelector from '@/components/DateSelector.vue';
 import ExpensesTable from '~/components/ui/expenses-table/ExpensesTable.vue';
 import { useRouter } from 'vue-router';
@@ -54,6 +55,10 @@ onMounted(() => {
     {
       label: "Go to My Budgets",
       onClick: () => { router.push('/myBudgets') },
+    },
+    {
+      label: "Go to Shared Activities",
+      onClick: () => { router.push('/sharedActivities') },
     },
   ]);
 

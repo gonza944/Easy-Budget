@@ -5,7 +5,8 @@ export const useClearStore = () => {
   const { clearExpensesBurnDown } = useBurnDownChartStore();
   const { clearExpensesByCategory } = UseExpensesByCategoryStore();
   const { clearExpensesTotals } = UseExpensesTotalsStore();
-
+  const { clearSharedActivities } = useMySharedActivitiesStore();
+  const { clearMembers } = useMyMembersStore();
   const clearStore = () => {
     clearNuxtData();
     clearBudgets();
@@ -14,6 +15,8 @@ export const useClearStore = () => {
     clearExpensesBurnDown();
     clearExpensesByCategory();
     clearExpensesTotals();
+    clearSharedActivities();
+    clearMembers();
   };
 
   return {
