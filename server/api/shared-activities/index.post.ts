@@ -3,7 +3,6 @@ import {
   CreateSharedActivitySchema, 
   SharedActivityApiResponseSchema,
   type SharedActivityApiResponse,
-  type Member 
 } from "~/types/sharedExpenses";
 import type { SessionUser } from "~/types/auth";
 
@@ -35,7 +34,6 @@ export default defineEventHandler(async (event) => {
 
     // Start a transaction-like approach by handling errors properly
     let activityId: number | undefined;
-    const createdMembers: Member[] = [];
 
     try {
       // 1. Create the shared activity
@@ -60,69 +58,24 @@ export default defineEventHandler(async (event) => {
 
       activityId = activityData.id;
 
-      // 2. Handle members - create new ones or find existing ones
-      for (const participant of participants) {
-        let member: Member;
+        // 2. Create all activity participations in bulk
+        const participationData = participants.map(participant => ({
+          activity_id: activityId,
+          member_id: participant.id,
+          user_id: user.id
+        }));
 
-        if (participant.id) {
-          // Existing member - verify it belongs to this user
-          const { data: existingMember, error: memberError } = await userSupabase
-            .from("members")
-            .select("*")
-            .eq("id", participant.id)
-            .single();
-
-          if (memberError || !existingMember) {
-            throw createError({
-              statusCode: 400,
-              statusMessage: `Member with ID ${participant.id} not found or not accessible`,
-            });
-          }
-
-          member = existingMember;
-        } else {
-          // New member - create it
-          const { data: newMember, error: createMemberError } = await userSupabase
-            .from("members")
-            .insert({
-              email: participant.email,
-              display_name: participant.display_name,
-              user_id: user.id,
-              member_id: participant.member_id || null
-            })
-            .select()
-            .single();
-
-          if (createMemberError) {
-            console.error("Error creating member:", createMemberError);
-            throw createError({
-              statusCode: 500,
-              statusMessage: `Failed to create member: ${createMemberError.message}`,
-            });
-          }
-
-          member = newMember;
-        }
-
-        createdMembers.push(member);
-
-        // 3. Create activity participation
         const { error: participationError } = await userSupabase
           .from("activity_participations")
-          .insert({
-            activity_id: activityId,
-            member_id: member.id,
-            user_id: user.id
-          });
+          .insert(participationData);
 
         if (participationError) {
-          console.error("Error creating activity participation:", participationError);
+          console.error("Error creating activity participations:", participationError);
           throw createError({
             statusCode: 500,
-            statusMessage: `Failed to add member to activity: ${participationError.message}`,
+            statusMessage: `Failed to add participants to activity: ${participationError.message}`,
           });
         }
-      }
 
       // 4. Fetch the complete activity with members for response
       const { data: completeActivity, error: fetchError } = await userSupabase

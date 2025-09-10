@@ -4,6 +4,7 @@ import type {
   ActivityBalances,
   CreateSharedActivity,
   SettlementTransactionWithMembers,
+  SharedActivityApiResponse,
   SharedActivityWithMembers,
   SharedExpenseWithMember,
 } from "~/types/sharedExpenses";
@@ -149,7 +150,7 @@ export const useMySharedActivitiesStore = defineStore(
     ) => {
       const previousSharedActivities = new Map(sharedActivities.value);
 
-      return await useFetch<SharedActivityWithMembers>(
+      return await useFetch<SharedActivityApiResponse>(
         "/api/shared-activities",
         {
           method: "POST",
@@ -170,8 +171,13 @@ export const useMySharedActivitiesStore = defineStore(
               [optimisticSharedActivity.id, optimisticSharedActivity],
             ]);
           },
-          async onResponse() {
-           await fetchSharedActivities();
+          async onResponse({response}) {
+            if (response._data.data) {
+              sharedActivities.value = new Map([
+                ...previousSharedActivities,
+                [response._data.data.id, response._data.data],
+              ]);
+            }
           },
           onResponseError() {
             sharedActivities.value = new Map(previousSharedActivities);
