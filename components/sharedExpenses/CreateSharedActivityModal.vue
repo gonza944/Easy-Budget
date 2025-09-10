@@ -3,11 +3,14 @@ import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { CreateSharedActivitySchema } from '~/types/sharedExpenses';
 import CreateSharedActivityForm from './CreateSharedActivityForm.vue';
+import { useMediaQuery } from '@vueuse/core';
 
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 
 const { fetchMembers } = useMyMembersStore();
 const { createSharedActivity } = useMySharedActivitiesStore();
+
+const isMobile = useMediaQuery('(max-width: 768px)');
 
 callOnce(async () => {
     fetchMembers();
@@ -28,7 +31,21 @@ const isFormValid = computed(() => {
 </script>
 
 <template>
-    <Dialog :open="isOpen" @update:open="isOpen = $event">
+    <Drawer v-if="isMobile" :open="isOpen" @update:open="isOpen = $event">
+        <DrawerContent class="p-4">
+            <DrawerHeader class="pb-8">
+                <DrawerTitle class="text-2xl font-bold">Create Shared Activity</DrawerTitle>
+            </DrawerHeader>
+            <CreateSharedActivityForm :form="form" :on-submit="onSubmit" :is-form-valid="isFormValid" />
+            <DrawerFooter>
+                <Button type="submit" :disabled="!isFormValid" @click="onSubmit">
+                    Submit
+                </Button>
+            </DrawerFooter>
+        </DrawerContent>
+    </Drawer>
+    <!-- Desktop -->
+    <Dialog v-else :open="isOpen" @update:open="isOpen = $event">
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>Create Shared Activity</DialogTitle>
