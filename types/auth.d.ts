@@ -17,4 +17,11 @@ declare module '#auth-utils' {
   }
 }
 
+// Export SessionUser type for server-side use
+export type SessionUser = {
+  id: string;
+  email: string;
+  name: string;
+};
+
 export {} 

@@ -1,13 +1,7 @@
 import { z } from 'zod';
 import { createUserSupabaseClient } from "../../supabaseConnection";
 import { ExpenseCreateSchema, ExpenseSchema } from '~/types/expense';
-
-// Define simplified session user type based on what's stored in the session
-type SessionUser = {
-  id: string;
-  email: string;
-  name: string;
-};
+import type { SessionUser } from "~/types/auth";
 
 export default defineEventHandler(async (event) => {
   try {
