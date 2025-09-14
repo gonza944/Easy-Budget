@@ -87,7 +87,18 @@ export default defineEventHandler(async (event) => {
           user_id,
           created_at,
           updated_at,
-          is_active
+          is_active,
+          activity_participations!inner(
+            members(
+              id,
+              email,
+              display_name,
+              user_id,
+              member_id,
+              created_at,
+              updated_at
+            )
+          )
         `)
         .eq("id", activityId)
         .single();
@@ -100,10 +111,22 @@ export default defineEventHandler(async (event) => {
         });
       }
 
+      // Transform the response to match SharedActivityWithMembers format
+      const activityWithMembers = {
+        id: completeActivity.id,
+        name: completeActivity.name,
+        description: completeActivity.description,
+        user_id: completeActivity.user_id,
+        created_at: completeActivity.created_at,
+        updated_at: completeActivity.updated_at,
+        is_active: completeActivity.is_active,
+        members: completeActivity.activity_participations?.map((participation: any) => participation.members) || []
+      };
+
       // Return success response
       const response: SharedActivityApiResponse = {
         success: true,
-        data: completeActivity
+        data: activityWithMembers
       };
 
       return SharedActivityApiResponseSchema.parse(response);

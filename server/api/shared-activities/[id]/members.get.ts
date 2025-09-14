@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
         )
       `)
       .eq('activity_id', Number(activityId))
-      .order('members.display_name');
+      .order('member.display_name');
     
     if (error) {
       console.error("Database error fetching activity members:", error);

@@ -169,7 +169,7 @@ export const SettlementTransactionWithMembersSchema = SettlementTransactionSchem
 // ===== API RESPONSE SCHEMAS =====
 export const SharedActivityApiResponseSchema = z.object({
   success: z.boolean(),
-  data: SharedActivitySchema.optional(),
+  data: SharedActivityWithMembersSchema.optional(),
   error: z.string().optional(),
 });
 

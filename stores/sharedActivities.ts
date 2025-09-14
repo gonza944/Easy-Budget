@@ -1,12 +1,13 @@
 import { defineStore } from "pinia";
 import { toast } from "vue-sonner";
-import type {
-  ActivityBalances,
-  CreateSharedActivity,
-  SettlementTransactionWithMembers,
-  SharedActivityApiResponse,
-  SharedActivityWithMembers,
-  SharedExpenseWithMember,
+import {
+  SharedActivityApiResponseSchema,
+  type ActivityBalances,
+  type CreateSharedActivity,
+  type SettlementTransactionWithMembers,
+  type SharedActivityApiResponse,
+  type SharedActivityWithMembers,
+  type SharedExpenseWithMember,
 } from "~/types/sharedExpenses";
 
 export const useMySharedActivitiesStore = defineStore(
@@ -167,17 +168,18 @@ export const useMySharedActivitiesStore = defineStore(
               is_active: true,
             };
             sharedActivities.value = new Map([
-              ...previousSharedActivities,
               [optimisticSharedActivity.id, optimisticSharedActivity],
+              ...previousSharedActivities,
             ]);
           },
           async onResponse({response}) {
-            if (response._data.data) {
-              sharedActivities.value = new Map([
-                ...previousSharedActivities,
-                [response._data.data.id, response._data.data],
-              ]);
-            }
+            const parseResult = SharedActivityApiResponseSchema.safeParse(response._data);
+              if (parseResult.success && parseResult.data.success && parseResult.data.data) {
+                sharedActivities.value = new Map([
+                  [parseResult.data.data.id, parseResult.data.data],
+                  ...previousSharedActivities,
+                ]);
+              }
           },
           onResponseError() {
             sharedActivities.value = new Map(previousSharedActivities);
