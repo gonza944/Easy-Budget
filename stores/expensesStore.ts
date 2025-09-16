@@ -73,15 +73,19 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     return maxDailyBudget - totalExpenses;
   });
 
+  const formatDate = computed(() => {
+    const date = selectedDate.value;
+    return `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  });
+
   async function fetchExpenses(budgetId: number) {
     try {
       loading.value = !expenses.value[budgetId];
-      const date = selectedDate.value;
 
       // Format date as YYYY-MM-DD (without time component)
-      const formattedDate = `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      const formattedDate = formatDate.value;
 
       const { data: fetchedExpenses, error } = await useFetch<Expense[]>(
         () => `/api/expenses`,
@@ -122,14 +126,13 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     if (!selectedBudget.value?.id) return;
 
     const budgetId = selectedBudget.value.id;
-    let previousExpenses: Expense[] = [];
+    const previousExpenses = expenses.value[budgetId] || [];
 
     return await $fetch<Expense>("/api/expenses", {
       method: "POST",
       body: expense,
       onRequest() {
         // Store the previously cached value to restore if fetch fails
-        previousExpenses = expenses.value[budgetId] || [];
 
         // Optimistically add the expense with a temporary ID
         const optimisticExpense: Expense = {
@@ -152,7 +155,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       },
       async onResponse() {
         // Revalidate data on success
-        fetchExpenses(budgetId);
+        refreshNuxtData(`expenses-${budgetId}-${formatDate.value}`);
         refreshAllMetrics(budgetId, selectedDate.value);
       },
     });
@@ -193,7 +196,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       },
       async onResponse() {
         // Revalidate data on success
-        fetchExpenses(budgetId);
+        refreshNuxtData(`expenses-${budgetId}-${formatDate.value}`);
         refreshAllMetrics(budgetId, selectedDate.value);
       },
     });
