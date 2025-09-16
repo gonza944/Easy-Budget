@@ -60,7 +60,7 @@
 
     <!-- type and Amount row -->
     <div class="flex flex-row gap-4 items-center justify-between">
-      <div class="flex space-x-2">
+      <div class="flex space-x-2 mt-5">
         <Switch id="expense-type" v-model="isExpense" />
         <Label for="expense-type">{{ isExpense ? 'Expense' : 'Income' }}</Label>
       </div>
