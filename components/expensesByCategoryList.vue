@@ -30,7 +30,7 @@ const isOpen = ref(!isMobile.value)
             <div v-for="(amount, category) in expensesByCategory" v-else :key="category"
               class="flex flex-row justify-between">
               <p>{{ category }}:</p>
-              <p class="text-destructive-foreground">{{ Number(amount).toLocaleString('en-US', {
+              <p :class="{ 'text-success': amount <= 0, 'text-destructive-foreground': amount > 0 }">{{ Math.abs(amount).toLocaleString('en-US', {
                 style: 'currency', currency:
                   'USD'
                 }) }}</p>
