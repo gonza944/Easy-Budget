@@ -30,10 +30,10 @@ export const columns: ColumnDef<Expense>[] = [
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
-      }).format(amount);
+      }).format(Math.abs(amount));
       return h(
         "div",
-        { class: "text-right text-destructive-foreground" },
+        { class: `text-right text-destructive-foreground ${amount < 0 ? 'text-success' : 'text-destructive-foreground'}` },
         formatted
       );
     },
