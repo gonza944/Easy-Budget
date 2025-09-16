@@ -4,7 +4,9 @@
       <DrawerHeader class="pb-8">
         <DrawerTitle class="text-2xl font-bold">Add Expense</DrawerTitle>
       </DrawerHeader>
-      <FormContent :categories="categories" :on-number-input="onNumberInput" :handle-form-submit="handleFormSubmit" />
+      <FormContent
+        v-model:is-expense="isExpense" :categories="categories" :on-number-input="onNumberInput"
+        :handle-form-submit="handleFormSubmit" />
       <DrawerFooter>
         <FormFooter :is-form-valid="isFormValid" :on-submit="onSubmit" />
       </DrawerFooter>
@@ -18,7 +20,9 @@
         <DialogTitle class="text-2xl font-bold">Add Expense</DialogTitle>
       </DialogHeader>
 
-      <FormContent :categories="categories" :on-number-input="onNumberInput" :handle-form-submit="handleFormSubmit" />
+      <FormContent
+        v-model:is-expense="isExpense" :categories="categories" :on-number-input="onNumberInput"
+        :handle-form-submit="handleFormSubmit" />
       <DialogFooter class="mt-4">
         <FormFooter :is-form-valid="isFormValid" :on-submit="onSubmit" />
       </DialogFooter>
@@ -32,8 +36,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { useMyExpensesStore } from '~/stores/expensesStore';
 import { useMyBudgetStoreStore } from '~/stores/budgetStore';
-import { z } from 'zod';
-import { ExpenseCreateSchema } from '~/types/expense';
+import { ExpenseCreateSchema, ExpenseFormSchema } from '~/types/expense';
 import { useSelectedDate } from '~/composables/useSelectedDate';
 import FormContent from './formContent.vue';
 import FormFooter from './formFooter.vue';
@@ -46,25 +49,14 @@ const { categories } = storeToRefs(useCategoryStore());
 const { selectedDate } = useSelectedDate();
 const budgetStore = useMyBudgetStoreStore();
 const { selectedBudget } = storeToRefs(budgetStore);
+const isExpense = ref(true);
 
 // Track form errors
 const categoryError = ref('');
 const amountError = ref('');
 
-// Form schema
-const expenseSchema = toTypedSchema(
-  z.object({
-    name: z.string().min(1, 'Name is required'),
-    amount: z.string().min(1, 'Amount is required')
-      .transform(val => Number(val))
-      .refine(val => !isNaN(val) && val > 0, 'Amount must be greater than 0'),
-    description: z.string().optional(),
-    category_id: z.number({
-      required_error: 'Please select a category',
-      invalid_type_error: 'Please select a category',
-    }),
-  })
-);
+// Form schema - using ExpenseFormSchema from types
+const expenseSchema = toTypedSchema(ExpenseFormSchema);
 
 const form = useForm({
   validationSchema: expenseSchema,
@@ -111,11 +103,13 @@ const onSubmit = async (closeModal = true) => {
     const date = selectedDate.value;
     const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
+    const amount = isExpense.value ? Number(values.amount) : Number(values.amount) * -1;
+
     const expenseData = ExpenseCreateSchema.parse({
       budget_id: selectedBudget.value.id,
       category_id: values.category_id,
       name: values.name,
-      amount: Number(values.amount),
+      amount,
       description: values.description || '',
       date: formattedDate,
     });

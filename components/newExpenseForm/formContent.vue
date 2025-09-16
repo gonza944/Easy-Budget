@@ -1,4 +1,3 @@
-
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="handleFormSubmit">
     <!-- Name field -->
@@ -14,79 +13,67 @@
       </FormItem>
     </FormField>
 
-    <!-- Category and Amount row -->
-    <div class="flex flex-col sm:flex-row gap-4">
-      <!-- Category field -->
-      <FormField v-slot="{ componentField, errorMessage: categoryError }" name="category_id" class="flex-1">
-        <FormItem class="h-full flex flex-col">
-          <FormLabel>Category</FormLabel>
-          <Combobox 
-            :model-value="componentField.modelValue"
-            @update:model-value="componentField.onChange"
-          >
-            <FormControl class="w-full">
-              <ComboboxAnchor>
-                <div class="relative w-full items-center">
-                  <ComboboxInput 
-                    class="text-base md:text-sm"
-                    placeholder="Select category"
-                    :display-value="(val: number) => {
-                      if (!val) return '';
-                      const category = categories.find(cat => cat.id === val);
-                      return category ? category.name : '';
-                    }"
-                  />
-                  <ComboboxTrigger class="absolute end-0 inset-y-0 flex items-center justify-center px-3">
-                    <ChevronsUpDown class="size-4 text-muted-foreground" />
-                  </ComboboxTrigger>
-                </div>
-              </ComboboxAnchor>
-            </FormControl>
+    <!-- Category field -->
+    <FormField v-slot="{ componentField, errorMessage: categoryError }" name="category_id" class="flex-1">
+      <FormItem class="h-full flex flex-col">
+        <FormLabel>Category</FormLabel>
+        <Combobox :model-value="componentField.modelValue" @update:model-value="componentField.onChange">
+          <FormControl class="w-full">
+            <ComboboxAnchor>
+              <div class="relative w-full items-center">
+                <ComboboxInput class="text-base md:text-sm" placeholder="Select category" :display-value="(val: number) => {
+                  if (!val) return '';
+                  const category = categories.find(cat => cat.id === val);
+                  return category ? category.name : '';
+                }" />
+                <ComboboxTrigger class="absolute end-0 inset-y-0 flex items-center justify-center px-3">
+                  <ChevronsUpDown class="size-4 text-muted-foreground" />
+                </ComboboxTrigger>
+              </div>
+            </ComboboxAnchor>
+          </FormControl>
 
-            <ComboboxList>
-              <ComboboxEmpty>
-                Nothing found.
-              </ComboboxEmpty>
+          <ComboboxList>
+            <ComboboxEmpty>
+              Nothing found.
+            </ComboboxEmpty>
 
-              <ComboboxGroup class="overflow-y-auto max-h-48 md:max-h-72">
-                <ComboboxItem 
-                  v-for="category in categories" 
-                  :key="category.id" 
-                  :value="category.id"
-                  class="text-base md:text-sm"
-                >
-                  {{ category.name }}
+            <ComboboxGroup class="overflow-y-auto max-h-48 md:max-h-72">
+              <ComboboxItem v-for="category in categories" :key="category.id" :value="category.id"
+                class="text-base md:text-sm">
+                {{ category.name }}
 
-                  <ComboboxItemIndicator>
-                    <Check class="ml-auto h-4 w-4" />
-                  </ComboboxItemIndicator>
-                </ComboboxItem>
-              </ComboboxGroup>
-            </ComboboxList>
-          </Combobox>
-          <Transition name="slide-fade">
-            <FormMessage v-if="categoryError" :class="{ 'opacity-0': !categoryError }">
-              {{ categoryError || ' ' }}
-            </FormMessage>
-          </Transition>
-        </FormItem>
-      </FormField>
+                <ComboboxItemIndicator>
+                  <Check class="ml-auto h-4 w-4" />
+                </ComboboxItemIndicator>
+              </ComboboxItem>
+            </ComboboxGroup>
+          </ComboboxList>
+        </Combobox>
+        <Transition name="slide-fade">
+          <FormMessage v-if="categoryError" :class="{ 'opacity-0': !categoryError }">
+            {{ categoryError || ' ' }}
+          </FormMessage>
+        </Transition>
+      </FormItem>
+    </FormField>
+
+    <!-- type and Amount row -->
+    <div class="flex flex-row gap-4 items-center justify-between">
+      <div class="flex space-x-2 mt-5">
+        <Switch id="expense-type" v-model="isExpense" />
+        <Label for="expense-type">{{ isExpense ? 'Expense' : 'Income' }}</Label>
+      </div>
 
       <!-- Amount field -->
       <FormField v-slot="{ componentField, errorMessage: amountError }" name="amount" class="flex-1">
-        <FormItem class="h-full flex flex-col">
+        <FormItem class="h-full flex flex-col w-full">
           <FormLabel>Amount</FormLabel>
           <FormControl>
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-              <Input 
-                type="text" 
-                inputmode="decimal" 
-                placeholder="0.00"
-                class="pl-7"
-                v-bind="componentField"
-                @input="onNumberInput"
-              />
+              <Input type="text" inputmode="decimal" placeholder="0.00" class="pl-7" v-bind="componentField"
+                @input="onNumberInput" />
             </div>
           </FormControl>
           <Transition name="slide-fade">
@@ -122,6 +109,8 @@ type Props = {
   handleFormSubmit: () => void;
 };
 
+const isExpense = defineModel<boolean>('isExpense', { required: true });
+
 defineProps<Props>();
 </script>
 
@@ -145,4 +134,3 @@ defineProps<Props>();
   max-height: 40px;
 }
 </style>
-
