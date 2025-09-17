@@ -70,7 +70,7 @@ onMounted(() => {
   <div class="flex flex-col items-center justify-center md:h-[100dvh] pt-4 md:pt-0">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full md:w-auto px-2">
       <div class="flex flex-col gap-4 md:col-span-2">
-        <BudgetBurdownChart :data="expensesBurnDown || []" class="w-full order-2 md:order-none" />
+        <BudgetBurdownChart class="w-full order-2 md:order-none" />
 
         <div class="flex flex-col md:flex-row gap-4 w-full order-1 md:order-none md:overflow-x-auto">
           <DateSelector className="hidden md:block" v-model:selectedDate="selectedDate" />

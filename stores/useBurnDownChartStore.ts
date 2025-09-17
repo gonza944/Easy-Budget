@@ -61,6 +61,7 @@ export const useBurnDownChartStore = defineStore(
       expensesBurnDown,
       clearExpensesBurnDown,
       fetchExpensesBurnDown,
+      loading,
     };
   }
 );
