@@ -5,9 +5,11 @@ export const useBurnDownChartStore = defineStore(
   "myUseBurnDownChartStore",
   () => {
     const expensesBurnDown = ref<DataRecord[]>([]);
+    const loading = ref(false);
 
     const clearExpensesBurnDown = () => {
       expensesBurnDown.value = [];
+      loading.value = false;
     };
 
     const fetchExpensesBurnDown = async (
@@ -15,16 +17,17 @@ export const useBurnDownChartStore = defineStore(
       startDate: string,
       endDate: string
     ) => {
-      const { data } = await useFetch<{expensesBurnDown: DataRecord[]}>("/api/metrics/expensesBurnDown", {
+      loading.value = true;
+      const data = await $fetch<{expensesBurnDown: DataRecord[]}>("/api/metrics/expensesBurnDown", {
         query: {
           initial_date: startDate,
           final_date: endDate,
           budget_id,
         },
-        key: `expensesBurnDown-${budget_id}-${startDate}-${endDate}`,
       });
 
-      expensesBurnDown.value = data.value?.expensesBurnDown || [];
+      expensesBurnDown.value = data?.expensesBurnDown || [];
+      loading.value = false;
     };
 
     // Watch for changes in selectedBudget and selectedDate to auto-fetch data

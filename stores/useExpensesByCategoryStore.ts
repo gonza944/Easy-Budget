@@ -17,25 +17,30 @@ export const UseExpensesByCategoryStore = defineStore(
       endDate: string
     ) => {
       loading.value = true;
-      const { data } = await useFetch<{expensesByCategory: Record<string, number>}>("/api/metrics/totalExpensesByCategory", {
-        query: {
-          initial_date: startDate,
-          final_date: endDate,
-          budget_id,
-        },
-        key: `expensesByCategory-${budget_id}-${startDate}-${endDate}`,
-        transform: (data) => {
-          if (!data || !data.expensesByCategory) {
-            return { expensesByCategory: {} };
-          }
-          const sortedEntries = Object.entries(data.expensesByCategory).sort(
-            (a, b) => b[1] - a[1]
-          );
-          return { expensesByCategory: Object.fromEntries(sortedEntries) };
-        },
-      });
+      const data = await $fetch<{ expensesByCategory: Record<string, number> }>(
+        "/api/metrics/totalExpensesByCategory",
+        {
+          query: {
+            initial_date: startDate,
+            final_date: endDate,
+            budget_id,
+          },
+        }
+      );
 
-      expensesByCategory.value = data.value?.expensesByCategory || {};
+      const parsedData = (data: {
+        expensesByCategory: Record<string, number>;
+      }) => {
+        if (!data || !data.expensesByCategory) {
+          return { expensesByCategory: {} };
+        }
+        const sortedEntries = Object.entries(data.expensesByCategory).sort(
+          (a, b) => b[1] - a[1]
+        );
+        return { expensesByCategory: Object.fromEntries(sortedEntries) };
+      };
+      
+      expensesByCategory.value = parsedData(data)?.expensesByCategory || {};
       loading.value = false;
     };
 
@@ -45,20 +50,22 @@ export const UseExpensesByCategoryStore = defineStore(
       // Use storeToRefs to get reactive refs from the stores
       const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
       const { selectedDate } = useSelectedDate();
-      
+
       // Create computed values for only the parts we care about
       const budgetId = computed(() => selectedBudget.value?.id);
       const monthYear = computed(() => {
         const date = selectedDate.value;
         return `${date.getFullYear()}-${date.getMonth()}`;
       });
-      
+
       // Watch the computed values that represent meaningful changes
       watch(
         [budgetId, monthYear],
         ([currentBudgetId, _currentMonthYear]) => {
           if (currentBudgetId) {
-            const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(selectedDate.value);
+            const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(
+              selectedDate.value
+            );
             fetchExpensesByCategory(currentBudgetId, startDate, endDate);
           }
         },
@@ -73,4 +80,4 @@ export const UseExpensesByCategoryStore = defineStore(
       loading,
     };
   }
-); 
+);

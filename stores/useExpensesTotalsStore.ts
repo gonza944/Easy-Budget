@@ -17,15 +17,14 @@ export const UseExpensesTotalsStore = defineStore(
       const parsedDate = formatDateToUTCISOString(target_date);
       loading.value = !remainingBudget.value;
 
-      const { data } = await useFetch<number>("/api/metrics/monthlyBudget", {
+      const data = await $fetch<number>("/api/metrics/monthlyBudget", {
         query: {
           budget_id,
           target_date: parsedDate,
         },
-        key: `monthlyBudget-${budget_id}-${parsedDate}`,
       });
 
-      monthlyBudget.value = data.value || 0;
+      monthlyBudget.value = data || 0;
       loading.value = false;
     };
 
