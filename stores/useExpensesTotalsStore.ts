@@ -16,17 +16,20 @@ export const UseExpensesTotalsStore = defineStore(
     const fetchMonthlyBudget = async (budget_id: number, target_date: Date) => {
       const parsedDate = formatDateToUTCISOString(target_date);
       loading.value = !remainingBudget.value;
+      try {
+        const data = await $fetch<number>("/api/metrics/monthlyBudget", {
+          query: {
+            budget_id,
+            target_date: parsedDate,
+          },
+        });
 
-      const { data } = await useFetch<number>("/api/metrics/monthlyBudget", {
-        query: {
-          budget_id,
-          target_date: parsedDate,
-        },
-        key: `monthlyBudget-${budget_id}-${parsedDate}`,
-      });
-
-      monthlyBudget.value = data.value || 0;
-      loading.value = false;
+        monthlyBudget.value = data || 0;
+      } catch (error) {
+        console.error("Error fetching monthly budget:", error);
+      } finally {
+        loading.value = false;
+      }
     };
 
     const fetchRemainingBudget = async (budget_id: number) => {

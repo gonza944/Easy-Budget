@@ -4,11 +4,13 @@ import type { DataRecord } from '~/types/metrics'
 import { utcFormat } from 'd3-time-format'
 import type { HTMLAttributes } from 'vue';
 import { useMediaQuery } from '@vueuse/core';
+import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
 
-defineProps<{ data: DataRecord[], className?: HTMLAttributes['class'] }>()
+defineProps<{ className?: HTMLAttributes['class'] }>()
 
 const isMobile = useMediaQuery('(max-width: 768px)');
 const isOpen = ref(!isMobile.value)
+const { expensesBurnDown, loading } = storeToRefs(useBurnDownChartStore());
 
 const x = (d: DataRecord) => d.x
 const y = [
@@ -38,13 +40,19 @@ const lineDashArray = (d: DataRecord, i: number) => i === 1 ? [3] : []
 
       <CollapsibleContent>
         <CardContent>
-          <VisXYContainer :data="data" class="budget-chart">
+          <div v-if="loading">
+            <div class="flex flex-col gap-4">
+              <Skeleton v-for="i in 5" :key="i" class="w-full h-8" />
+            </div>
+          </div>
+          <VisXYContainer v-else :data="expensesBurnDown" class="budget-chart">
             <VisAxis :gridLine="false" type="x" :tickFormat="utcFormat('%b %d')"
               tickTextColor="var(--muted-foreground)" />
             <VisAxis :gridLine="false" type="y" tickTextColor="var(--muted-foreground)" />
             <VisLine :x="x" :y="y" :lineDashArray="lineDashArray" interpolateMissingData="true" :color="color" />
-            <VisPlotline axis="y" :value="0" lineStyle="dash" :lineWidth="1" :lineOpacity="0.5" color="var(--muted-foreground)"/>
-            <VisCrosshair :template="template" :lineWidth="1" :lineOpacity="0.5" color="var(--foreground)"/>
+            <VisPlotline axis="y" :value="0" lineStyle="dash" :lineWidth="1" :lineOpacity="0.5"
+              color="var(--muted-foreground)" />
+            <VisCrosshair :template="template" :lineWidth="1" :lineOpacity="0.5" color="var(--foreground)" />
             <VisTooltip />
           </VisXYContainer>
         </CardContent>
