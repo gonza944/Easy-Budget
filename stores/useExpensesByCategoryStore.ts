@@ -17,31 +17,35 @@ export const UseExpensesByCategoryStore = defineStore(
       endDate: string
     ) => {
       loading.value = true;
-      const data = await $fetch<{ expensesByCategory: Record<string, number> }>(
-        "/api/metrics/totalExpensesByCategory",
-        {
+      try {
+        const data = await $fetch<{
+          expensesByCategory: Record<string, number>;
+        }>("/api/metrics/totalExpensesByCategory", {
           query: {
             initial_date: startDate,
             final_date: endDate,
             budget_id,
           },
-        }
-      );
+        });
 
-      const parsedData = (data: {
-        expensesByCategory: Record<string, number>;
-      }) => {
-        if (!data || !data.expensesByCategory) {
-          return { expensesByCategory: {} };
-        }
-        const sortedEntries = Object.entries(data.expensesByCategory).sort(
-          (a, b) => b[1] - a[1]
-        );
-        return { expensesByCategory: Object.fromEntries(sortedEntries) };
-      };
-      
-      expensesByCategory.value = parsedData(data)?.expensesByCategory || {};
-      loading.value = false;
+        const parsedData = (data: {
+          expensesByCategory: Record<string, number>;
+        }) => {
+          if (!data || !data.expensesByCategory) {
+            return { expensesByCategory: {} };
+          }
+          const sortedEntries = Object.entries(data.expensesByCategory).sort(
+            (a, b) => b[1] - a[1]
+          );
+          return { expensesByCategory: Object.fromEntries(sortedEntries) };
+        };
+
+        expensesByCategory.value = parsedData(data)?.expensesByCategory || {};
+      } catch (error) {
+        console.error("Error fetching expenses by category:", error);
+      } finally {
+        loading.value = false;
+      }
     };
 
     // Watch for changes in selectedBudget and selectedDate to auto-fetch data

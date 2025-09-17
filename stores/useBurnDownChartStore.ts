@@ -18,16 +18,23 @@ export const useBurnDownChartStore = defineStore(
       endDate: string
     ) => {
       loading.value = true;
-      const data = await $fetch<{expensesBurnDown: DataRecord[]}>("/api/metrics/expensesBurnDown", {
-        query: {
-          initial_date: startDate,
-          final_date: endDate,
-          budget_id,
-        },
-      });
-
-      expensesBurnDown.value = data?.expensesBurnDown || [];
-      loading.value = false;
+      try {
+        const data = await $fetch<{ expensesBurnDown: DataRecord[] }>(
+          "/api/metrics/expensesBurnDown",
+          {
+            query: {
+              initial_date: startDate,
+              final_date: endDate,
+              budget_id,
+            },
+          }
+        );
+        expensesBurnDown.value = data?.expensesBurnDown || [];
+      } catch (error) {
+        console.error("Error fetching expenses burn down:", error);
+      } finally {
+        loading.value = false;
+      }
     };
 
     // Watch for changes in selectedBudget and selectedDate to auto-fetch data
@@ -36,20 +43,22 @@ export const useBurnDownChartStore = defineStore(
       // Use storeToRefs to get reactive refs from the stores
       const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
       const { selectedDate } = useSelectedDate();
-      
+
       // Create computed values for only the parts we care about
       const budgetId = computed(() => selectedBudget.value?.id);
       const monthYear = computed(() => {
         const date = selectedDate.value;
         return `${date.getFullYear()}-${date.getMonth()}`;
       });
-      
+
       // Watch the computed values that represent meaningful changes
       watch(
         [budgetId, monthYear],
         ([currentBudgetId, _currentMonthYear]) => {
           if (currentBudgetId) {
-            const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(selectedDate.value);
+            const { startDate, endDate } = calculateFirstAndLastDayOfTheMonth(
+              selectedDate.value
+            );
             fetchExpensesBurnDown(currentBudgetId, startDate, endDate);
           }
         },
