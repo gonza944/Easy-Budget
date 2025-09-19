@@ -1,6 +1,7 @@
 import { defineStore, storeToRefs } from "pinia";
 import { useSelectedDate } from "~/composables/useSelectedDate";
 import { useMyBudgetStoreStore } from "~/stores/budgetStore";
+import { UseExpensesTotalsStore } from "~/stores/useExpensesTotalsStore";
 import type { Expense, ExpenseCreate } from "~/types/expense";
 import { toast } from "vue-sonner";
 
@@ -61,16 +62,41 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     if (!selectedBudget?.id) return 0;
 
     const budgetId = selectedBudget.id;
-    const budgetExpenses = expenses.value[budgetId] || [];
-
-    const totalExpenses = budgetExpenses.reduce(
+    const currentDate = selectedDate.value;
+    
+    // Get today's expenses only (expenses for current day)
+    const todayExpenses = expenses.value[budgetId] || [];
+    const todayExpensesTotal = todayExpenses.reduce(
       (sum, expense) => sum + Number(expense.amount),
       0
     );
 
-    const maxDailyBudget = Number(selectedBudget.currentPeriod?.dailyAmount);
+    // Access current remaining monthly budget from the expenses totals store
+    // This has this month's expenses subtracted (including today's)
+    const expensesTotalsStore = UseExpensesTotalsStore();
+    const currentRemainingMonthlyBudget = expensesTotalsStore.monthlyBudget || 0;
 
-    return maxDailyBudget - totalExpenses;
+    // Calculate remaining days in the month (including today)
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const today = currentDate.getDate();
+    const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+    const remainingDays = lastDayOfMonth - today + 1;
+
+    // Avoid division by zero
+    if (remainingDays <= 0) return 0;
+
+    // ALGORITHM: Calculate what the remaining monthly budget was at the START of today
+    // by adding back today's expenses to the current remaining budget
+    const remainingMonthlyAtStartOfDay = currentRemainingMonthlyBudget + todayExpensesTotal;
+
+    // Calculate the original daily budget for today based on the start-of-day remaining budget
+    const originalDailyBudgetForToday = remainingMonthlyAtStartOfDay / remainingDays;
+    
+    // Calculate today's available budget by subtracting today's expenses from the original daily budget
+    const todayAvailableBudget = originalDailyBudgetForToday - todayExpensesTotal;
+
+    return Math.max(0, todayAvailableBudget);
   });
 
   const formatDate = computed(() => {

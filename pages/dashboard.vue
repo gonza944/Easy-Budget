@@ -29,7 +29,6 @@ const { getExpensesByBudgetId } = store;
 const { loading: expensesLoading } = storeToRefs(useMyExpensesStore());
 const { selectedDate } = useSelectedDate();
 const { monthlyBudget, loading: monthlyBudgetLoading } = storeToRefs(UseExpensesTotalsStore());
-const { expensesBurnDown } = storeToRefs(useBurnDownChartStore());
 const { selectedBudget } = storeToRefs(useMyBudgetStoreStore());
 
 const showExpenseForm = ref(false);
