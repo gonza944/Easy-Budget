@@ -42,13 +42,12 @@ export default defineEventHandler(async (event) => {
           .eq('budget_id', budget_id)
           .gte('date', startDate)
           .lte('date', endDate),
-        // NEW: Get budget period for the specific month
+        // Get budget period for the specific month with corrected year/month comparison
         userSupabase
           .from('budget_periods')
           .select('daily_amount, monthly_amount')
           .eq('budget_id', budget_id)
-          .lte('valid_from_year', queryYear)
-          .lte('valid_from_month', queryMonth)
+          .or(`valid_from_year.lt.${queryYear},and(valid_from_year.eq.${queryYear},valid_from_month.lte.${queryMonth})`)
           .or(`valid_until_year.is.null,valid_until_year.gt.${queryYear},and(valid_until_year.eq.${queryYear},valid_until_month.gte.${queryMonth})`)
           .order('valid_from_year', { ascending: false })
           .order('valid_from_month', { ascending: false })
