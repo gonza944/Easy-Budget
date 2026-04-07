@@ -31,9 +31,9 @@ const onNumberInput = (e: Event) => {
   <form class="flex flex-col gap-6 " @submit="onSubmit">
     <FormField v-slot="{ componentField }" name="name">
       <FormItem class="flex flex-col gap-4">
-        <FormLabel>Name</FormLabel>
+        <FormLabel>Nombre</FormLabel>
         <FormControl>
-          <Input type="text" v-bind="componentField" placeholder="Budget name" />
+          <Input type="text" v-bind="componentField" placeholder="Nombre del presupuesto" />
         </FormControl>
         <div class="min-h-[20px] block">
           <FormMessage />
@@ -43,9 +43,9 @@ const onNumberInput = (e: Event) => {
 
     <FormField v-slot="{ componentField }" name="description">
       <FormItem>
-        <FormLabel>Description</FormLabel>
+        <FormLabel>Descripción</FormLabel>
         <FormControl>
-          <Textarea placeholder="Tell us a little bit about the budget" class="resize-none" v-bind="componentField" />
+          <Textarea placeholder="Cuéntanos un poco sobre el presupuesto" class="resize-none" v-bind="componentField" />
         </FormControl>
         <div class="min-h-[20px] block">
           <FormMessage />
@@ -55,7 +55,7 @@ const onNumberInput = (e: Event) => {
 
     <FormField v-slot="{ componentField }" name="startingBudget">
       <FormItem class="flex flex-col">
-        <FormLabel>Starting Budget</FormLabel>
+        <FormLabel>Presupuesto inicial</FormLabel>
         <FormControl>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
@@ -73,7 +73,7 @@ const onNumberInput = (e: Event) => {
 
     <FormField v-slot="{ componentField }" name="startDate">
       <FormItem>
-        <FormLabel>Start Date</FormLabel>
+        <FormLabel>Fecha de inicio</FormLabel>
         <FormControl>
           <DatePicker v-bind="componentField" :maxValue="maxCalendarDate" />
         </FormControl>

@@ -12,7 +12,7 @@ type Props = {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    cancelText: 'Cancel',
+    cancelText: 'Cancelar',
     onCancel: undefined
 })
 

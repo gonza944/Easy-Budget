@@ -39,16 +39,16 @@ const todayDay = computed(() => {
                 <CardContent>
                     <TooltipTrigger
                         class="absolute right-3 top-3 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                        <Button variant="default" size="icon" class="h-8 w-8" title="Set to today's date"
+                        <Button variant="default" size="icon" class="h-8 w-8" title="Ir a la fecha de hoy"
                             @click="setToday">
                             <span class="text-xs font-light text-primary-foreground">{{ todayDay }}</span>
                         </Button>
                     </TooltipTrigger>
-                    <Calendar v-model="internalValue" initial-focus />
+                    <Calendar v-model="internalValue" locale="es-AR" initial-focus />
                 </CardContent>
             </Card>
             <TooltipContent>
-                <p>Set to today's date</p>
+                <p>Ir a la fecha de hoy</p>
             </TooltipContent>
         </Tooltip>
     </TooltipProvider>

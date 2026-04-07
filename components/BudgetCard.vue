@@ -37,7 +37,7 @@ const navigateToExpenses = (id: number) => {
                 <PopoverContent class="p-4" align="end" side="bottom">
                     <Button variant="ghost" class="w-full justify-start rounded-sm h-9 px-2 text-destructive-foreground"
                         @click="handleDeleteClick(onDeleteClick, budget.id)">
-                        Delete Budget
+                        Eliminar presupuesto
                     </Button>
                 </PopoverContent>
             </Popover>

@@ -34,12 +34,12 @@ const isFormValid = computed(() => {
     <Drawer v-if="isMobile" :open="isOpen" @update:open="isOpen = $event">
         <DrawerContent class="p-4">
             <DrawerHeader class="pb-8">
-                <DrawerTitle class="text-2xl font-bold">Create Shared Activity</DrawerTitle>
+                <DrawerTitle class="text-2xl font-bold">Crear actividad compartida</DrawerTitle>
             </DrawerHeader>
             <CreateSharedActivityForm :form="form" :on-submit="onSubmit" :is-form-valid="isFormValid" />
             <DrawerFooter>
                 <Button type="submit" :disabled="!isFormValid" @click="onSubmit">
-                    Submit
+                    Guardar
                 </Button>
             </DrawerFooter>
         </DrawerContent>
@@ -48,12 +48,12 @@ const isFormValid = computed(() => {
     <Dialog v-else :open="isOpen" @update:open="isOpen = $event">
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Create Shared Activity</DialogTitle>
+                <DialogTitle>Crear actividad compartida</DialogTitle>
             </DialogHeader>
             <CreateSharedActivityForm :form="form" :on-submit="onSubmit" :is-form-valid="isFormValid" />
             <DialogFooter>
                 <Button type="submit" :disabled="!isFormValid" @click="onSubmit">
-                    Submit
+                    Guardar
                 </Button>
             </DialogFooter>
         </DialogContent>

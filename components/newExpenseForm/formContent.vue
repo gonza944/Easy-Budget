@@ -3,9 +3,9 @@
     <!-- Name field -->
     <FormField v-slot="{ componentField, errorMessage }" name="name">
       <FormItem>
-        <FormLabel>Name</FormLabel>
+        <FormLabel>Nombre</FormLabel>
         <FormControl>
-          <Input v-bind="componentField" placeholder="Expense name" />
+          <Input v-bind="componentField" placeholder="Nombre del gasto" />
         </FormControl>
         <Transition name="slide-fade">
           <FormMessage v-if="errorMessage" />
@@ -16,12 +16,12 @@
     <!-- Category field -->
     <FormField v-slot="{ componentField, errorMessage: categoryError }" name="category_id" class="flex-1">
       <FormItem class="h-full flex flex-col">
-        <FormLabel>Category</FormLabel>
+        <FormLabel>Categoría</FormLabel>
         <Combobox :model-value="componentField.modelValue" @update:model-value="componentField.onChange">
           <FormControl class="w-full">
             <ComboboxAnchor>
               <div class="relative w-full items-center">
-                <ComboboxInput class="text-base md:text-sm" placeholder="Select category" :display-value="(val: number) => {
+                <ComboboxInput class="text-base md:text-sm" placeholder="Selecciona una categoría" :display-value="(val: number) => {
                   if (!val) return '';
                   const category = categories.find(cat => cat.id === val);
                   return category ? category.name : '';
@@ -35,7 +35,7 @@
 
           <ComboboxList>
             <ComboboxEmpty>
-              Nothing found.
+              No se encontraron resultados.
             </ComboboxEmpty>
 
             <ComboboxGroup class="overflow-y-auto max-h-48 md:max-h-72">
@@ -62,13 +62,13 @@
     <div class="flex flex-row gap-4 items-center justify-between">
       <div class="flex space-x-2 mt-5">
         <Switch id="expense-type" v-model="isExpense" />
-        <Label for="expense-type">{{ isExpense ? 'Expense' : 'Income' }}</Label>
+        <Label for="expense-type">{{ isExpense ? 'Gasto' : 'Ingreso' }}</Label>
       </div>
 
       <!-- Amount field -->
       <FormField v-slot="{ componentField, errorMessage: amountError }" name="amount" class="flex-1">
         <FormItem class="h-full flex flex-col w-full">
-          <FormLabel>Amount</FormLabel>
+          <FormLabel>Monto</FormLabel>
           <FormControl>
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
@@ -88,9 +88,9 @@
     <!-- Description field -->
     <FormField v-slot="{ componentField, errorMessage }" name="description">
       <FormItem>
-        <FormLabel>Description</FormLabel>
+        <FormLabel>Descripción</FormLabel>
         <FormControl>
-          <Textarea v-bind="componentField" placeholder="Description (optional)" class="resize-none" rows="2" />
+          <Textarea v-bind="componentField" placeholder="Descripción (opcional)" class="resize-none" rows="2" />
         </FormControl>
         <Transition name="slide-fade">
           <FormMessage v-if="errorMessage" />

@@ -85,7 +85,7 @@ const { toggleDescriptionColumnVisibility } = useColumnVisibility(table)
           <template v-else-if="!loading && table.getRowModel().rows?.length === 0">
             <TableRow>
               <TableCell :colspan="columns.length" class="h-24 text-center">
-                No Expenses yet.
+                Todavía no hay gastos.
               </TableCell>
             </TableRow>
           </template>

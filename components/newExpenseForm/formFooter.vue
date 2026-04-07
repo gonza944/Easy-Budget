@@ -1,7 +1,7 @@
 <template>
-    <Button variant="outline" @click="onSubmit(false)" :disabled="!isFormValid">Add Another Expense</Button>
+    <Button variant="outline" @click="onSubmit(false)" :disabled="!isFormValid">Agregar otro gasto</Button>
     <Button type="submit" @click="onSubmit" :disabled="!isFormValid">
-        Add Expense
+        Agregar gasto
     </Button>
 </template>
 
