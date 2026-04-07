@@ -27,7 +27,7 @@ const formatDate = (value: string | number | Date) => dateFormatter.format(new D
 const color = (d: DataRecord, i: number) => ['var(--chart-1)', 'var(--chart-3)'][i]
 const template = (d: DataRecord) => `<div class="flex flex-col gap-4 text-sm">
 <span>Fecha: ${formatDate(d.x)}</span>
-${d.y !== undefined ? `<span>Presupuesto restante: <span class="text-sm font-medium ${d.y >= 0 ? 'text-success' : 'text-destructive-foreground'}">${d.y?.toLocaleString(locale, { style: 'currency', currency: 'USD' })}</span></span>` : '<span>Todavía no hay gastos registrados.</span>'}
+${d.y !== undefined ? `<span>Presupuesto restante: <span class="text-sm font-medium ${d.y >= 0 ? 'text-success' : 'text-destructive-foreground'}">${d.y?.toLocaleString(locale, { style: 'currency', currency: 'ARS' })}</span></span>` : '<span>Todavía no hay gastos registrados.</span>'}
 </div>`
 // Create a function that returns different dash styles based on the line index
 const lineDashArray = (d: DataRecord, i: number) => i === 1 ? [3] : []

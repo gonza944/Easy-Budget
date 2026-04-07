@@ -21,8 +21,8 @@ const theOtherBudgetAmount = computed(() => {
   )
 
   return budgetType.value === 'daily' 
-    ? monthlyAmount.toLocaleString(locale, { style: 'currency', currency: 'USD' })
-    : dailyAmount.toLocaleString(locale, { style: 'currency', currency: 'USD' })
+    ? monthlyAmount.toLocaleString(locale, { style: 'currency', currency: 'ARS' })
+    : dailyAmount.toLocaleString(locale, { style: 'currency', currency: 'ARS' })
 })
 
 // Only allow numeric input with decimals

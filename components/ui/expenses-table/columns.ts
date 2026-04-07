@@ -29,7 +29,7 @@ export const columns: ColumnDef<Expense>[] = [
       const amount = Number.parseFloat(row.getValue("amount"));
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
       }).format(Math.abs(amount));
       return h(
         "div",

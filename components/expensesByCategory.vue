@@ -21,7 +21,7 @@ const categoryAccessor = (d: { category: string, amount: number }) => d.category
 const tooltipHtml = (d: { data: { category: string, amount: number } }) => {
   return `<div class="flex gap-2 items-center">
     <span>${d.data.category}:</span>
-    <span>${d.data.amount.toLocaleString(locale, { style: 'currency', currency: 'USD' })}</span>
+    <span>${d.data.amount.toLocaleString(locale, { style: 'currency', currency: 'ARS' })}</span>
   </div>`;
 };
 

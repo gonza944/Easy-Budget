@@ -48,7 +48,7 @@ const isEditing = ref(false);
             'text-destructive-foreground': (remainingMonthlyBudget || 0) < 0,
             'text-success': (remainingMonthlyBudget || 0) >= 0
           }">
-            {{ Number(remainingMonthlyBudget).toLocaleString(locale, { style: 'currency', currency: 'USD' }) }}
+            {{ Number(remainingMonthlyBudget).toLocaleString(locale, { style: 'currency', currency: 'ARS' }) }}
           </p>
         </template>
       </div>
@@ -63,7 +63,7 @@ const isEditing = ref(false);
             'text-destructive-foreground': remainingDailyBudget < 0,
             'text-success': remainingDailyBudget >= 0
           }">
-            {{ remainingDailyBudget.toLocaleString(locale, { style: 'currency', currency: 'USD' }) }}
+            {{ remainingDailyBudget.toLocaleString(locale, { style: 'currency', currency: 'ARS' }) }}
           </p>
         </template>
       </div>

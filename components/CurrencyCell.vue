@@ -14,7 +14,7 @@ const locale = 'es-AR';
 const amount = computed(() => {
   const value = props.item[props.column.key];
   return typeof value === 'number'
-    ? value.toLocaleString(locale, { style: 'currency', currency: 'USD' })
+    ? value.toLocaleString(locale, { style: 'currency', currency: 'ARS' })
     : value;
 });
 </script>
