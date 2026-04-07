@@ -6,6 +6,7 @@ import { computed } from 'vue';
 import { cn } from '@sglara/cn';
 
 const props = defineProps<{ data: Record<string, number>, class?: HTMLAttributes['class'] }>()
+const locale = 'es-AR'
 
 const chartData = computed(() => {
   return Object.entries(props.data || {}).map(([category, amount]) => ({
@@ -20,7 +21,7 @@ const categoryAccessor = (d: { category: string, amount: number }) => d.category
 const tooltipHtml = (d: { data: { category: string, amount: number } }) => {
   return `<div class="flex gap-2 items-center">
     <span>${d.data.category}:</span>
-    <span>${d.data.amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>
+    <span>${d.data.amount.toLocaleString(locale, { style: 'currency', currency: 'USD' })}</span>
   </div>`;
 };
 
@@ -39,7 +40,7 @@ const colorAccessor = (d: { category: string, amount: number }, i: number) => {
 <template>
   <Card :class="cn(props.class, 'budget-chart')">
     <CardHeader>
-      <CardTitle>Expenses by Category</CardTitle>
+      <CardTitle>Gastos por categoría</CardTitle>
     </CardHeader>
     <CardContent>
       <VisSingleContainer :data="chartData">

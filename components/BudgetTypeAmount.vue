@@ -9,6 +9,7 @@ const { form } = defineProps<{
 
 const budgetType = toRef(form.values, 'budgetType')
 const budgetAmount = toRef(form.values, 'budgetAmount')
+const locale = 'es-AR'
 
 const theOtherBudgetAmount = computed(() => {
   const today = new Date()
@@ -20,8 +21,8 @@ const theOtherBudgetAmount = computed(() => {
   )
 
   return budgetType.value === 'daily' 
-    ? monthlyAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-    : dailyAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+    ? monthlyAmount.toLocaleString(locale, { style: 'currency', currency: 'USD' })
+    : dailyAmount.toLocaleString(locale, { style: 'currency', currency: 'USD' })
 })
 
 // Only allow numeric input with decimals
@@ -57,11 +58,11 @@ onMounted(() => {
     <div class="flex gap-4 items-center justify-between">
       <FormField v-slot="{ componentField }" name="budgetType">
         <FormItem class="flex flex-col self-start">
-          <FormLabel>Budget Type</FormLabel>
+          <FormLabel>Tipo de presupuesto</FormLabel>
           <Select v-bind="componentField">
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Select a budget type" />
+                <SelectValue placeholder="Selecciona un tipo de presupuesto" />
               </SelectTrigger>
             </FormControl>
             <div class="min-h-[20px] block">
@@ -70,10 +71,10 @@ onMounted(() => {
             <SelectContent>
               <SelectGroup>
                 <SelectItem value="daily">
-                  Daily
+                  Diario
                 </SelectItem>
                 <SelectItem value="monthly">
-                  Monthly
+                  Mensual
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
@@ -83,7 +84,7 @@ onMounted(() => {
 
       <FormField v-slot="{ componentField }" name="budgetAmount">
         <FormItem class="flex flex-col">
-          <FormLabel>Budget Amount</FormLabel>
+          <FormLabel>Monto del presupuesto</FormLabel>
           <FormControl>
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
@@ -105,7 +106,7 @@ onMounted(() => {
     </div>
 
     <p v-if="Number(budgetAmount) > 0" class="text-sm text-muted-foreground">
-      The {{ budgetType === 'daily' ? 'monthly' : 'daily' }} budget amount is {{ theOtherBudgetAmount }}
+      El presupuesto {{ budgetType === 'daily' ? 'mensual' : 'diario' }} es {{ theOtherBudgetAmount }}
     </p>
   </div>
 </template>

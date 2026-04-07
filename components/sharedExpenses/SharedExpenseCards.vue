@@ -53,7 +53,7 @@ const handleDeleteConfirm = () => {
                 <PopoverContent class="p-4" align="end" side="bottom">
                     <Button variant="ghost" class="w-full justify-start rounded-sm h-9 px-2 text-destructive-foreground"
                         @click="handleDeleteClick(sharedActivity.id, index)">
-                        Delete Shared Activity
+                        Eliminar actividad compartida
                     </Button>
                 </PopoverContent>
             </Popover>
@@ -69,9 +69,9 @@ const handleDeleteConfirm = () => {
     <ConfirmationDialog 
         v-if="isDeleteDialogOpen" 
         v-model:open="isDeleteDialogOpen" 
-        title="Delete Shared Activity"
-        description="Are you sure you want to delete this shared activity? This action cannot be undone."
-        action-text="Delete" 
+        title="Eliminar actividad compartida"
+        description="¿Seguro que quieres eliminar esta actividad compartida? Esta acción no se puede deshacer."
+        action-text="Eliminar"
         :on-cancel="handleDeleteCancel" 
         :on-confirm="handleDeleteConfirm" />
 </template>

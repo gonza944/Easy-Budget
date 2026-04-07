@@ -43,24 +43,24 @@ const handleAddExpense = () => {
 onMounted(() => {
   updateMenuElements([
     {
-      label: "Add Expense",
+      label: "Agregar gasto",
       onClick: () => { handleAddExpense() },
     },
     {
-      label: "Select Date",
+      label: "Seleccionar fecha",
       onClick: () => { showDateSelector.value = !showDateSelector.value },
     },
     {
-      label: "Go to My Budgets",
+      label: "Ir a mis presupuestos",
       onClick: () => { router.push('/myBudgets') },
     },
     {
-      label: "Go to Shared Activities",
+      label: "Ir a actividades compartidas",
       onClick: () => { router.push('/sharedActivities') },
     },
   ]);
 
-  updateMenuTitle(`${selectedBudget?.value?.name} Dashboard`);
+  updateMenuTitle(selectedBudget?.value?.name ? `Panel de ${selectedBudget.value.name}` : 'Panel');
 })
 </script>
 
@@ -78,7 +78,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <ExpensesTable title="Expenses" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
+      <ExpensesTable title="Gastos" :data="expenses || []" :columns="columns" :handleAddExpense="handleAddExpense"
         :loading="expensesLoading" />
     </div>
 

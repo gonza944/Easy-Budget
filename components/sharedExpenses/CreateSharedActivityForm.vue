@@ -66,18 +66,18 @@ const filteredParticipants = computed(() => {
     <form class="flex flex-col gap-4" :disabled="!isFormValid" @submit="form.handleSubmit(onSubmit)">
         <FormField v-slot="{ componentField }" name="name">
             <FormItem v-auto-animate>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Nombre</FormLabel>
                 <FormControl>
-                    <Input v-bind="componentField" placeholder="Activity name" />
+                    <Input v-bind="componentField" placeholder="Nombre de la actividad" />
                 </FormControl>
                 <FormMessage />
             </FormItem>
         </FormField>
         <FormField v-slot="{ componentField }" name="description">
             <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Descripción</FormLabel>
                 <FormControl>
-                    <Textarea v-bind="componentField" placeholder="Description (optional)" class="resize-none"
+                    <Textarea v-bind="componentField" placeholder="Descripción (opcional)" class="resize-none"
                         rows="2" />
                 </FormControl>
                 <FormMessage />
@@ -86,7 +86,7 @@ const filteredParticipants = computed(() => {
         <!-- Participants field: Stores array of Member objects (not strings) -->
         <FormField v-slot="{ componentField }" name="participants">
             <FormItem v-auto-animate>
-                <FormLabel>Participants</FormLabel>
+                <FormLabel>Participantes</FormLabel>
                 <FormControl>
                     <!-- 
                         Combobox handles the dropdown selection of participants
@@ -116,7 +116,7 @@ const filteredParticipants = computed(() => {
 
                                 <!-- Search input for filtering available participants -->
                                 <ComboboxInput v-model="searchTerm" as-child no-border>
-                                    <TagsInputInput placeholder="Add participants..."
+                                    <TagsInputInput placeholder="Agregar participantes..."
                                         class="min-w-[200px] w-full p-0 border-none h-auto" @keydown.enter.prevent />
                                 </ComboboxInput>
                             </TagsInput>
@@ -124,8 +124,7 @@ const filteredParticipants = computed(() => {
 
                         <!-- Dropdown list of available participants -->
                         <ComboboxList class="w-[--reka-popper-anchor-width]">
-                            <ComboboxEmpty class="p-4">No participants found. You can add them manually after creating
-                                the activity.</ComboboxEmpty>
+                            <ComboboxEmpty class="p-4">No se encontraron participantes. Puedes agregarlos manualmente después de crear la actividad.</ComboboxEmpty>
                             <ComboboxGroup>
                                 <!-- 
                                     Each selectable participant item

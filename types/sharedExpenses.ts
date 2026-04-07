@@ -31,7 +31,7 @@ export const SharedActivitySchema = z.object({
 });
 
 export const CreateSharedActivitySchema = z.object({
-  name: z.string().min(1, "Activity name is required"),
+  name: z.string().min(1, "El nombre de la actividad es obligatorio"),
   description: z.string().optional().nullable(),
   participants: z.array(MemberSchema),
 });
@@ -232,4 +232,3 @@ export type SharedExpenseApiResponse = z.infer<typeof SharedExpenseApiResponseSc
 export type SettlementApiResponse = z.infer<typeof SettlementApiResponseSchema>;
 export type MemberApiResponse = z.infer<typeof MemberApiResponseSchema>;
 export type DeleteSharedActivityResponse = z.infer<typeof DeleteSharedActivityResponseSchema>;
-

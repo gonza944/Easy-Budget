@@ -10,6 +10,8 @@ type Props = {
   remainingDailyBudget: number;
 };
 
+const locale = 'es-AR';
+
 defineProps<Props>();
 
 const { selectedDate } = useSelectedDate();
@@ -33,11 +35,11 @@ const isEditing = ref(false);
       </Button>
     </div>
     <CardHeader class="w-full">
-      <CardTitle>Remaining Budgets</CardTitle>
+      <CardTitle>Presupuesto restante</CardTitle>
     </CardHeader>
     <CardContent class="flex flex-col gap-4 w-full">
       <div class="flex flex-row gap-2 justify-between">
-        <p>Monthly Budget:</p>
+        <p>Presupuesto mensual:</p>
         <template v-if="monthlyBudgetLoading">
           <Skeleton class="w-[30%] h-10 rounded-full" />
         </template>
@@ -46,13 +48,13 @@ const isEditing = ref(false);
             'text-destructive-foreground': (remainingMonthlyBudget || 0) < 0,
             'text-success': (remainingMonthlyBudget || 0) >= 0
           }">
-            {{ Number(remainingMonthlyBudget).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+            {{ Number(remainingMonthlyBudget).toLocaleString(locale, { style: 'currency', currency: 'USD' }) }}
           </p>
         </template>
       </div>
 
       <div class="flex flex-row gap-2 justify-between">
-        <p>Daily Budget:</p>
+        <p>Presupuesto diario:</p>
         <template v-if="monthlyBudgetLoading">
           <Skeleton class="w-[30%] h-10 rounded-full" />
         </template>
@@ -61,7 +63,7 @@ const isEditing = ref(false);
             'text-destructive-foreground': remainingDailyBudget < 0,
             'text-success': remainingDailyBudget >= 0
           }">
-            {{ remainingDailyBudget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+            {{ remainingDailyBudget.toLocaleString(locale, { style: 'currency', currency: 'USD' }) }}
           </p>
         </template>
       </div>

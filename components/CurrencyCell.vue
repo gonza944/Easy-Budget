@@ -8,12 +8,13 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const locale = 'es-AR';
 
 // Get the amount from the item using the column key
 const amount = computed(() => {
   const value = props.item[props.column.key];
   return typeof value === 'number'
-    ? value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+    ? value.toLocaleString(locale, { style: 'currency', currency: 'USD' })
     : value;
 });
 </script>
@@ -22,4 +23,4 @@ const amount = computed(() => {
   <div class="text-right text-destructive-foreground">
     {{ amount }}
   </div>
-</template> 
+</template>

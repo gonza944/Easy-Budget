@@ -3,6 +3,7 @@ import { UseExpensesByCategoryStore } from '~/stores/useExpensesByCategoryStore'
 import { useMediaQuery } from '@vueuse/core';
 
 const { expensesByCategory, loading } = storeToRefs(UseExpensesByCategoryStore());
+const locale = 'es-AR';
 
 const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -15,7 +16,7 @@ const isOpen = ref(!isMobile.value)
       <CardHeader class="w-full flex-shrink-0">
         <CollapsibleTriggerResponsive :is-open="isOpen">
           <CardTitle>
-            <span>Expenses by Category</span>
+            <span>Gastos por categoría</span>
           </CardTitle>
         </CollapsibleTriggerResponsive>
       </CardHeader>
@@ -30,7 +31,7 @@ const isOpen = ref(!isMobile.value)
             <div v-for="(amount, category) in expensesByCategory" v-else :key="category"
               class="flex flex-row justify-between">
               <p>{{ category }}:</p>
-              <p :class="{ 'text-success': amount <= 0, 'text-destructive-foreground': amount > 0 }">{{ Math.abs(amount).toLocaleString('en-US', {
+              <p :class="{ 'text-success': amount <= 0, 'text-destructive-foreground': amount > 0 }">{{ Math.abs(amount).toLocaleString(locale, {
                 style: 'currency', currency:
                   'USD'
                 }) }}</p>

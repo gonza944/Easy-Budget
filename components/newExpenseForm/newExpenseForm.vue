@@ -2,7 +2,7 @@
   <Drawer v-if="isMobile" :open="isOpen" @update:open="isOpen = $event">
     <DrawerContent class="p-4">
       <DrawerHeader class="pb-8">
-        <DrawerTitle class="text-2xl font-bold">Add Expense</DrawerTitle>
+        <DrawerTitle class="text-2xl font-bold">Agregar gasto</DrawerTitle>
       </DrawerHeader>
       <FormContent
         v-model:is-expense="isExpense" :categories="categories" :on-number-input="onNumberInput"
@@ -17,7 +17,7 @@
   <Dialog v-else :open="isOpen" @update:open="isOpen = $event">
     <DialogContent class="sm:max-w-md">
       <DialogHeader class="pb-2">
-        <DialogTitle class="text-2xl font-bold">Add Expense</DialogTitle>
+        <DialogTitle class="text-2xl font-bold">Agregar gasto</DialogTitle>
       </DialogHeader>
 
       <FormContent

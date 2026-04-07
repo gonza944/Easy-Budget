@@ -137,7 +137,7 @@ export const useMySharedActivitiesStore = defineStore(
           selectedSharedActivityBalances.value = previousSelectedBalances;
           selectedSharedActivityExpenses.value = previousSelectedExpenses;
           selectedSharedActivitySettlements.value = previousSelectedSettlements;
-          toast.error("Failed to delete shared activity");
+          toast.error("No se pudo eliminar la actividad compartida");
         },
         async onResponse() {
           // Invalidate shared activities in the background if the request succeeded
@@ -183,7 +183,7 @@ export const useMySharedActivitiesStore = defineStore(
           },
           onResponseError() {
             sharedActivities.value = new Map(previousSharedActivities);
-            toast.error("Failed to create shared activity");
+            toast.error("No se pudo crear la actividad compartida");
           },
         }
       );

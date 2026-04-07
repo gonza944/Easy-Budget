@@ -30,11 +30,11 @@ async function login() {
       await refreshSession()
       await navigateTo('/')
     } else {
-      errorMessage.value = 'Login failed'
+      errorMessage.value = 'No se pudo iniciar sesión'
     }
   } catch (error) {
     console.error('Login error:', error)
-    errorMessage.value = 'Bad credentials'
+    errorMessage.value = 'Credenciales incorrectas'
     setIsLoading(false)
   }
 }
@@ -51,40 +51,40 @@ onUnmounted(() => {
     :class="props.class">
     <Card class="w-full md:max-w-md rounded-none md:rounded-lg md:h-auto">
       <CardHeader>
-        <CardTitle>Login to your account</CardTitle>
+        <CardTitle>Inicia sesión en tu cuenta</CardTitle>
         <CardDescription>
-          Enter your email below to login to your account
+          Ingresa tu correo electrónico para iniciar sesión
         </CardDescription>
       </CardHeader>
       <CardContent class="h-full">
         <form @submit.prevent="login">
           <div class="flex flex-col gap-6">
             <div class="grid gap-3">
-              <Label for="email">Email</Label>
+              <Label for="email">Correo electrónico</Label>
               <Input id="email" v-model="credentials.email" type="email" placeholder="m@example.com" required />
             </div>
             <div class="grid gap-3">
               <div class="flex items-center">
-                <Label for="password">Password</Label>
+                <Label for="password">Contraseña</Label>
                 <a href="#" class="ml-auto inline-block text-sm underline-offset-4 hover:underline">
-                  Forgot your password?
+                  ¿Olvidaste tu contraseña?
                 </a>
               </div>
               <Input id="password" v-model="credentials.password" type="password" required />
             </div>
             <div class="flex flex-col gap-3">
               <Button type="submit" class="w-full">
-                Login
+                Iniciar sesión
               </Button>
               <Button variant="outline" class="w-full">
-                Login with Google
+                Iniciar sesión con Google
               </Button>
             </div>
           </div>
           <div class="mt-4 text-center text-sm">
-            Don't have an account?
+            ¿No tienes una cuenta?
             <a href="#" class="underline underline-offset-4">
-              Sign up
+              Crear cuenta
             </a>
           </div>
         </form>

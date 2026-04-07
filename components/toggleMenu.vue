@@ -9,7 +9,7 @@ export type MenuElement = {
 
 const isOpen = useState('menu', () => false);
 const elements = useState<MenuElement[]>('menuElements', () => []);
-const menuTitle = useState<string>('menuTitle', () => 'Menu');
+const menuTitle = useState<string>('menuTitle', () => 'Menú');
 
 const onClickWrapper = (onClick: () => void) => {
   isOpen.value = false;
@@ -54,7 +54,7 @@ onBeforeUnmount(() => {
           </Button>
           <Divider class="text-primary" />
           <Button variant="ghost" @click="logout" class="w-full py-6 text-sm text-left justify-start text-destructive-foreground">
-            Logout
+            Cerrar sesión
           </Button>
         </CardContent>
       </Card>
