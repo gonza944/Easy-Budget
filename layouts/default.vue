@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-const { loggedIn } = useUserSession();
+const { loggedIn } = useAuth();
 const { isLoading } = useLoadingScreen();
 </script>
 

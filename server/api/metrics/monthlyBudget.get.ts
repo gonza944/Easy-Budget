@@ -1,27 +1,10 @@
 import { z } from "zod";
-import { createUserSupabaseClient } from "~/server/supabaseConnection";
+import { requireSupabaseUser } from "~/server/utils/supabase";
 import { MonthlyBudgetQuerySchema } from "~/types/metrics";
 import { calculateFirstAndLastDayOfTheMonth } from "~/utils/date";
 
 export default defineEventHandler(async (event) => {
-    // Check authentication first
-    const session = await getUserSession(event);
-    if (!session.user) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "Unauthorized: Please log in",
-      });
-    }
-
-    // Create authenticated Supabase client
-    if (!session.accessToken) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "No access token found in session",
-      });
-    }
-    
-    const userSupabase = createUserSupabaseClient(session.accessToken);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     // Validate query parameters
     const validatedQuery = await getValidatedQuery(event, MonthlyBudgetQuerySchema.parse);

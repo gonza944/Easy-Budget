@@ -1,85 +1,188 @@
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+
+const clearClientStores = () => {
+  if (import.meta.client) {
+    const { clearStore } = useClearStore();
+    clearStore();
+  }
+};
+
 export const useAuth = () => {
-  const { clearStore } = useClearStore();
-  const { loggedIn, user, session, fetch, clear } = useUserSession();
+  const user = useState<User | null>("auth:user", () => null);
+  const session = useState<Session | null>("auth:session", () => null);
+  const initialized = useState("auth:initialized", () => false);
+  const initializing = useState("auth:initializing", () => false);
 
-  // Enhanced login state that includes session validation
-  const isAuthenticated = computed(() => {
-    if (!loggedIn.value || !user.value) return false;
+  const loggedIn = computed(() => Boolean(user.value));
+  const isAuthenticated = computed(() => loggedIn.value);
 
-    // Check if session is expired
-    if (session.value?.expiresAt) {
-      const now = Math.floor(Date.now() / 1000);
-      const expiresAt = Number(session.value.expiresAt);
-
-      if (!isNaN(expiresAt) && expiresAt <= now) {
-        return false;
-      }
+  const sessionExpiresIn = computed(() => {
+    if (!session.value?.expires_at) {
+      return null;
     }
 
-    return true;
-  });
+    const remainingSeconds =
+      session.value.expires_at - Math.floor(Date.now() / 1000);
 
-  // Reactive session expiry warning
-  const sessionExpiresIn = computed(() => {
-    if (!session.value?.expiresAt) return null;
-
-    const now = Math.floor(Date.now() / 1000);
-    const expiresAt = Number(session.value.expiresAt);
-
-    if (isNaN(expiresAt)) return null;
-
-    const remainingSeconds = expiresAt - now;
     return remainingSeconds > 0 ? remainingSeconds : 0;
   });
 
-  // Check if Supabase token expires within 5 minutes
-  // Note: Our session lasts 1 year, but Supabase tokens expire ~1 hour
   const sessionExpiresSoon = computed(() => {
     return sessionExpiresIn.value !== null && sessionExpiresIn.value < 300;
   });
 
-  // Enhanced refresh that handles errors gracefully
-  const refreshSession = async () => {
+  const applyAuthState = (nextSession: Session | null, nextUser?: User | null) => {
+    session.value = nextSession;
+    user.value = nextUser ?? nextSession?.user ?? null;
+    initialized.value = true;
+  };
+
+  const clearAuthState = () => {
+    session.value = null;
+    user.value = null;
+    initialized.value = true;
+  };
+
+  const redirectToLoginIfNeeded = async () => {
+    if (import.meta.client && useRoute().path !== "/login") {
+      await navigateTo("/login");
+    }
+  };
+
+  const initialize = async (force = false) => {
+    if ((initialized.value && !force) || initializing.value) {
+      return;
+    }
+
+    initializing.value = true;
+
     try {
-      await fetch();
+      if (import.meta.server) {
+        const event = useRequestEvent();
+
+        if (!event) {
+          clearAuthState();
+          return;
+        }
+
+        const { getSupabaseUser } = await import("~/server/utils/supabase");
+        const serverUser = await getSupabaseUser(event);
+
+        applyAuthState(null, serverUser);
+        return;
+      }
+
+      const supabase = useSupabaseClient();
+      const [
+        {
+          data: { session: currentSession },
+        },
+        {
+          data: { user: currentUser },
+          error,
+        },
+      ] = await Promise.all([
+        supabase.auth.getSession(),
+        supabase.auth.getUser(),
+      ]);
+
+      if (error || !currentUser) {
+        clearAuthState();
+        return;
+      }
+
+      applyAuthState(currentSession, currentUser);
+    } catch (error) {
+      console.error("Failed to initialize auth state:", error);
+      clearAuthState();
+    } finally {
+      initializing.value = false;
+    }
+  };
+
+  const handleAuthStateChange = async (
+    event: AuthChangeEvent,
+    nextSession: Session | null
+  ) => {
+    if (event === "SIGNED_OUT" || !nextSession) {
+      clearAuthState();
+      clearClientStores();
+      await redirectToLoginIfNeeded();
+      return;
+    }
+
+    applyAuthState(nextSession);
+
+    if (!import.meta.client) {
+      return;
+    }
+
+    const supabase = useSupabaseClient();
+    const {
+      data: { user: verifiedUser },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !verifiedUser) {
+      clearAuthState();
+      clearClientStores();
+      await redirectToLoginIfNeeded();
+      return;
+    }
+
+    applyAuthState(nextSession, verifiedUser);
+  };
+
+  const refreshSession = async () => {
+    if (import.meta.server) {
+      await initialize(true);
+      return loggedIn.value;
+    }
+
+    try {
+      const supabase = useSupabaseClient();
+      const {
+        data: { session: refreshedSession },
+        error,
+      } = await supabase.auth.refreshSession();
+
+      if (error || !refreshedSession) {
+        clearAuthState();
+        clearClientStores();
+        return false;
+      }
+
+      await handleAuthStateChange("TOKEN_REFRESHED", refreshedSession);
       return true;
     } catch (error) {
       console.error("Failed to refresh session:", error);
-      // Clear session if refresh fails
-      await logout();
+      clearAuthState();
+      clearClientStores();
       return false;
     }
   };
 
-  // Enhanced logout that calls the API
-  const logout = async () => {
-    try {
-      await Promise.all([
-        $fetch("/api/auth/logout", {
-          method: "POST",
-        }),
-        clear(),
-      ]);
-      clearStore();
-    } catch (error) {
-      console.error("Error during API logout:", error);
-    }
-  };
-
-  // Login function
   const login = async (credentials: { email: string; password: string }) => {
-    try {
-      const result = await $fetch("/api/auth/login", {
-        method: "POST",
-        body: credentials,
-      });
+    if (import.meta.server) {
+      return { success: false, error: "Login is only available in the browser" };
+    }
 
-      if (result.success) {
-        await refreshSession();
-        return { success: true, user: result.user };
+    try {
+      const supabase = useSupabaseClient();
+      const {
+        data: { session: nextSession, user: nextUser },
+        error,
+      } = await supabase.auth.signInWithPassword(credentials);
+
+      if (error || !nextSession || !nextUser) {
+        return {
+          success: false,
+          error: error?.message || "Login failed",
+        };
       }
 
-      return { success: false, error: "Login failed" };
+      await handleAuthStateChange("SIGNED_IN", nextSession);
+      return { success: true, user: nextUser };
     } catch (error) {
       console.error("Login error:", error);
       return {
@@ -89,32 +192,39 @@ export const useAuth = () => {
     }
   };
 
-  // Auto-refresh session when it's about to expire
-  const startSessionWatcher = () => {
-    const intervalId = setInterval(async () => {
-      if (sessionExpiresSoon.value && isAuthenticated.value) {
-        console.log("Session expires soon, auto-refreshing...");
-        await refreshSession();
-      }
-    }, 60000); // Check every minute
+  const logout = async () => {
+    if (import.meta.server) {
+      clearAuthState();
+      return;
+    }
 
-    // Return cleanup function
-    return () => clearInterval(intervalId);
+    try {
+      const supabase = useSupabaseClient();
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("Supabase logout error:", error);
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    } finally {
+      clearAuthState();
+      clearClientStores();
+    }
   };
 
   return {
-    // State
-    loggedIn,
     user,
     session,
+    loggedIn,
     isAuthenticated,
+    initialized,
     sessionExpiresIn,
     sessionExpiresSoon,
-
-    // Actions
+    initialize,
+    handleAuthStateChange,
     login,
     logout,
     refreshSession,
-    startSessionWatcher,
   };
 };

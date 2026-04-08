@@ -1,152 +1,42 @@
 # Authentication Setup
 
-This project uses `nuxt-auth-utils` with Supabase for authentication. The system has been refactored to prevent auth desynchronization issues.
+This project now uses Supabase SSR auth as the single source of truth for browser and server authentication.
 
-## Environment Setup
+## Environment
 
-Make sure you have the following environment variables configured:
+Set these variables in your local environment:
 
 ```bash
-# Supabase Configuration
 SUPABASE_URL=your_supabase_project_url_here
 SUPABASE_KEY=your_supabase_anon_key_here
-
-# Session Configuration (required for nuxt-auth-utils)
-# Generate a secure password with at least 32 characters
-NUXT_SESSION_PASSWORD=your-session-password-with-at-least-32-characters-here
 ```
 
-You can generate a secure session password using:
-```bash
-openssl rand -base64 32
-```
+`SUPABASE_KEY` is the public anon key. It is exposed to the browser through Nuxt runtime config so the browser Supabase client can maintain the session cookie chain.
 
-## Features
+## How It Works
 
-### Enhanced Session Management
-- **Long-lasting sessions**: Sessions last for one year (365 days) for better user experience
-- **Automatic token refresh**: Supabase tokens are automatically refreshed when they're about to expire (within 5 minutes)
-- **Server-side session hooks**: Session validation and refresh happen server-side for better security
-- **Client-side session watcher**: Monitors token expiry and handles automatic refresh
-- **Synchronized logout**: Clears both client and server sessions properly
+- The browser uses `@supabase/ssr` `createBrowserClient()` for login, logout, session refresh, and multi-tab auth synchronization.
+- The server uses request-scoped `createServerClient()` instances that read and write the same Supabase auth cookies.
+- Nitro server middleware calls `auth.getUser()` early on HTML and API requests so stale access tokens can be refreshed before route handlers run.
+- App UI state comes from `useAuth()`, which mirrors the verified Supabase auth state instead of storing a second app-owned auth session.
 
-### Improved Auth Endpoints
+## Important Behavior
 
-- `POST /api/auth/login` - Enhanced login with proper session management
-- `POST /api/auth/logout` - Comprehensive logout that clears all sessions
-- `POST /api/auth/refresh` - Manual session refresh endpoint
-- `GET /api/auth/session` - Get current session status
+- Supabase access tokens are short-lived by design.
+- Durable login comes from refresh-token rotation, not from extending an app cookie lifetime.
+- On the Free plan, the app relies on Supabase default session behavior. There is no app-side one-month timer; the goal is to keep the refresh chain healthy so normal usage stays logged in long-term.
+- Same-browser multi-tab sync is handled by Supabase auth state events and shared browser storage/cookies.
 
-### Better Error Handling
-- Graceful handling of session expiry
-- Automatic cleanup of invalid sessions
-- Proper error propagation to the client
+## Main Files
 
-### Type Safety
-- Custom TypeScript definitions for session data
-- Enhanced user and session interfaces
-- Better IDE support and type checking
+- `composables/useAuth.ts`: app-facing auth state and login/logout helpers
+- `composables/useSupabaseClient.ts`: browser Supabase client singleton
+- `server/utils/supabase.ts`: request-scoped server client helpers
+- `server/middleware/auth.ts`: early server-side refresh hook
 
-## Usage
+## Verification Checklist
 
-### Basic Usage with useUserSession
-```vue
-<script setup>
-const { loggedIn, user, fetch: refreshSession } = useUserSession()
-
-// Check if user is logged in
-if (loggedIn.value) {
-  console.log('User:', user.value)
-}
-
-// Manually refresh session
-await refreshSession()
-</script>
-```
-
-### Using the Enhanced Auth Composable
-```vue
-<script setup>
-const { 
-  isAuthenticated, 
-  sessionExpiresSoon, 
-  sessionExpiresIn,
-  login,
-  logout,
-  refreshSession 
-} = useAuth()
-
-// Login
-const result = await login({ email: 'user@example.com', password: 'password' })
-if (result.success) {
-  // Login successful
-}
-
-// Logout
-await logout()
-</script>
-```
-
-### Session Monitoring
-The system automatically monitors session expiry and refreshes tokens when needed. You can also monitor session status:
-
-```vue
-<template>
-  <div v-if="sessionExpiresSoon" class="warning">
-    Session expires in {{ Math.floor(sessionExpiresIn / 60) }} minutes
-  </div>
-</template>
-```
-
-## Architecture
-
-### Server-Side Session Management
-- Session data is stored in secure HTTP-only cookies
-- Server-side hooks handle session validation and refresh
-- Supabase token refresh is handled transparently
-
-### Client-Side Synchronization
-- Client-side plugin monitors session state
-- Automatic refresh when session approaches expiry
-- Reactive session state across all components
-
-### Middleware Protection
-The `authenticated` middleware now properly handles session refresh and validation:
-- Checks authentication status
-- Refreshes session if needed
-- Redirects to login if session is invalid
-
-## Preventing Auth Desync Issues
-
-The refactored system addresses common auth desync issues:
-
-1. **Token Expiry**: Automatic refresh prevents expired token issues (Supabase tokens refresh automatically)
-2. **Long Sessions**: Sessions last one year, so users don't need to re-login frequently
-3. **Server/Client Mismatch**: Session hooks ensure server and client stay in sync
-4. **Multiple Tab Issues**: Centralized session management handles multi-tab scenarios
-5. **Network Issues**: Graceful error handling and retry logic
-6. **Race Conditions**: Proper async handling and state management
-
-## Migration Notes
-
-If migrating from the old auth system:
-
-1. Update login calls to use `/api/auth/login`
-2. Update logout calls to use `/api/auth/logout`
-3. Remove manual token refresh calls - now handled automatically
-4. Update TypeScript types if using custom session data
-5. Test authentication flows thoroughly
-
-## Troubleshooting
-
-### Session Password Error
-If you get a session password error, make sure `NUXT_SESSION_PASSWORD` is set and has at least 32 characters.
-
-### Supabase Connection Issues
-Verify your `SUPABASE_URL` and `SUPABASE_KEY` environment variables are correct.
-
-### Session Not Persisting
-Check that cookies are enabled and the session password is properly configured.
-
-### Auto-refresh Not Working
-Ensure the client-side plugin is loaded and the session includes `expiresAt` data. 
+- Login once, refresh the page, and confirm protected pages still load.
+- Open two tabs and verify login/logout propagates across both.
+- Wait past the JWT lifetime and confirm the next authenticated request still works.
+- Hard refresh a protected page after being idle and confirm the session is recovered without logging in again.

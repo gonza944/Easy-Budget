@@ -6,7 +6,7 @@ definePageMeta({
   middleware: ['authenticated'],
 })
 const router = useRouter();
-const { user } = useUserSession();
+const { user } = useAuth();
 const store = useMyBudgetStoreStore();
 const { fetchBudgets, deleteBudget } = store;
 const { budgets, loading } = storeToRefs(store);

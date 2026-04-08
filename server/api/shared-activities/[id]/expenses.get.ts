@@ -1,4 +1,4 @@
-import { createUserSupabaseClient } from "../../../supabaseConnection";
+import { requireSupabaseUser } from "~/server/utils/supabase";
 import { z } from "zod";
 import { SharedExpenseWithMemberSchema } from "~/types/sharedExpenses";
 
@@ -15,25 +15,7 @@ export default defineEventHandler(async (event) => {
         statusMessage: "Invalid activity ID",
       });
     }
-
-    // Check authentication first
-    const session = await getUserSession(event);
-    if (!session.user) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "Unauthorized: Please log in",
-      });
-    }
-
-    // Create authenticated Supabase client
-    if (!session.accessToken) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "No access token found in session",
-      });
-    }
-    
-    const userSupabase = createUserSupabaseClient(session.accessToken as string);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     // Get all shared expenses from the activity with member and category info
     const { data, error } = await userSupabase

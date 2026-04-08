@@ -1,4 +1,4 @@
-import { createUserSupabaseClient } from "../../supabaseConnection";
+import { requireSupabaseUser } from "~/server/utils/supabase";
 import { z } from "zod";
 import { SharedActivityWithMembersSchema } from "~/types/sharedExpenses";
 
@@ -7,24 +7,7 @@ const SharedActivitiesArraySchema = z.array(SharedActivityWithMembersSchema);
 
 export default defineEventHandler(async (event) => {
   try {
-    // Check authentication first
-    const session = await getUserSession(event);
-    if (!session.user) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "Unauthorized: Please log in",
-      });
-    }
-
-    // Create authenticated Supabase client
-    if (!session.accessToken) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "No access token found in session",
-      });
-    }
-    
-    const userSupabase = createUserSupabaseClient(session.accessToken as string);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     const query = getQuery(event);
     const nameFilter = query.name as string | undefined;

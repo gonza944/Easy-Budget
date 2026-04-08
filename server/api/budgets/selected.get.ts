@@ -1,24 +1,9 @@
-import { createUserSupabaseClient } from "../../supabaseConnection";
+import { requireSupabaseUser } from "~/server/utils/supabase";
 import { BudgetSchema, type Budget } from "~/utils/budgetSchemas";
 
 export default defineEventHandler<Promise<Budget>>(async (event) => {
   try {
-    const session = await getUserSession(event);
-    if (!session.user) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "Unauthorized: Please log in",
-      });
-    }
-
-    if (!session.accessToken) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "No access token found in session",
-      });
-    }
-
-    const userSupabase = createUserSupabaseClient(session.accessToken);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     // Get selected budget with current period info
     const { data: budget, error } = await userSupabase
@@ -39,7 +24,7 @@ export default defineEventHandler<Promise<Budget>>(async (event) => {
           is_current
         )
       `)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .eq('selected', true)
       .eq('budget_periods.is_current', true)
       .single();

@@ -1,27 +1,10 @@
 import { z } from "zod";
 import { BudgetPeriodSchema, budgetTypeAmountSchema, type BudgetPeriod } from "~/utils/budgetSchemas";
-import { createUserSupabaseClient } from "../../supabaseConnection";
+import { requireSupabaseUser } from "~/server/utils/supabase";
 
 export default defineEventHandler<Promise<{ success: boolean; data?: BudgetPeriod; error?: string }>>(async (event) => {
   try {
-    // Check authentication first
-    const session = await getUserSession(event);
-    if (!session.user) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "Unauthorized: Please log in",
-      });
-    }
-
-    // Create authenticated Supabase client
-    if (!session.accessToken) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "No access token found in session",
-      });
-    }
-    
-    const userSupabase = createUserSupabaseClient(session.accessToken);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
     const periodId = getRouterParam(event, 'id');
     
     if (!periodId) {
@@ -39,7 +22,7 @@ export default defineEventHandler<Promise<{ success: boolean; data?: BudgetPerio
       'update_budget_period_amounts',
       {
         p_period_id: parseInt(periodId),
-        p_user_id: session.user.id,
+        p_user_id: user.id,
         p_budget_type: budgetType,
         p_budget_amount: budgetAmount
       }

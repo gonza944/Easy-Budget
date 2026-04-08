@@ -19,10 +19,7 @@ const onClickWrapper = (onClick: () => void) => {
 const { logout: authLogout } = useAuth()
 
 async function logout() {
-  // Use the enhanced logout function from useAuth
   await authLogout()
-  
-  // Navigate to login after logout
   await navigateTo('/login')
 }
 

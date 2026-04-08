@@ -1,27 +1,10 @@
 import { CreateBudgetPeriodSchema, BudgetPeriodSchema, type BudgetPeriod } from "~/utils/budgetSchemas";
 import { calculateBudgetAmounts } from "~/utils/date";
-import { createUserSupabaseClient } from "../../supabaseConnection";
+import { requireSupabaseUser } from "~/server/utils/supabase";
 
 export default defineEventHandler<Promise<{ success: boolean; data?: BudgetPeriod; error?: string }>>(async (event) => {
   try {
-    // Check authentication first
-    const session = await getUserSession(event);
-    if (!session.user) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "Unauthorized: Please log in",
-      });
-    }
-
-    // Create authenticated Supabase client
-    if (!session.accessToken) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "No access token found in session",
-      });
-    }
-    
-    const userSupabase = createUserSupabaseClient(session.accessToken);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     const { budgetId, budgetType, budgetAmount, validFromYear, validFromMonth } =
       await readValidatedBody(event, CreateBudgetPeriodSchema.parse);
@@ -39,7 +22,7 @@ export default defineEventHandler<Promise<{ success: boolean; data?: BudgetPerio
       .from('budget_periods')
       .insert({
         budget_id: budgetId,
-        user_id: session.user.id,
+        user_id: user.id,
         daily_amount: dailyAmount,
         monthly_amount: monthlyAmount,
         valid_from_year: validFromYear,

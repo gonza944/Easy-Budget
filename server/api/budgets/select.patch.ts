@@ -1,25 +1,8 @@
-import { createUserSupabaseClient } from "../../supabaseConnection";
+import { requireSupabaseUser } from "~/server/utils/supabase";
 
 export default defineEventHandler(async (event) => {
   try {
-    // Check authentication first
-    const session = await getUserSession(event);
-    if (!session.user) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "Unauthorized: Please log in",
-      });
-    }
-
-    // Create authenticated Supabase client
-    if (!session.accessToken) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "No access token found in session",
-      });
-    }
-    
-    const userSupabase = createUserSupabaseClient(session.accessToken);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     const body = await readBody(event);
     const budgetId = Number(body.budgetId);
@@ -35,7 +18,7 @@ export default defineEventHandler(async (event) => {
     const { error: unselectError } = await userSupabase
       .from('budgets')
       .update({ selected: false })
-      .eq('user_id', session.user.id);
+      .eq('user_id', user.id);
 
     if (unselectError) {
       throw createError({
@@ -49,7 +32,7 @@ export default defineEventHandler(async (event) => {
       .from('budgets')
       .update({ selected: true })
       .eq('id', budgetId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
