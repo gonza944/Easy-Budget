@@ -105,7 +105,7 @@ export const useMyBudgetStoreStore = defineStore(
           // Rollback the data if the request failed
           budgets.value = previousBudgets;
           selectedBudget.value = previousSelected;
-          showErrorToast("Failed to select budget");
+          showErrorToast("No se pudo seleccionar el presupuesto");
         },
         async onResponse() {
           // Invalidate budgets in the background if the request succeeded
@@ -140,7 +140,7 @@ export const useMyBudgetStoreStore = defineStore(
           // Rollback the data if the request failed
           budgets.value = previousBudgets;
           selectedBudget.value = previousSelected;
-          showErrorToast("Failed to delete budget");
+          showErrorToast("No se pudo eliminar el presupuesto");
         },
         async onResponse() {
           // Invalidate budgets in the background if the request succeeded
@@ -173,7 +173,7 @@ export const useMyBudgetStoreStore = defineStore(
         onResponseError() {
           // Rollback the data if the request failed
           budgets.value = previousBudgets;
-          showErrorToast("Failed to create budget");
+          showErrorToast("No se pudo crear el presupuesto");
         },
         async onResponse() {
           // Invalidate budgets in the background if the request succeeded

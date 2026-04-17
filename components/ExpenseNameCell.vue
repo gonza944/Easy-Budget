@@ -17,7 +17,7 @@ const category = computed(() => {
   return getCategoryFromExpense(props.item);
 });
 
-const categoryName = computed(() => category.value?.name || 'Uncategorized');
+const categoryName = computed(() => category.value?.name || 'Sin categoría');
 
 </script>
 

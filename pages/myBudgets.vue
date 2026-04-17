@@ -43,15 +43,15 @@ const handleDeleteCancel = () => {
 onMounted(() => {
   updateMenuElements([
     {
-      label: "Add Budget",
+      label: "Agregar presupuesto",
       onClick: () => { isModalOpen.value = true },
     },
     {
-      label: "Go to Shared Activities",
+      label: "Ir a actividades compartidas",
       onClick: () => { router.push('/sharedActivities') },
     },
   ]);
-  updateMenuTitle("My Budgets");
+  updateMenuTitle("Mis presupuestos");
 });
 </script>
 
@@ -59,11 +59,11 @@ onMounted(() => {
 <template>
   <div class="h-[100dvh] flex flex-col gap-8 items-center md:justify-center pt-10 md:pt-0">
     <div class="flex flex-col items-center md:flex-row md:items-center md:gap-4 mb-8">
-      <NuxtImg src="/Logo.png" alt="Easy Budget Logo" class="h-24 md:h-24 w-auto mb-0" />
-      <h1 class="text-2xl md:text-4xl font-bold text-center">Welcome Back, {{ user?.name }}</h1>
+      <NuxtImg src="/Logo.png" alt="Logo de Easy Budget" class="h-24 md:h-24 w-auto mb-0" />
+      <h1 class="text-2xl md:text-4xl font-bold text-center">Que bueno verte de nuevo, {{ user?.name }}</h1>
     </div>
     <div class="flex w-full md:w-xl items-center gap-1.5">
-      <Input id="budget-name" v-model="budgetName" type="text" placeholder="Budget Name" class="h-12 bg-background" />
+      <Input id="budget-name" v-model="budgetName" type="text" placeholder="Nombre del presupuesto" class="h-12 bg-background" />
       <Button type="submit" size="iconLg">
         <SearchIcon />
       </Button>
@@ -100,9 +100,9 @@ onMounted(() => {
 
     <ConfirmationDialog
       v-model:open="isDeleteDialogOpen"
-      title="Delete Budget"
-      description="Are you sure you want to delete this budget? This action cannot be undone."
-      action-text="Delete"
+      title="Eliminar presupuesto"
+      description="¿Seguro que quieres eliminar este presupuesto? Esta acción no se puede deshacer."
+      action-text="Eliminar"
       :on-cancel="handleDeleteCancel"
       :on-confirm="handleDeleteConfirm"
     />

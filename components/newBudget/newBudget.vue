@@ -35,12 +35,12 @@ const onSubmit = form.handleSubmit(async (values) => {
   <Drawer v-if="isMobile" :open="isOpen" @update:open="isOpen = $event">
     <DrawerContent class="p-4">
       <DrawerHeader class="pb-8">
-        <DrawerTitle class="text-2xl font-bold">Create a New Budget</DrawerTitle>
+        <DrawerTitle class="text-2xl font-bold">Crear un nuevo presupuesto</DrawerTitle>
       </DrawerHeader>
       <NewBudgetForm :form="form" :on-submit="onSubmit" />
       <DrawerFooter>
         <Button type="submit" @click="onSubmit" :disabled="!isFormValid">
-          Submit
+          Guardar
         </Button>
       </DrawerFooter>
     </DrawerContent>
@@ -49,13 +49,13 @@ const onSubmit = form.handleSubmit(async (values) => {
   <Dialog v-else :open="isOpen" @update:open="isOpen = $event">
     <DialogContent class="sm:max-w-md">
       <DialogHeader class="pb-4">
-        <DialogTitle class="text-2xl font-bold">Create a New Budget</DialogTitle>
+        <DialogTitle class="text-2xl font-bold">Crear un nuevo presupuesto</DialogTitle>
       </DialogHeader>
       <NewBudgetForm :form="form" :on-submit="onSubmit" />
 
       <DialogFooter>
         <Button type="submit" @click="onSubmit" :disabled="!isFormValid">
-          Submit
+          Guardar
         </Button>
       </DialogFooter>
     </DialogContent>

@@ -6,14 +6,14 @@ import ExpensesTableDropdown from "./ExpensesTableDropdown.vue";
 export const columns: ColumnDef<Expense>[] = [
   {
     accessorKey: "name",
-    header: () => h("div", { class: "text-left" }, "Name"),
+    header: () => h("div", { class: "text-left" }, "Nombre"),
     cell: ({ row }) => {
       return h("div", { class: "break-words whitespace-normal hyphens-auto text-left font-medium" }, row.getValue("name"));
     },
   },
   {
     accessorKey: "description",
-    header: () => h("div", { class: "text-left" }, "Description"),
+    header: () => h("div", { class: "text-left" }, "Descripción"),
     cell: ({ row }) => {
       return h(
         "div",
@@ -24,12 +24,12 @@ export const columns: ColumnDef<Expense>[] = [
   },
   {
     accessorKey: "amount",
-    header: () => h("div", { class: "text-right" }, "Amount"),
+    header: () => h("div", { class: "text-right" }, "Monto"),
     cell: ({ row }) => {
       const amount = Number.parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
       }).format(Math.abs(amount));
       return h(
         "div",

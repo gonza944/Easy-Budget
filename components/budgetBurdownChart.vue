@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { VisXYContainer, VisLine, VisAxis, VisCrosshair, VisTooltip, VisPlotline } from '@unovis/vue'
 import type { DataRecord } from '~/types/metrics'
-import { utcFormat } from 'd3-time-format'
 import type { HTMLAttributes } from 'vue';
 import { useMediaQuery } from '@vueuse/core';
 import { useBurnDownChartStore } from '~/stores/useBurnDownChartStore';
@@ -17,11 +16,18 @@ const y = [
   (d: DataRecord) => d.y,
   (d: DataRecord) => d.y2
 ]
+const locale = 'es-AR'
+const dateFormatter = new Intl.DateTimeFormat(locale, {
+  month: 'short',
+  day: '2-digit',
+  timeZone: 'UTC',
+})
+const formatDate = (value: string | number | Date) => dateFormatter.format(new Date(value))
 
 const color = (d: DataRecord, i: number) => ['var(--chart-1)', 'var(--chart-3)'][i]
 const template = (d: DataRecord) => `<div class="flex flex-col gap-4 text-sm">
-<span>Date: ${utcFormat('%b %d')(new Date(d.x))}</span>
-${d.y !== undefined ? `<span>Remaining Budget: <span class="text-sm font-medium ${d.y >= 0 ? 'text-success' : 'text-destructive-foreground'}">${d.y?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span></span>` : '<span>No expenses recorded yet.</span>'}
+<span>Fecha: ${formatDate(d.x)}</span>
+${d.y !== undefined ? `<span>Presupuesto restante: <span class="text-sm font-medium ${d.y >= 0 ? 'text-success' : 'text-destructive-foreground'}">${d.y?.toLocaleString(locale, { style: 'currency', currency: 'ARS' })}</span></span>` : '<span>Todavía no hay gastos registrados.</span>'}
 </div>`
 // Create a function that returns different dash styles based on the line index
 const lineDashArray = (d: DataRecord, i: number) => i === 1 ? [3] : []
@@ -33,7 +39,7 @@ const lineDashArray = (d: DataRecord, i: number) => i === 1 ? [3] : []
       <CardHeader>
         <CollapsibleTriggerResponsive :is-open="isOpen">
           <CardTitle>
-            <span>Budget Burndown Chart</span>
+            <span>Evolución del presupuesto</span>
           </CardTitle>
         </CollapsibleTriggerResponsive>
       </CardHeader>
@@ -46,7 +52,7 @@ const lineDashArray = (d: DataRecord, i: number) => i === 1 ? [3] : []
             </div>
           </div>
           <VisXYContainer v-else :data="expensesBurnDown" class="budget-chart">
-            <VisAxis :gridLine="false" type="x" :tickFormat="utcFormat('%b %d')"
+            <VisAxis :gridLine="false" type="x" :tickFormat="formatDate"
               tickTextColor="var(--muted-foreground)" />
             <VisAxis :gridLine="false" type="y" tickTextColor="var(--muted-foreground)" />
             <VisLine :x="x" :y="y" :lineDashArray="lineDashArray" interpolateMissingData="true" :color="color" />

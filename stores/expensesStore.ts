@@ -137,7 +137,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
       // All calculated data is now handled by individual store watchers
     } catch (error) {
       console.error("Error fetching expenses:", error);
-      showErrorToast("Failed to fetch expenses");
+      showErrorToast("No se pudieron cargar los gastos");
     } finally {
       loading.value = false;
     }
@@ -177,7 +177,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
           ...expenses.value,
           [budgetId]: previousExpenses,
         };
-        showErrorToast("Failed to add expense");
+        showErrorToast("No se pudo agregar el gasto");
       },
       async onResponse() {
         // Revalidate data on success
@@ -218,7 +218,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
           ...expenses.value,
           [budgetId]: previousExpenses,
         };
-        showErrorToast("Failed to delete expense");
+        showErrorToast("No se pudo eliminar el gasto");
       },
       async onResponse() {
         // Revalidate data on success

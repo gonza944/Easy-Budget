@@ -2,11 +2,11 @@
   <Drawer :open="isOpen" @update:open="isOpen = $event">
     <DrawerContent class="flex flex-col gap-4 items-center justify-center pb-8">
       <DrawerHeader>
-        <DrawerTitle class="text-2xl font-bold">Select Date</DrawerTitle>
+        <DrawerTitle class="text-2xl font-bold">Seleccionar fecha</DrawerTitle>
       </DrawerHeader>
 
-      <Calendar v-model="internalValue" initial-focus />
-      <Button variant="default" class="w-xs" @click="onTodayClick">Today</Button>
+      <Calendar v-model="internalValue" locale="es-AR" initial-focus />
+      <Button variant="default" class="w-xs" @click="onTodayClick">Hoy</Button>
 
     </DrawerContent>
   </Drawer>

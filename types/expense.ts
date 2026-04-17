@@ -12,11 +12,11 @@ import { z } from 'zod';
 
   // Schema for expense form (client-side validation)
   export const ExpenseFormSchema = ExpenseCreateSchema.omit({ budget_id: true, date: true }).extend({
-    amount: z.string().min(1, 'Amount is required')
+    amount: z.string().min(1, 'El monto es obligatorio')
       .transform(val => Number(val)),
     category_id: z.number({
-      required_error: 'Please select a category',
-      invalid_type_error: 'Please select a category',
+      required_error: 'Selecciona una categoría',
+      invalid_type_error: 'Selecciona una categoría',
     }),
   });
   

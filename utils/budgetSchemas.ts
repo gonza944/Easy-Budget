@@ -56,19 +56,19 @@ export const CreateBudgetPeriodSchema = z.object({
 export const budgetTypeAmountSchema = z.object({
   budgetType: CreateBudgetPeriodSchema.shape.budgetType,
   budgetAmount: z.union([
-    z.string().min(1, { message: "Required" }).transform((val) => parseFloat(val)),
-    z.number().min(1, { message: "Required" })
+    z.string().min(1, { message: "Obligatorio" }).transform((val) => parseFloat(val)),
+    z.number().min(1, { message: "Obligatorio" })
   ]),
 });
 
 // Form schema for frontend (accepts either daily or monthly input)
 export const newBudgetSchemaForm = z
   .object({
-    name: z.string().min(1, { message: "Required" }),
+    name: z.string().min(1, { message: "Obligatorio" }),
     description: z.string().optional(),
     startingBudget: z
       .string()
-      .min(1, { message: "Required" })
+      .min(1, { message: "Obligatorio" })
       .transform((val) => parseFloat(val)),
     startDate: z.date().optional().default(new Date()),
   })

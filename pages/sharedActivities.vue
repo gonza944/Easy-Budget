@@ -28,19 +28,19 @@ watch(sharedActivityName, async () => {
 onMounted(() => {
   updateMenuElements([
     {
-      label: "Create Shared Activity",
+      label: "Crear actividad compartida",
       onClick: () => { isCreateSharedActivityModalOpen.value = !isCreateSharedActivityModalOpen.value },
     },
     {
-      label: "Go to My Expenses",
+      label: "Ir a mis gastos",
       onClick: () => { router.push('/dashboard') },
     },
     {
-      label: "Go to My Budgets",
+      label: "Ir a mis presupuestos",
       onClick: () => { router.push('/myBudgets') },
     },
   ]);
-  updateMenuTitle("Shared Activities");
+  updateMenuTitle("Actividades compartidas");
 });
 
 </script>
@@ -48,11 +48,11 @@ onMounted(() => {
 <template>
   <div class="h-[100dvh] flex flex-col gap-8 items-center md:justify-center pt-10 md:pt-0">
     <div class="flex flex-col items-center md:flex-row md:items-center md:gap-4 mb-8">
-      <NuxtImg src="/Logo.png" alt="Easy Budget Logo" class="h-24 md:h-24 w-auto mb-0" />
-      <h1 class="text-2xl md:text-4xl font-bold text-center">Join the Fun: Revisit Your Shared Activities!</h1>
+      <NuxtImg src="/Logo.png" alt="Logo de Easy Budget" class="h-24 md:h-24 w-auto mb-0" />
+      <h1 class="text-2xl md:text-4xl font-bold text-center">Vuelve a tus actividades compartidas</h1>
     </div>
     <div class="flex w-full md:w-xl items-center gap-1.5">
-      <Input id="shared-activity-name" v-model="sharedActivityName" type="text" placeholder="Shared Activity Name"
+      <Input id="shared-activity-name" v-model="sharedActivityName" type="text" placeholder="Nombre de la actividad compartida"
         class="h-12 bg-background" />
       <Button type="submit" size="iconLg" @click="fetchSharedActivities()">
         <SearchIcon />
