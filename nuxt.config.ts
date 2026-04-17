@@ -31,11 +31,19 @@ export default defineNuxtConfig({
     '@nuxt/scripts',
     '@nuxt/test-utils',
     'shadcn-nuxt',
-    'nuxt-auth-utils',
     '@nuxtjs/google-fonts',
     '@pinia/nuxt',
     'pinia-plugin-persistedstate/nuxt',
   ],
+
+  runtimeConfig: {
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseAnonKey: process.env.SUPABASE_KEY,
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseAnonKey: process.env.SUPABASE_KEY,
+    },
+  },
 
   googleFonts: {
     families: {

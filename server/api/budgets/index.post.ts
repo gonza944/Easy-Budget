@@ -1,27 +1,10 @@
 import { newBudgetSchema, CreateBudgetApiResponseSchema, type CreateBudgetApiResponse } from "~/utils/budgetSchemas";
 import { calculateBudgetAmounts } from "~/utils/date";
-import { createUserSupabaseClient } from "../../supabaseConnection";
+import { requireSupabaseUser } from "~/server/utils/supabase";
 
 export default defineEventHandler<Promise<CreateBudgetApiResponse>>(async (event) => {
   try {
-    // Check authentication first
-    const session = await getUserSession(event);
-    if (!session.user) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "Unauthorized: Please log in",
-      });
-    }
-
-    // Create authenticated Supabase client
-    if (!session.accessToken) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: "No access token found in session",
-      });
-    }
-    
-    const userSupabase = createUserSupabaseClient(session.accessToken);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     const { name, description, startingBudget, budgetType, budgetAmount, startDate } =
       await readValidatedBody(event, newBudgetSchema.parse);
@@ -49,7 +32,7 @@ export default defineEventHandler<Promise<CreateBudgetApiResponse>>(async (event
         p_description: description || null,
         p_starting_budget: startingBudget,
         p_start_date: startDate,
-        p_user_id: session.user.id,
+        p_user_id: user.id,
         p_daily_amount: dailyAmount,
         p_monthly_amount: monthlyAmount,
         p_valid_from_year: currentYear,

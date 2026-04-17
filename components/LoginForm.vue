@@ -4,7 +4,6 @@ import type { HTMLAttributes } from 'vue'
 const props = defineProps<{
   class?: HTMLAttributes['class']
 }>()
-const { fetch: refreshSession } = useUserSession()
 const credentials = reactive({
   email: '',
   password: '',
@@ -12,35 +11,36 @@ const credentials = reactive({
 
 const { setIsLoading, isLoading } = useLoadingScreen()
 const errorMessage = ref('')
+const { login: signIn } = useAuth()
 
 async function login() {
   if (isLoading.value) return
 
   setIsLoading(true)
   errorMessage.value = ''
+  let navigated = false
 
   try {
-    const result = await $fetch('/api/auth/login', {
-      method: 'POST',
-      body: credentials
-    })
+    const result = await signIn(credentials)
 
     if (result.success) {
-      // Refresh the session on client-side and redirect to the home page
-      await refreshSession()
       await navigateTo('/')
+      navigated = true
     } else {
-      errorMessage.value = 'No se pudo iniciar sesión'
+      errorMessage.value = result.error || 'Login failed'
     }
   } catch (error) {
     console.error('Login error:', error)
     errorMessage.value = 'Credenciales incorrectas'
-    setIsLoading(false)
+  } finally {
+    if (!navigated) {
+      setIsLoading(false)
+    }
   }
 }
 
 onUnmounted(() => {
-    setIsLoading(false)
+  setIsLoading(false)
 })
 
 </script>
