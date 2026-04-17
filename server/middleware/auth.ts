@@ -5,5 +5,6 @@ export default defineEventHandler(async (event) => {
     await refreshSupabaseAuthIfNeeded(event);
   } catch (error) {
     console.error("Supabase auth middleware error:", error);
+    throw error;
   }
 });

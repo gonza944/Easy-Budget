@@ -10,6 +10,14 @@ export default defineEventHandler(async (event) => {
     return validatedUser;
   } catch (error) {
     console.error("Error fetching user:", error);
-    return undefined;
+
+    if (error && typeof error === "object" && "statusCode" in error) {
+      throw error;
+    }
+
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to fetch user",
+    });
   }
 });

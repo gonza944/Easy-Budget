@@ -18,20 +18,24 @@ async function login() {
 
   setIsLoading(true)
   errorMessage.value = ''
+  let navigated = false
 
   try {
     const result = await signIn(credentials)
 
     if (result.success) {
       await navigateTo('/')
+      navigated = true
     } else {
       errorMessage.value = result.error || 'Login failed'
-      setIsLoading(false)
     }
   } catch (error) {
     console.error('Login error:', error)
     errorMessage.value = 'Credenciales incorrectas'
-    setIsLoading(false)
+  } finally {
+    if (!navigated) {
+      setIsLoading(false)
+    }
   }
 }
 
