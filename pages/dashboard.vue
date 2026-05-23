@@ -34,6 +34,7 @@ const showExpenseForm = ref(false);
 const showDateSelector = ref(false);
 
 const getRemainingDailyBudget = computed(() => store.getRemainingDailyBudget);
+const getTodayExpensesTotal = computed(() => store.getTodayExpensesTotal);
 const expenses = computed(() => selectedBudget.value?.id ? getExpensesByBudgetId(selectedBudget.value?.id) : []);
 
 const handleAddExpense = () => {
@@ -73,7 +74,7 @@ onMounted(() => {
         <div class="flex flex-col md:flex-row gap-4 w-full order-1 md:order-none md:overflow-x-auto">
           <DateSelector className="hidden md:block" v-model:selectedDate="selectedDate" />
           <BudgetSummaryCard :remaining-monthly-budget="monthlyBudget ?? null" :monthly-budget-loading="monthlyBudgetLoading"
-            :remaining-daily-budget="getRemainingDailyBudget" />
+            :remaining-daily-budget="getRemainingDailyBudget" :today-expenses-total="getTodayExpensesTotal" />
           <ExpensesByCategoryList />
         </div>
       </div>

@@ -54,6 +54,19 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
   });
 
   // Derived getters for budget calculations
+  const getTodayExpensesTotal = computed(() => {
+    const budgetStore = useMyBudgetStoreStore();
+    const selectedBudget = budgetStore.selectedBudget;
+
+    if (!selectedBudget?.id) return 0;
+
+    const budgetExpenses = expenses.value[selectedBudget.id] || [];
+    return budgetExpenses.reduce(
+      (sum, expense) => sum + Number(expense.amount),
+      0
+    );
+  });
+
   const getRemainingDailyBudget = computed(() => {
     // Access budget store within computed to avoid circular dependency
     const budgetStore = useMyBudgetStoreStore();
@@ -235,6 +248,7 @@ export const useMyExpensesStore = defineStore("myExpensesStore", () => {
     // Getters
     getExpensesByBudgetId,
     getRemainingDailyBudget,
+    getTodayExpensesTotal,
     getCategoryFromExpense,
     loading,
     // Actions
