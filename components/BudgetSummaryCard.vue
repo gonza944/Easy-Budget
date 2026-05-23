@@ -8,6 +8,7 @@ type Props = {
   remainingMonthlyBudget: number | null;
   monthlyBudgetLoading: boolean;
   remainingDailyBudget: number;
+  todayExpensesTotal: number;
 };
 
 const locale = 'es-AR';
@@ -64,6 +65,18 @@ const isEditing = ref(false);
             'text-success': remainingDailyBudget >= 0
           }">
             {{ remainingDailyBudget.toLocaleString(locale, { style: 'currency', currency: 'ARS' }) }}
+          </p>
+        </template>
+      </div>
+
+      <div class="flex flex-row gap-2 justify-between">
+        <p>Gasto del día:</p>
+        <template v-if="monthlyBudgetLoading">
+          <Skeleton class="w-[30%] h-10 rounded-full" />
+        </template>
+        <template v-else>
+          <p class="text-destructive-foreground">
+            {{ todayExpensesTotal.toLocaleString(locale, { style: 'currency', currency: 'ARS' }) }}
           </p>
         </template>
       </div>
