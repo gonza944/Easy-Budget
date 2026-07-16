@@ -7,7 +7,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   try {
-    const { supabase: userSupabase } = await requireSupabaseUser(event);
+    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     // Validate request body
     const validatedData = await readValidatedBody(event, (body) => {
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
     // Insert the category
     const { data, error } = await userSupabase
       .from("categories")
-      .insert({ name, description: description || null })
+      .insert({ name, description: description || null, user_id: user.id })
       .select("id, name, description, archived_at")
       .single();
 

@@ -1,30 +1,30 @@
 <template>
-  <Drawer v-if="isMobile" :open="isOpen" @update:open="isOpen = $event">
+  <Drawer v-if="isMobile" :open="isOpen" @update:open="updateOpen">
     <DrawerContent class="p-4">
       <DrawerHeader class="pb-8">
         <DrawerTitle class="text-2xl font-bold">Agregar gasto</DrawerTitle>
       </DrawerHeader>
       <FormContent
-        v-model:is-expense="isExpense" :categories="categories" :on-number-input="onNumberInput"
+        v-model:is-expense="isExpense" :categories="activeCategories" :on-number-input="onNumberInput"
         :handle-form-submit="handleFormSubmit" />
       <DrawerFooter>
-        <FormFooter :is-form-valid="isFormValid" :on-submit="onSubmit" />
+        <FormFooter :is-form-valid="isFormValid" :is-submitting="isSubmitting" :on-submit="onSubmit" />
       </DrawerFooter>
     </DrawerContent>
   </Drawer>
 
 
-  <Dialog v-else :open="isOpen" @update:open="isOpen = $event">
+  <Dialog v-else :open="isOpen" @update:open="updateOpen">
     <DialogContent class="sm:max-w-md">
       <DialogHeader class="pb-2">
         <DialogTitle class="text-2xl font-bold">Agregar gasto</DialogTitle>
       </DialogHeader>
 
       <FormContent
-        v-model:is-expense="isExpense" :categories="categories" :on-number-input="onNumberInput"
+        v-model:is-expense="isExpense" :categories="activeCategories" :on-number-input="onNumberInput"
         :handle-form-submit="handleFormSubmit" />
       <DialogFooter class="mt-4">
-        <FormFooter :is-form-valid="isFormValid" :on-submit="onSubmit" />
+        <FormFooter :is-form-valid="isFormValid" :is-submitting="isSubmitting" :on-submit="onSubmit" />
       </DialogFooter>
     </DialogContent>
 
@@ -37,6 +37,7 @@ import { useForm } from 'vee-validate';
 import { useMyExpensesStore } from '~/stores/expensesStore';
 import { useMyBudgetStoreStore } from '~/stores/budgetStore';
 import { ExpenseCreateSchema, ExpenseFormSchema } from '~/types/expense';
+import type { CategorySelection } from '~/types/category';
 import { useSelectedDate } from '~/composables/useSelectedDate';
 import FormContent from './formContent.vue';
 import FormFooter from './formFooter.vue';
@@ -45,11 +46,13 @@ import { useMediaQuery } from '@vueuse/core';
 const isOpen = defineModel<boolean>('modelValue', { required: true });
 const isMobile = useMediaQuery('(max-width: 768px)');
 const store = useMyExpensesStore();
-const { categories } = storeToRefs(useCategoryStore());
+const categoryStore = useCategoryStore();
+const { activeCategories } = storeToRefs(categoryStore);
 const { selectedDate } = useSelectedDate();
 const budgetStore = useMyBudgetStoreStore();
 const { selectedBudget } = storeToRefs(budgetStore);
 const isExpense = ref(true);
+const isSubmitting = ref(false);
 
 // Track form errors
 const categoryError = ref('');
@@ -64,7 +67,7 @@ const form = useForm({
     name: '',
     amount: '',
     description: '',
-    category_id: undefined,
+    category: undefined,
   }
 });
 
@@ -77,7 +80,7 @@ watch(() => form.errors.value.amount, (val) => {
   amountError.value = val || '';
 });
 
-watch(() => form.errors.value.category_id, (val) => {
+watch(() => form.errors.value.category, (val) => {
   categoryError.value = val || '';
 });
 
@@ -97,28 +100,49 @@ const onNumberInput = (e: Event) => {
   input.dispatchEvent(new Event('change', { bubbles: true }));
 };
 
+const updateOpen = (open: boolean) => {
+  if (!isSubmitting.value) isOpen.value = open;
+};
+
+const resolveCategoryId = async (selection: CategorySelection) => {
+  if (typeof selection === 'number') return selection;
+
+  return (await categoryStore.createCategory({ name: selection.name })).id;
+};
+
 const onSubmit = async (closeModal = true) => {
-  return form.handleSubmit(async (values, { resetForm }) => {
-    if (!selectedBudget.value?.id) return;
-    const date = selectedDate.value;
-    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  if (isSubmitting.value) return;
 
-    const amount = isExpense.value ? Number(values.amount) : Number(values.amount) * -1;
+  return form.handleSubmit(async (values, { resetForm, setFieldValue }) => {
+    if (isSubmitting.value || !selectedBudget.value?.id || !values.category) return;
 
-    const expenseData = ExpenseCreateSchema.parse({
-      budget_id: selectedBudget.value.id,
-      category_id: values.category_id,
-      name: values.name,
-      amount,
-      description: values.description || '',
-      date: formattedDate,
-    });
+    isSubmitting.value = true;
 
-    store.addExpense(expenseData);
-    if (closeModal) {
-      isOpen.value = false;
+    try {
+      const date = selectedDate.value;
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const categoryId = await resolveCategoryId(values.category);
+      const amount = isExpense.value ? Number(values.amount) : Number(values.amount) * -1;
+
+      setFieldValue('category', categoryId);
+
+      const expenseData = ExpenseCreateSchema.parse({
+        budget_id: selectedBudget.value.id,
+        category_id: categoryId,
+        name: values.name,
+        amount,
+        description: values.description || '',
+        date: formattedDate,
+      });
+
+      await store.addExpense(expenseData);
+      resetForm();
+      if (closeModal) isOpen.value = false;
+    } catch (error) {
+      console.error('Error submitting expense:', error);
+    } finally {
+      isSubmitting.value = false;
     }
-    resetForm();
   })();
 };
 

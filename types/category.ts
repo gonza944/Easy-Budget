@@ -9,6 +9,19 @@ export const CategorySchema = z.object({
 
 export const CategoriesArraySchema = z.array(CategorySchema);
 
+export const CategoryDraftSchema = z.object({
+  kind: z.literal("draft"),
+  name: z.string().trim().min(1),
+});
+
+export const CategorySelectionSchema = z.union(
+  [z.number(), CategoryDraftSchema],
+  {
+    required_error: "Selecciona una categoría",
+    invalid_type_error: "Selecciona una categoría",
+  },
+);
+
 export const CreateCategorySchema = z.object({
   name: z.string().trim().min(1, "Category name is required"),
   description: z.string().trim().optional(),
@@ -34,6 +47,8 @@ export const CategoryResponseSchema = z.object({
 
 export type Category = z.infer<typeof CategorySchema>;
 export type CategoriesResponse = z.infer<typeof CategoriesArraySchema>;
+export type CategoryDraft = z.infer<typeof CategoryDraftSchema>;
+export type CategorySelection = z.infer<typeof CategorySelectionSchema>;
 export type CreateCategory = z.infer<typeof CreateCategorySchema>;
 export type UpdateCategory = z.infer<typeof UpdateCategorySchema>;
 export type CategoryResponse = z.infer<typeof CategoryResponseSchema>;
