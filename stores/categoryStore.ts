@@ -10,6 +10,20 @@ import type {
 const sortCategories = (categories: Category[]) =>
   [...categories].sort((a, b) => a.name.localeCompare(b.name, "es"));
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (
+    error &&
+    typeof error === "object" &&
+    "data" in error &&
+    error.data &&
+    typeof error.data === "object" &&
+    "statusMessage" in error.data &&
+    typeof error.data.statusMessage === "string"
+  ) return error.data.statusMessage;
+
+  return fallback;
+};
+
 export const useCategoryStore = defineStore("categoryStore", () => {
   const categories = ref<Category[]>([]);
   const loading = ref(false);
@@ -22,22 +36,16 @@ export const useCategoryStore = defineStore("categoryStore", () => {
     loading.value = false;
   };
 
-  const fetchCategories = async () => {
-    loading.value = true;
+  const fetchCategories = async (silent = false) => {
+    if (!silent) loading.value = true;
 
     try {
-      const { data, error } = await useFetch<CategoriesResponse>("/api/categories", {
-        key: "categories",
-      });
-
-      if (error.value) throw error.value;
-
-      categories.value = sortCategories(data.value || []);
+      categories.value = sortCategories(await $fetch<CategoriesResponse>("/api/categories"));
     } catch (error) {
       console.error("Error fetching categories:", error);
-      toast.error("No se pudieron cargar las categorías");
+      if (!silent) toast.error("No se pudieron cargar las categorías");
     } finally {
-      loading.value = false;
+      if (!silent) loading.value = false;
     }
   };
 
@@ -63,11 +71,12 @@ export const useCategoryStore = defineStore("categoryStore", () => {
           category.id === optimisticCategory.id ? response.data : category,
         ),
       );
+      void fetchCategories(true);
 
       return response.data;
     } catch (error) {
       categories.value = previousCategories;
-      toast.error("No se pudo crear la categoría");
+      toast.error(getErrorMessage(error, "No se pudo crear la categoría"));
       throw error;
     }
   };
@@ -107,6 +116,7 @@ export const useCategoryStore = defineStore("categoryStore", () => {
           item.id === input.id ? response.data : item,
         ),
       );
+      void fetchCategories(true);
 
       return response.data;
     } catch (error) {

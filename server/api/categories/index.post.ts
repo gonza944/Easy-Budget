@@ -26,8 +26,9 @@ export default defineEventHandler(async (event) => {
     // Check if category with the same name already exists for this user
     const { data: existingCategory, error: checkError } = await userSupabase
       .from("categories")
-      .select('id')
+      .select('id, archived_at')
       .eq('name', name)
+      .eq('user_id', user.id)
       .maybeSingle();
 
     if (checkError) {
@@ -40,7 +41,9 @@ export default defineEventHandler(async (event) => {
     if (existingCategory) {
       throw createError({
         statusCode: 409,
-        statusMessage: "A category with this name already exists",
+        statusMessage: existingCategory.archived_at
+          ? "La categoría ya existe, pero está archivada. Restáurala para volver a usarla."
+          : "La categoría ya existe.",
       });
     }
 

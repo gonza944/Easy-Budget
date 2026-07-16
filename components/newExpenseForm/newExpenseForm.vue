@@ -113,36 +113,35 @@ const resolveCategoryId = async (selection: CategorySelection) => {
 const onSubmit = async (closeModal = true) => {
   if (isSubmitting.value) return;
 
-  return form.handleSubmit(async (values, { resetForm, setFieldValue }) => {
+  return form.handleSubmit((values, { resetForm }) => {
     if (isSubmitting.value || !selectedBudget.value?.id || !values.category) return;
 
     isSubmitting.value = true;
+    const { category, name, amount: rawAmount, description } = values;
+    const date = selectedDate.value;
+    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-    try {
-      const date = selectedDate.value;
-      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      const categoryId = await resolveCategoryId(values.category);
-      const amount = isExpense.value ? Number(values.amount) : Number(values.amount) * -1;
-
-      setFieldValue('category', categoryId);
+    const submitExpense = async () => {
+      const categoryId = await resolveCategoryId(category);
+      const amount = isExpense.value ? Number(rawAmount) : Number(rawAmount) * -1;
 
       const expenseData = ExpenseCreateSchema.parse({
-        budget_id: selectedBudget.value.id,
+        budget_id: selectedBudget.value?.id,
         category_id: categoryId,
-        name: values.name,
+        name,
         amount,
-        description: values.description || '',
+        description: description || '',
         date: formattedDate,
       });
 
-      await store.addExpense(expenseData);
-      resetForm();
-      if (closeModal) isOpen.value = false;
-    } catch (error) {
-      console.error('Error submitting expense:', error);
-    } finally {
-      isSubmitting.value = false;
-    }
+      return store.addExpense(expenseData);
+    };
+
+    resetForm();
+    if (closeModal) isOpen.value = false;
+    void submitExpense()
+      .catch((error) => console.error('Error submitting expense:', error))
+      .finally(() => { isSubmitting.value = false; });
   })();
 };
 
