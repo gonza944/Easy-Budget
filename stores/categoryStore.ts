@@ -1,6 +1,7 @@
 import type { CategoriesResponse, Category } from "~/types/category";
 
 export const useCategoryStore = defineStore("categoryStore", () => {
+  const requestFetch = useRequestFetch();
   const categories = ref<Category[]>([]);
 
   const clearCategories = () => {
