@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { CategorySelectionSchema } from './category';
 
   // Schema for expense creation payload
   export const ExpenseCreateSchema = z.object({
@@ -12,10 +11,13 @@ import { CategorySelectionSchema } from './category';
     });
 
   // Schema for expense form (client-side validation)
-  export const ExpenseFormSchema = ExpenseCreateSchema.omit({ budget_id: true, date: true, category_id: true }).extend({
+  export const ExpenseFormSchema = ExpenseCreateSchema.omit({ budget_id: true, date: true }).extend({
     amount: z.string().min(1, 'El monto es obligatorio')
       .transform(val => Number(val)),
-    category: CategorySelectionSchema,
+    category_id: z.number({
+      required_error: 'Selecciona una categoría',
+      invalid_type_error: 'Selecciona una categoría',
+    }),
   });
   
   // Schema for expense response (same as in GET endpoint)
