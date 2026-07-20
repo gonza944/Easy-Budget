@@ -14,25 +14,18 @@
     </FormField>
 
     <!-- Category field -->
-    <FormField v-slot="{ componentField, errorMessage: categoryError }" name="category" class="flex-1">
+    <FormField v-slot="{ componentField, errorMessage: categoryError }" name="category_id" class="flex-1">
       <FormItem class="h-full flex flex-col">
         <FormLabel>Categoría</FormLabel>
-        <Combobox
-          v-model:open="categoryOpen"
-          :model-value="componentField.modelValue"
-          :reset-model-value-on-clear="true"
-          @update:model-value="componentField.onChange"
-        >
+        <Combobox :model-value="componentField.modelValue" @update:model-value="componentField.onChange">
           <FormControl class="w-full">
             <ComboboxAnchor>
               <div class="relative w-full items-center">
-                <ComboboxInput
-                  class="text-base md:text-sm"
-                  placeholder="Selecciona una categoría"
-                  :model-value="categorySearch"
-                  :display-value="displayCategory"
-                  @update:model-value="(value) => updateCategorySearch(value, componentField.modelValue, componentField.onChange)"
-                />
+                <ComboboxInput class="text-base md:text-sm" placeholder="Selecciona una categoría" :display-value="(val: number) => {
+                  if (!val) return '';
+                  const category = categories.find(cat => cat.id === val);
+                  return category ? category.name : '';
+                }" />
                 <ComboboxTrigger class="absolute end-0 inset-y-0 flex items-center justify-center px-3">
                   <ChevronsUpDown class="size-4 text-muted-foreground" />
                 </ComboboxTrigger>
@@ -42,18 +35,7 @@
 
           <ComboboxList>
             <ComboboxEmpty>
-              <Button
-                v-if="categorySearch.trim()"
-                type="button"
-                variant="ghost"
-                class="w-full justify-start"
-                @mousedown.prevent
-                @click="selectDraft(componentField.onChange)"
-              >
-                <Plus class="size-4" />
-                Crear “{{ categorySearch.trim() }}”
-              </Button>
-              <span v-else>No se encontraron resultados.</span>
+              No se encontraron resultados.
             </ComboboxEmpty>
 
             <ComboboxGroup class="overflow-y-auto max-h-48 md:max-h-72">
@@ -119,44 +101,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ChevronsUpDown, Check, Plus } from 'lucide-vue-next';
-import type { Category, CategorySelection } from '~/types/category';
+import { ChevronsUpDown, Check } from 'lucide-vue-next';
 
 type Props = {
-  categories: Category[];
+  categories: Array<{ id: number; name: string }>;
   onNumberInput: (e: Event) => void;
   handleFormSubmit: () => void;
 };
 
 const isExpense = defineModel<boolean>('isExpense', { required: true });
-const props = defineProps<Props>();
-const categoryOpen = ref(false);
-const categorySearch = ref('');
 
-const displayCategory = (selection: CategorySelection | undefined) => {
-  if (typeof selection === 'number') {
-    return props.categories.find((category) => category.id === selection)?.name || '';
-  }
-
-  return selection?.name || '';
-};
-
-const updateCategorySearch = (
-  search: string,
-  selection: CategorySelection | undefined,
-  onChange: (value: CategorySelection | undefined) => void,
-) => {
-  categorySearch.value = search;
-  if (selection && search !== displayCategory(selection)) onChange(undefined);
-};
-
-const selectDraft = (onChange: (value: CategorySelection) => void) => {
-  const name = categorySearch.value.trim();
-  if (!name) return;
-
-  onChange({ kind: 'draft', name });
-  categoryOpen.value = false;
-};
+defineProps<Props>();
 </script>
 
 <style scoped>
