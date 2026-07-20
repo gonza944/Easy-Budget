@@ -1,66 +1,63 @@
-import { z } from 'zod';
 import { requireSupabaseUser } from "~/server/utils/supabase";
-
-// Schema for creating a new category
-export const CreateCategorySchema = z.object({
-  name: z.string().min(1, "Category name is required"),
-  description: z.string().optional()
-});
-
-// Schema for the response body
-export const CategoryResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.object({
-    id: z.number(),
-    name: z.string(),
-    description: z.string().optional(),
-  }).optional(),
-  error: z.string().optional()
-});
-
-// Derive TypeScript types from Zod schemas
-export type CreateCategory = z.infer<typeof CreateCategorySchema>;
-export type CategoryResponse = z.infer<typeof CategoryResponseSchema>;
+import {
+  CategoryResponseSchema,
+  CreateCategorySchema,
+  type CategoryResponse,
+} from "~/types/category";
 
 export default defineEventHandler(async (event) => {
   try {
     const { supabase: userSupabase, user } = await requireSupabaseUser(event);
 
     // Validate request body
-    const validatedData = await readValidatedBody(event, CreateCategorySchema.parse);
+    const validatedData = await readValidatedBody(event, (body) => {
+      const result = CreateCategorySchema.safeParse(body);
+      if (!result.success) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: result.error.issues[0]?.message || "Invalid category data",
+        });
+      }
+
+      return result.data;
+    });
     const { name, description } = validatedData;
 
     // Check if category with the same name already exists for this user
     const { data: existingCategory, error: checkError } = await userSupabase
       .from("categories")
-      .select('id')
+      .select('id, archived_at')
       .eq('name', name)
+      .eq('user_id', user.id)
       .maybeSingle();
 
     if (checkError) {
       throw createError({
         statusCode: 500,
-        message: checkError.message,
+        statusMessage: checkError.message,
       });
     }
 
     if (existingCategory) {
       throw createError({
         statusCode: 409,
-        message: "A category with this name already exists",
+        statusMessage: existingCategory.archived_at
+          ? "La categoría ya existe, pero está archivada. Restáurala para volver a usarla."
+          : "La categoría ya existe.",
       });
     }
 
     // Insert the category
-    const { data, error } = await userSupabase.from("categories").insert({
-      name,
-      description,
-    }).select().single();
+    const { data, error } = await userSupabase
+      .from("categories")
+      .insert({ name, description: description || null, user_id: user.id })
+      .select("id, name, description, archived_at")
+      .single();
 
     if (error) {
       throw createError({
         statusCode: 500,
-        message: error.message,
+        statusMessage: error.message,
       });
     }
 
@@ -69,17 +66,18 @@ export default defineEventHandler(async (event) => {
       success: true,
       data
     };
-    
-    return response;
+
+    return CategoryResponseSchema.parse(response);
   } catch (error) {
     console.error("Error creating category:", error);
-    
-    // Ensure error response matches our schema
-    const errorResponse: CategoryResponse = {
-      success: false,
-      error: error instanceof Error ? error.message : String(error)
-    };
-    
-    return errorResponse;
+
+    if (error && typeof error === "object" && "statusCode" in error) {
+      throw error;
+    }
+
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to create category",
+    });
   }
-}); 
+});

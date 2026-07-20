@@ -4,12 +4,12 @@ import { requireSupabaseUser } from "~/server/utils/supabase";
 
 export default defineEventHandler(async (event) => {
   try {
-    const { supabase: userSupabase, user } = await requireSupabaseUser(event);
+    const { supabase: userSupabase } = await requireSupabaseUser(event);
 
     // Query categories
     const { data, error } = await userSupabase
       .from("categories")
-      .select()
+      .select("id, name, description, archived_at")
       .order('name');
 
     if (error) {
@@ -45,4 +45,4 @@ export default defineEventHandler(async (event) => {
       statusMessage: "Internal server error",
     });
   }
-}); 
+});
