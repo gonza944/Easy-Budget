@@ -50,6 +50,10 @@ onMounted(() => {
       label: "Ir a actividades compartidas",
       onClick: () => { router.push('/sharedActivities') },
     },
+    {
+      label: "Gestionar categorías",
+      onClick: () => { router.push('/categories') },
+    },
   ]);
   updateMenuTitle("Mis presupuestos");
 });
