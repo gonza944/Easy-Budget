@@ -15,25 +15,27 @@ export default defineEventHandler(async (event) => {
         ...validatedData,
         user_id: user.id  // Use just the ID, not the whole user object
       }])
-      .select()
-      .single();
+      .select();
     
     if (error) {
       throw new Error(error.message);
     }
     
-    if (!data) throw createError({ statusCode: 500, statusMessage: 'Failed to create expense: No data returned' });
-
-    return ExpenseSchema.parse(data);
+    if (!data || data.length === 0) {
+      throw new Error('Failed to create expense: No data returned');
+    }
+    
+    // Validate and return the created expense
+    return ExpenseSchema.parse(data[0]);
     
   } catch (error) {
-    console.error("Error creating expense:", error);
-
-    if (error && typeof error === "object" && "statusCode" in error) throw error;
-
-    throw createError({
+    console.log(error);
+    return {
       statusCode: error instanceof z.ZodError ? 400 : 500,
-      statusMessage: error instanceof z.ZodError ? "Invalid expense data" : "Failed to create expense",
-    });
+      body: { 
+        message: "Failed to create expense", 
+        error: error instanceof Error ? error.message : String(error) 
+      }
+    };
   }
-});
+}); 
