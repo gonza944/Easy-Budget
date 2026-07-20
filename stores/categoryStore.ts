@@ -25,6 +25,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 };
 
 export const useCategoryStore = defineStore("categoryStore", () => {
+  const requestFetch = useRequestFetch();
   const categories = ref<Category[]>([]);
   const loading = ref(false);
   const activeCategories = computed(() =>
@@ -40,7 +41,7 @@ export const useCategoryStore = defineStore("categoryStore", () => {
     if (!silent) loading.value = true;
 
     try {
-      categories.value = sortCategories(await $fetch<CategoriesResponse>("/api/categories"));
+      categories.value = sortCategories(await requestFetch<CategoriesResponse>("/api/categories"));
     } catch (error) {
       console.error("Error fetching categories:", error);
       if (!silent) toast.error("No se pudieron cargar las categorías");
